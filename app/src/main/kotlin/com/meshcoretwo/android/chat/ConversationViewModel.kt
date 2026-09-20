@@ -60,6 +60,9 @@ sealed class ConversationUiState {
         val mentionCandidates: List<ContactDto>,
         /** Backs the message-actions menu's quick-react row and the emoji picker's "Frequently Used" section. */
         val recentEmojis: List<String>,
+        /** Flood region this channel currently sends with (per-channel override, else the device default);
+         * `null` for DMs and for an "All regions"/un-scoped channel. Shown in the footer of outgoing messages. */
+        val sendRegion: String? = null,
     ) : ConversationUiState()
 }
 
@@ -227,6 +230,11 @@ class ConversationViewModel(
                     messages = messages,
                     maxMessageBytes = MessageService.maxChannelMessageLength(nodeNameBytes),
                     recentEmojis = recentEmojis,
+                    sendRegion = when (val scope = resolvedChannel.floodScope) {
+                        is ChannelFloodScope.Region -> scope.name
+                        is ChannelFloodScope.Inherit -> connectionManager.connectedDeviceRecord?.defaultFloodScopeName
+                        is ChannelFloodScope.AllRegions -> null
+                    }?.takeIf { it.isNotEmpty() },
                 )
                 connectionManager.notificationService?.setActiveConversation(channelIndex = target.index, channelRadioID = radioID)
                 connectionManager.channelService?.markConversationRead(resolvedChannel.id)

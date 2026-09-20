@@ -175,8 +175,15 @@ private class LocationHistoryMapController {
     private var lastPoints: List<LocationMapPoint> = emptyList()
     private var pendingPath: PlottedLocationPath? = null
 
+    /** A fit requested before [attach] ran (the map view hands its instance over asynchronously); replayed on attach. */
+    private var pendingFit = false
+
     fun attach(map: MapLibreMap) {
         this.map = map
+        if (pendingFit) {
+            pendingFit = false
+            fitToContent()
+        }
         if (attached) return
         attached = true
 
@@ -223,7 +230,11 @@ private class LocationHistoryMapController {
     }
 
     fun fitToContent() {
-        val map = map ?: return
+        val map = map
+        if (map == null) {
+            pendingFit = true
+            return
+        }
         when {
             lastPoints.isEmpty() -> Unit
             lastPoints.size == 1 -> map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lastPoints[0].latitude, lastPoints[0].longitude), 12.0))

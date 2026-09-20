@@ -262,6 +262,7 @@ fun ChatConversationScreen(
                             showIncomingPath = showIncomingPath,
                             showIncomingHopCount = showIncomingHopCount,
                             showIncomingRegion = showIncomingRegion,
+                            sendRegion = current.sendRegion,
                             onLinkClick = ::onLinkClick,
                             onLongPress = { actionsMessage = message },
                             onReact = { emoji -> viewModel.sendReaction(emoji, message) },
@@ -373,6 +374,7 @@ private fun MessageBubble(
     showIncomingPath: Boolean,
     showIncomingHopCount: Boolean,
     showIncomingRegion: Boolean,
+    sendRegion: String?,
     onLinkClick: (LinkToken) -> Unit,
     onLongPress: () -> Unit,
     onReact: (String) -> Unit,
@@ -459,6 +461,7 @@ private fun MessageBubble(
                     showIncomingPath = showIncomingPath,
                     showIncomingHopCount = showIncomingHopCount,
                     showIncomingRegion = showIncomingRegion,
+                    outgoingRegion = sendRegion.takeIf { showIncomingRegion },
                 )
             } else Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -531,6 +534,7 @@ private fun QuietMessageMeta(
     showIncomingPath: Boolean,
     showIncomingHopCount: Boolean,
     showIncomingRegion: Boolean,
+    outgoingRegion: String?,
 ) {
     val color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
     val regionMatch = if (!isOutgoing && showIncomingRegion && message.isFloodRouted) {
@@ -543,6 +547,8 @@ private fun QuietMessageMeta(
     val parts = buildList {
         add(formatMessageTime(message.sortDate))
         if (isOutgoing) {
+            // Region isn't stored per outgoing message: this is the channel's current send region.
+            outgoingRegion?.let(::add)
             if (message.heardRepeats > 0) add("\u21BB ${message.heardRepeats}")
         } else {
             if (showIncomingHopCount && message.isFloodRouted) {

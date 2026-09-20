@@ -284,6 +284,9 @@ private fun NeighborSnrMapLibreView(modifier: Modifier, controller: NeighborSnrM
 private class NeighborSnrMapController {
     private var map: MapLibreMap? = null
     private var attached = false
+
+    /** A fit requested before [attach] ran (the map view hands its instance over asynchronously); replayed on attach. */
+    private var pendingFit: List<SnrMapPoint>? = null
     private var pointsSource: GeoJsonSource? = null
     private var linesSource: GeoJsonSource? = null
     private var badgesSource: GeoJsonSource? = null
@@ -293,6 +296,10 @@ private class NeighborSnrMapController {
 
     fun attach(map: MapLibreMap) {
         this.map = map
+        pendingFit?.let { points ->
+            pendingFit = null
+            fitToPoints(points)
+        }
         if (attached) return
         attached = true
 
@@ -367,7 +374,11 @@ private class NeighborSnrMapController {
     }
 
     fun fitToPoints(points: List<SnrMapPoint>) {
-        val map = map ?: return
+        val map = map
+        if (map == null) {
+            pendingFit = points
+            return
+        }
         when {
             points.isEmpty() -> Unit
             points.size == 1 -> map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(points[0].latitude, points[0].longitude), 12.0))

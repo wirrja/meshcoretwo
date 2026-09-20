@@ -1,0 +1,27 @@
+name: build
+
+# Полная проверка проекта на каждый push: сборка, lint и юнит-тесты всех модулей, включая
+# RuntimeModuleListTest (сверка runtime-зависимостей release с runtime-modules.txt — это и есть
+# автоматическая проверка на появление новых, в т.ч. GMS/Firebase, зависимостей).
+# Android SDK на ubuntu-latest предустановлен (ANDROID_HOME), эмулятор не нужен.
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # gradle.properties пришпиливает org.gradle.java.home к локальному пути разработчика —
+      # переопределяем значением от setup-java (см. protocol-tests.yml).
+      - name: Build, lint and test
+        run: ./gradlew build -Dorg.gradle.java.home="$JAVA_HOME" --no-daemon
