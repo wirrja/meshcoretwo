@@ -174,6 +174,10 @@ private fun OutgoingDetailRows(message: MessageDto) {
 private fun IncomingDetailRows(message: MessageDto) {
     val hopsText = if (message.isDirectRouted) "Direct" else if (message.hopCount == 1) "1 hop" else "${message.hopCount} hops"
     DetailRow(hopsText)
+    // Lives here rather than in the chat footer, which stays one quiet line.
+    if (message.hasExtraIncomingPaths) {
+        DetailRow(pluralStringResource(R.plurals.chat_heard_times, arrivalCount(message), arrivalCount(message)))
+    }
     message.pathHashSizeIfKnown?.let { DetailRow(stringResource(R.string.chat_path_hash, it)) }
     if (message.routeType == RouteType.TC_FLOOD) {
         DetailRow(
