@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.ui.components
 
+import com.meshcoretwo.android.ui.theme.LocalIsDarkTheme
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -47,7 +48,7 @@ fun <T> FilterChipRow(
                 label = { Text(label(item)) },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.Transparent,
+                    containerColor = if (LocalIsDarkTheme.current) MaterialTheme.colorScheme.surfaceContainerHigh else cardSurfaceColor(),
                     labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -55,7 +56,7 @@ fun <T> FilterChipRow(
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = isSelected,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    borderColor = Color.Transparent,
                     selectedBorderColor = Color.Transparent,
                 ),
             )

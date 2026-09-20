@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.tools
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -115,8 +117,10 @@ fun SavedPathsScreen(connectionManager: ConnectionManager, onSelect: (TracePathD
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.saved_title)) },
                 actions = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_done)) } },
             )

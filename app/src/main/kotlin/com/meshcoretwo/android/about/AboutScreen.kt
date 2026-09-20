@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.about
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -65,7 +67,7 @@ fun AboutScreen(
     onOpenLicense: (assetPath: String, title: String) -> Unit,
     onOpenLicenses: () -> Unit,
 ) {
-    Scaffold(topBar = { BackTopAppBar(stringResource(R.string.settings_about), onBack) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { BackTopAppBar(stringResource(R.string.settings_about), onBack) }) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -143,6 +145,7 @@ fun AboutScreen(
 @Composable
 internal fun BackTopAppBar(title: String, onBack: () -> Unit) {
     TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         title = { Text(title) },
         navigationIcon = { IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.common_back)) } },
     )

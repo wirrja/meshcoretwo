@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.tools
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -135,8 +137,10 @@ fun TracePathListScreen(connectionManager: ConnectionManager, prefs: SharedPrefe
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.tools_trace)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.common_back)) } },
                 actions = { IconButton(onClick = { showSavedPaths = true }) { Icon(painterResource(R.drawable.ic_bookmark), contentDescription = stringResource(R.string.trace_saved_paths_cd)) } },

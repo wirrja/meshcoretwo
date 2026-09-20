@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.chat
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -112,9 +114,11 @@ fun RoomConversationScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text((state as? RoomConversationUiState.Loaded)?.session?.name ?: "") },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.common_back)) }

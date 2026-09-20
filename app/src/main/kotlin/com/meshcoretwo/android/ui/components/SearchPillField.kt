@@ -40,8 +40,8 @@ fun SearchPillField(
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = Color.Transparent,
             focusedBorderColor = Color.Transparent,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = cardSurfaceColor(),
+            focusedContainerColor = cardSurfaceColor(),
         ),
     )
 }

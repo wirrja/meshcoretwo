@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -147,7 +148,7 @@ fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
             Button(
                 onClick = ::startPairing,
                 enabled = uiState !is PairUiState.Pairing,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             ) {
                 if (uiState is PairUiState.Pairing) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
@@ -156,7 +157,7 @@ fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            OutlinedButton(onClick = { showWiFiConnection = true }, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { showWiFiConnection = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                 Icon(painterResource(R.drawable.ic_wifi), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.pair_connect_wifi))

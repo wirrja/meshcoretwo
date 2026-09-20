@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.settings
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -88,8 +90,10 @@ fun DangerZoneScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.common_danger_zone)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

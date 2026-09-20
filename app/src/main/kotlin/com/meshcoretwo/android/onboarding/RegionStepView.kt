@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -156,7 +157,7 @@ private fun DetectedContent(region: RegionSelection, onChooseAnother: () -> Unit
         Spacer(modifier = Modifier.height(12.dp))
         TextButton(onClick = onChooseAnother) { Text(stringResource(R.string.region_choose_different)) }
         Spacer(modifier = Modifier.weight(1f))
-        Button(onClick = onUseThisRegion, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = onUseThisRegion, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
             Text(stringResource(R.string.region_use_this))
         }
     }
@@ -187,7 +188,7 @@ private fun ManualPickerContent(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        Button(onClick = onContinue, enabled = selection != null, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = onContinue, enabled = selection != null, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
             Text(stringResource(R.string.common_continue))
         }
     }

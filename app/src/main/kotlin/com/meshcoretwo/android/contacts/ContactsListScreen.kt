@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.contacts
 
+import com.meshcoretwo.android.ui.components.listCard
+import androidx.compose.ui.graphics.Color
 import com.meshcoretwo.android.ui.components.RefreshOnResume
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -125,6 +127,7 @@ fun ContactsListScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             CompactSearchTopBar(
                 title = stringResource(R.string.common_contacts),
@@ -179,6 +182,7 @@ fun ContactsListScreen(
                         items(sorted, key = { it.id }) { contact ->
                             Box(modifier = Modifier.animateItem()) {
                                 ContactRow(
+                                    asCard = true,
                                     contact = contact,
                                     userLocation = userLocation,
                                     inboundHopCount = current.inboundHopByKey[contact.publicKey.hexString],
@@ -326,17 +330,20 @@ internal fun ContactRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
+    asCard: Boolean = false,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = (if (asCard) modifier.listCard(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 14.dp, vertical = 14.dp)
+        else modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 16.dp, vertical = 14.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PresenceAvatar(
             name = contact.displayName,
             lastHeard = contact.lastHeardTimestamp.toInstantOrNull(),
             category = AvatarCategory.fromContactType(contact.type),
+            size = if (asCard) 52.dp else 44.dp,
         )
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -373,7 +380,7 @@ internal fun ContactRow(
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(2.dp))
+            Spacer(modifier = Modifier.size(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = contact.publicKeyPrefixHex(),

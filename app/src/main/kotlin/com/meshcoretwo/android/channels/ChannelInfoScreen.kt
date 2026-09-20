@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.channels
 
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,8 +84,10 @@ fun ChannelInfoScreen(connectionManager: ConnectionManager, index: UByte, onBack
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text((state as? ChannelInfoUiState.Loaded)?.channel?.name ?: "") },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.common_back)) } },
             )

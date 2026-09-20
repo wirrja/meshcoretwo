@@ -297,6 +297,7 @@ fun MeshCoreTwoTheme(themeService: ThemeService, content: @Composable () -> Unit
         MaterialTheme(
             colorScheme = current.colorScheme(isDark),
             typography = MeshCoreTwoTypography,
+            shapes = MeshCoreTwoShapes,
             content = content,
         )
     }

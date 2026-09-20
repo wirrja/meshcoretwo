@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,14 +41,14 @@ fun DetailRow(label: String, value: String, dense: Boolean = false, singleLine: 
         // bodyMedium (14sp), not the default 16sp: long translated labels ("Последний раз слышно")
         // beside values ("Никогда", "Вчера") looked oversized. The label may shrink and wrap; the
         // value keeps its natural width, right-aligned.
-        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 label,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f, fill = false).padding(end = 12.dp),
             )
-            Text(value, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.End)
+            Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, textAlign = TextAlign.End)
         }
     }
 }

@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.ui.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -41,7 +42,9 @@ fun InitialsAvatar(
 ) {
     val fill = category?.let { categoryAvatarColor(it) } ?: identityColor(name)
     val glyphColor = avatarGlyphColor(fill, usesCategoryOverride = category != null)
-    Surface(shape = CircleShape, color = fill, modifier = modifier.size(size)) {
+    // Shape carries meaning: people are circles, places (channels, repeaters, rooms) are soft squares.
+    val shape = if (category == null) CircleShape else RoundedCornerShape(size * 0.3f)
+    Surface(shape = shape, color = fill, modifier = modifier.size(size)) {
         Box(contentAlignment = Alignment.Center) {
             if (category != null) {
                 Icon(

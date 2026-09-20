@@ -2,8 +2,11 @@
 
 package com.meshcoretwo.android.contacts
 
+import com.meshcoretwo.android.ui.components.SectionCard
+import androidx.compose.material3.TopAppBarDefaults
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -92,8 +95,10 @@ fun ContactDetailScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text((state as? ContactDetailUiState.Loaded)?.contact?.displayName ?: "") },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.common_back)) } },
                 actions = {
@@ -146,7 +151,7 @@ private fun ContactDetailContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InitialsAvatar(name = contact.displayName, size = 72.dp, category = AvatarCategory.fromContactType(contact.type))
+            InitialsAvatar(name = contact.displayName, size = 80.dp, category = AvatarCategory.fromContactType(contact.type))
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(contact.displayName, style = MaterialTheme.typography.headlineSmall)
@@ -155,7 +160,7 @@ private fun ContactDetailContent(
             }
         }
 
-        Column {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(
                 value = nicknameInput,
                 onValueChange = { nicknameInput = it },
@@ -170,7 +175,7 @@ private fun ContactDetailContent(
                 },
             )
 
-            Spacer(modifier = Modifier.size(8.dp))
+            SectionCard {
             // Actions are full-width rows (not pill buttons): the label gets the whole width, so long
             // translations never squeeze or break it.
             if (contact.type == ContactType.CHAT && !contact.isBlocked) {
@@ -188,12 +193,21 @@ private fun ContactDetailContent(
             FavoriteToggleButton(isFavorite = contact.isFavorite, onToggle = viewModel::toggleFavorite)
             HorizontalDivider()
             SettingsListRow(title = stringResource(R.string.contacts_telemetry_history), onClick = { onOpenTelemetryHistory(contact.id) })
+            }
         }
 
-        Column {
+        SectionCard {
             SettingsGroupLabel(stringResource(R.string.contacts_info))
             SelectionContainer {
-                Text(contact.publicKeyHex(), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    contact.publicKeyHex(),
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.shapes.small)
+                        .padding(12.dp),
+                )
             }
             Spacer(modifier = Modifier.size(8.dp))
             DetailRow(stringResource(R.string.contacts_last_heard), contact.lastHeardTimestamp.toInstantOrNull()?.let { formatRelativeTimestamp(it) } ?: stringResource(R.string.common_never))
@@ -201,13 +215,13 @@ private fun ContactDetailContent(
             DetailRow(stringResource(R.string.contacts_unread), contact.unreadCount.toString())
         }
 
-        Column {
+        SectionCard {
             SettingsGroupLabel(stringResource(R.string.contacts_path))
             DetailRow(stringResource(R.string.contacts_route), contact.routeLabel())
         }
 
         if (contact.hasLocation) {
-            Column {
+            SectionCard {
                 SettingsGroupLabel(stringResource(R.string.contacts_location))
                 DetailRow(stringResource(R.string.contacts_coordinates), "%.5f, %.5f".format(contact.latitude, contact.longitude))
                 SettingsListRow(title = stringResource(R.string.contacts_open_maps), icon = R.drawable.ic_map, onClick = {
@@ -218,7 +232,7 @@ private fun ContactDetailContent(
         }
 
         if (contact.type == ContactType.CHAT || !state.isVContact) {
-            Column {
+            SectionCard {
                 if (contact.type == ContactType.CHAT) {
                     SettingsGroupLabel(stringResource(R.string.common_danger_zone))
                     SettingsListRow(

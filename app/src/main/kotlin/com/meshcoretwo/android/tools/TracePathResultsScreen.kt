@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.tools
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,8 +73,10 @@ fun TracePathResultsScreen(result: TraceResult, viewModel: TracePathViewModel, c
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.trace_results)) },
                 actions = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_dismiss)) } },
             )

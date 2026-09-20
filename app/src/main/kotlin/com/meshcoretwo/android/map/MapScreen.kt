@@ -26,6 +26,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -168,9 +169,9 @@ fun MapScreen(
 
             Surface(
                 modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp),
-                shape = RoundedCornerShape(19.dp),
+                shape = CircleShape,
                 color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 4.dp,
+                shadowElevation = 6.dp,
             ) {
                 Row(modifier = Modifier.padding(start = 14.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -228,6 +229,10 @@ fun MapScreen(
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp, pressedElevation = 3.dp),
             ) { Icon(painterResource(R.drawable.ic_my_location), contentDescription = stringResource(R.string.path_map_my_location)) }
         }
     }

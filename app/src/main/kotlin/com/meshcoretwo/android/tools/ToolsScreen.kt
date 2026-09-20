@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.tools
 
+import androidx.compose.ui.graphics.Color
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,6 +47,7 @@ fun ToolsScreen(
     onOpenNodeDiscovery: () -> Unit,
 ) {
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = { CompactSearchTopBar(title = stringResource(R.string.tools_title), connectionManager = connectionManager) },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxWidth().padding(horizontal = 16.dp)) {

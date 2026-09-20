@@ -14,7 +14,8 @@ import androidx.compose.ui.graphics.Color
  * `Theme.incomingBubbleColor`, since superseded by the Material 3 layout pass in PLAN.md's Phase 10.
  */
 @Composable
-fun incomingBubbleColor(): Color = MaterialTheme.colorScheme.surfaceContainerHigh
+fun incomingBubbleColor(): Color =
+    if (LocalIsDarkTheme.current) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLowest
 
 /**
  * Relative luminances of the surfaces avatars and identity names sit on: the list canvas

@@ -2,11 +2,27 @@
 
 package com.meshcoretwo.android
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.animateContentSize
+import com.meshcoretwo.android.ui.components.accentBackdrop
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -117,6 +133,29 @@ import com.meshcoretwo.services.persistence.NodeLocationFix
 import java.util.UUID
 import kotlinx.coroutines.flow.StateFlow
 
+private val TabRoutes = setOf(MainRoute.CHATS, MainRoute.CONTACTS, MainRoute.MAP, MainRoute.TOOLS, MainRoute.SETTINGS)
+private const val ScreenTransitionMillis = 260
+
+private fun isTabSwitch(from: String?, to: String?) = from in TabRoutes && to in TabRoutes
+
+/** Tab-to-tab: a quick crossfade. Drill-down/back: a short slide (a fifth of the width) plus fade —
+ * lighter than a full-width push and keeps the outgoing screen visible behind it. */
+private fun screenEnter(from: String?, to: String?, forward: Boolean): EnterTransition =
+    if (isTabSwitch(from, to)) {
+        fadeIn(tween(200))
+    } else {
+        fadeIn(tween(ScreenTransitionMillis)) +
+            slideInHorizontally(tween(ScreenTransitionMillis)) { full -> if (forward) full / 5 else -full / 5 }
+    }
+
+private fun screenExit(from: String?, to: String?, forward: Boolean): ExitTransition =
+    if (isTabSwitch(from, to)) {
+        fadeOut(tween(120))
+    } else {
+        fadeOut(tween(ScreenTransitionMillis)) +
+            slideOutHorizontally(tween(ScreenTransitionMillis)) { full -> if (forward) -full / 5 else full / 5 }
+    }
+
 internal object MainRoute {
     const val CHATS = "chats"
     const val CONTACTS = "contacts"
@@ -226,18 +265,17 @@ private fun FloatingNavBar(
         Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(horizontal = 24.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(32.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 3.dp,
-            shadowElevation = 8.dp,
+            tonalElevation = 1.dp,
+            shadowElevation = 4.dp,
         ) {
             Row(
-                Modifier.padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                Modifier.padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 destinations.forEach { destination ->
@@ -250,21 +288,44 @@ private fun FloatingNavBar(
                         if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                         label = "navItemTint",
                     )
-                    Box(
-                        Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(background)
-                            .semantics { role = Role.Tab; this.selected = selected }
-                            .clickable { onSelect(destination) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painterResource(destination.icon),
-                            contentDescription = stringResource(destination.label),
-                            tint = tint,
-                            modifier = Modifier.size(24.dp),
-                        )
+                    // The active tab claims a bigger share of the bar and shows its label; weights (not fixed
+                    // widths) guarantee all five tabs always fit, whatever the label length or screen width.
+                    val weight by animateFloatAsState(
+                        if (selected) 2.4f else 1f,
+                        spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
+                        label = "navItemWeight",
+                    )
+                    Box(Modifier.weight(weight).height(48.dp), contentAlignment = Alignment.Center) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .widthIn(max = if (selected) Dp.Infinity else 48.dp)
+                                .height(48.dp)
+                                .clip(CircleShape)
+                                .background(background)
+                                .semantics { role = Role.Tab; this.selected = selected }
+                                .clickable { onSelect(destination) }
+                                .padding(horizontal = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Icon(
+                                painterResource(destination.icon),
+                                contentDescription = if (selected) null else stringResource(destination.label),
+                                tint = tint,
+                                modifier = Modifier.size(24.dp),
+                            )
+                            if (selected) {
+                                Text(
+                                    stringResource(destination.label),
+                                    color = tint,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false).padding(start = 4.dp),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -358,7 +419,11 @@ fun MainScreen(
         NavHost(
             navController = navController,
             startDestination = MainRoute.CHATS,
-            modifier = Modifier.padding(padding).consumeWindowInsets(padding),
+            modifier = Modifier.accentBackdrop().padding(padding).consumeWindowInsets(padding),
+            enterTransition = { screenEnter(initialState.destination.route, targetState.destination.route, forward = true) },
+            exitTransition = { screenExit(initialState.destination.route, targetState.destination.route, forward = true) },
+            popEnterTransition = { screenEnter(initialState.destination.route, targetState.destination.route, forward = false) },
+            popExitTransition = { screenExit(initialState.destination.route, targetState.destination.route, forward = false) },
         ) {
             composable(MainRoute.CHATS) {
                 ChatsListScreen(

@@ -41,7 +41,7 @@ fun SettingsGroupLabel(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         letterSpacing = 0.06.em,
-        modifier = modifier.padding(top = 14.dp, bottom = 6.dp),
+        modifier = modifier.padding(top = 18.dp, bottom = 6.dp),
     )
 }
 
@@ -68,15 +68,15 @@ fun SettingsListRow(
     Row(
         modifier = modifier.fillMaxWidth()
             .let { if (onClick != null) it.clickable(onClick = onClick) else it }
-            .padding(vertical = 11.dp),
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             Box(
-                modifier = Modifier.size(26.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+                modifier = Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
             }
             Spacer(modifier = Modifier.width(12.dp))
         }
@@ -85,7 +85,7 @@ fun SettingsListRow(
             if (value != null) {
                 Text(
                     value,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = if (singleLineValue) 1 else Int.MAX_VALUE,
                     overflow = if (singleLineValue) TextOverflow.Ellipsis else TextOverflow.Clip,

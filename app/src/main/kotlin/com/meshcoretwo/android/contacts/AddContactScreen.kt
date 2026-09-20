@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.contacts
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import com.meshcoretwo.android.ui.i18n.UiText
 import com.meshcoretwo.android.ui.i18n.toUiText
 import androidx.compose.ui.platform.LocalContext
@@ -133,8 +135,10 @@ fun AddContactScreen(connectionManager: ConnectionManager, prefilledLink: String
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.contacts_add_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) }

@@ -2,6 +2,10 @@
 
 package com.meshcoretwo.android.chat
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.background
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
@@ -35,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -194,8 +199,10 @@ fun ChatConversationScreen(
 
     Scaffold(
         modifier = Modifier.imePadding(),
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = {
                     val loaded = state as? ConversationUiState.Loaded
                     Column {
@@ -421,9 +428,15 @@ private fun MessageBubble(
                 linkified.tokens.filter { it.kind == LinkToken.Kind.MENTION }.map { it.value }.distinct()
             }
             val mentionColors = mentionNames.associateWith { identityColor(it) }
+            val gradientBubble = isOutgoing && !message.hasFailed
+            val primary = MaterialTheme.colorScheme.primary
+            val bubbleBrush = remember(primary) {
+                Brush.linearGradient(listOf(lerp(primary, Color.White, 0.10f), lerp(primary, Color.Black, 0.12f)))
+            }
             Surface(
-                color = bubbleColor,
+                color = if (gradientBubble) Color.Transparent else bubbleColor,
                 shape = bubbleShape(isOutgoing),
+                shadowElevation = if (isOutgoing) 0.dp else 1.dp,
                 modifier = Modifier.combinedClickable(onClick = {}, onLongClick = onLongPress),
             ) {
                 Text(
@@ -437,7 +450,7 @@ private fun MessageBubble(
                         selfName = selfName,
                         onLinkClick = onLinkClick,
                     ),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = (if (gradientBubble) Modifier.background(bubbleBrush) else Modifier).padding(horizontal = 14.dp, vertical = 9.dp),
                     color = textColor,
                 )
             }
@@ -639,7 +652,7 @@ internal fun formatMessageTime(date: Instant): String =
     DatePatterns.timeShort().format(date)
 
 /** Corner radius of the pill-shaped compose field. Ported from `ChatInputMetrics.fieldCornerRadius`. */
-private val ChatInputFieldCornerRadius = 20.dp
+private val ChatInputFieldCornerRadius = 24.dp
 
 /**
  * Ported from `Components/ChatInputBar.swift`, minus its leading-accessory slot (no attachments
@@ -704,7 +717,7 @@ internal fun ChatInputBar(
         text = text.substring(0, index) + MentionUtilities.createMention(contact.name) + " " + text.substring(index + searchPattern.length)
     }
 
-    Surface(tonalElevation = 2.dp) {
+    Surface(color = Color.Transparent) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             if (mentionSuggestions.isNotEmpty()) {
                 MentionSuggestionsList(mentionSuggestions, onSelect = ::insertMention)
@@ -718,9 +731,18 @@ internal fun ChatInputBar(
                     enabled = canSendConnection,
                     maxLines = 4,
                     shape = RoundedCornerShape(ChatInputFieldCornerRadius),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        disabledBorderColor = Color.Transparent,
+                    ),
                 )
                 FilledIconButton(
                     enabled = canSend,
+                    modifier = Modifier.padding(bottom = 4.dp).size(48.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,

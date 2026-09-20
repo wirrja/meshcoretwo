@@ -2,12 +2,15 @@
 
 package com.meshcoretwo.android.chat
 
+import androidx.compose.ui.graphics.Color
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +47,7 @@ import com.meshcoretwo.android.ui.components.CompactSearchTopBar
 import com.meshcoretwo.android.ui.components.ConfirmDialog
 import com.meshcoretwo.android.ui.components.ConnectingState
 import com.meshcoretwo.android.ui.components.EmptyState
+import com.meshcoretwo.android.ui.components.listCard
 import com.meshcoretwo.android.ui.components.FilterChipRow
 import com.meshcoretwo.android.ui.components.HeaderIconButton
 import com.meshcoretwo.android.ui.components.PresenceAvatar
@@ -84,6 +88,7 @@ fun ChatsListScreen(connectionManager: ConnectionManager, onOpenConversation: (C
     var leaveCandidate by remember { mutableStateOf<ChannelDto?>(null) }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             CompactSearchTopBar(
                 title = stringResource(R.string.chats_title),
@@ -222,8 +227,9 @@ private fun NoMatchesContent(modifier: Modifier = Modifier) {
 @Composable
 private fun ConversationListRow(item: ConversationItem, onClick: () -> Unit, onLongClick: () -> Unit, modifier: Modifier = Modifier) {
     val conversation = item.conversation
+    val hasUnread = conversation.unreadCount > 0 && !conversation.isMuted
     Row(
-        modifier = modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = modifier.listCard(onClick = onClick, onLongClick = onLongClick, emphasized = hasUnread).padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PresenceAvatar(
@@ -231,8 +237,9 @@ private fun ConversationListRow(item: ConversationItem, onClick: () -> Unit, onL
             lastHeard = conversation.lastHeard,
             category = conversation.avatarCategory,
             isPublicChannel = conversation.isPublicChannel,
+            size = 52.dp,
         )
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Name + badges share one weighted group; the timestamp sits after it at natural
@@ -242,6 +249,7 @@ private fun ConversationListRow(item: ConversationItem, onClick: () -> Unit, onL
                     Text(
                         text = conversation.displayName,
                         style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (hasUnread) FontWeight.Bold else FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
@@ -269,24 +277,24 @@ private fun ConversationListRow(item: ConversationItem, onClick: () -> Unit, onL
                     Text(
                         text = formatRelativeTimestamp(date),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (hasUnread) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         softWrap = false,
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(2.dp))
+            Spacer(modifier = Modifier.size(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = item.previewText(stringResource(R.string.chats_no_messages)),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (hasUnread) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                 )
-                if (conversation.unreadCount > 0 && !conversation.isMuted) {
+                if (hasUnread) {
                     Spacer(modifier = Modifier.width(8.dp))
                     UnreadBadge(count = conversation.unreadCount)
                 }
@@ -297,13 +305,15 @@ private fun ConversationListRow(item: ConversationItem, onClick: () -> Unit, onL
 
 @Composable
 private fun UnreadBadge(count: Int) {
-    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
-        Text(
-            text = if (count > 99) "99+" else count.toString(),
-            color = MaterialTheme.colorScheme.onPrimary,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-        )
+    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary, modifier = Modifier.defaultMinSize(minWidth = 22.dp, minHeight = 22.dp)) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 6.dp)) {
+            Text(
+                text = if (count > 99) "99+" else count.toString(),
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }
 

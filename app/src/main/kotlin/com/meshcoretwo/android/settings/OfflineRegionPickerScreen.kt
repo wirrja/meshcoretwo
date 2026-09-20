@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.settings
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import android.graphics.PointF
 import android.text.format.Formatter
 import androidx.compose.foundation.BorderStroke
@@ -134,8 +136,10 @@ fun OfflineRegionPickerScreen(
     LaunchedEffect(mapSizePx) { controller.recomputeBounds() }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.offmap_pick_region)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(painterResource(R.drawable.ic_close), contentDescription = stringResource(R.string.common_cancel)) }

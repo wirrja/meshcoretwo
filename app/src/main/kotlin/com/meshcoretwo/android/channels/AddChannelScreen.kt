@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.channels
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
@@ -113,8 +115,10 @@ fun AddChannelScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(mode?.title ?: R.string.add_channel_title)) },
                 navigationIcon = {
                     IconButton(onClick = { if (mode == null) onCancel() else { mode = null; error = null } }) {

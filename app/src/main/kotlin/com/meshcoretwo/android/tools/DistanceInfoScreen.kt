@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.tools
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,8 +35,10 @@ fun DistanceInfoScreen(state: TracePathUiState, onDismiss: () -> Unit) {
     val title = stringResource(if (state.isDistanceUsingFallback) R.string.dist_info else R.string.dist_unavailable)
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(title) },
                 actions = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_done)) } },
             )

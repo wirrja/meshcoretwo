@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -73,7 +74,7 @@ fun PermissionsScreen(onContinue: () -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onContinue, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                 Text(stringResource(R.string.common_continue))
             }
         }

@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.ui.components
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableFloatStateOf
@@ -50,7 +51,7 @@ fun CompactSearchTopBar(
     searchPlaceholder: String = stringResource(R.string.common_search),
     filters: (@Composable () -> Unit)? = null,
 ) {
-    Surface(modifier = modifier.fillMaxWidth()) {
+    Surface(modifier = modifier.fillMaxWidth(), color = Color.Transparent) {
         Column(Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
@@ -60,10 +61,10 @@ fun CompactSearchTopBar(
                 // One line, shrinking to fit: with three action buttons a long translation
                 // ("Yhteystiedot") would otherwise break mid-word.
                 var titleScale by remember(title) { mutableFloatStateOf(1f) }
-                val baseSize = MaterialTheme.typography.headlineSmall.fontSize
+                val baseSize = MaterialTheme.typography.headlineMedium.fontSize
                 Text(
                     title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontSize = baseSize * titleScale,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,

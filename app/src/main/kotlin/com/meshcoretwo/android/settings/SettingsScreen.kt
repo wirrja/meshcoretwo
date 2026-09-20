@@ -2,6 +2,12 @@
 
 package com.meshcoretwo.android.settings
 
+import com.meshcoretwo.android.ui.components.cardSurfaceColor
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 import com.meshcoretwo.android.ui.i18n.toUiText
 import com.meshcoretwo.android.ui.i18n.UiText
 import android.content.ActivityNotFoundException
@@ -173,6 +179,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = { CompactSearchTopBar(title = stringResource(R.string.settings_title), connectionManager = connectionManager) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
@@ -259,65 +266,101 @@ private fun SettingsContent(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ConnectionSection(onOpenDeviceSelection = onOpenDeviceSelection)
-        HorizontalDivider()
-        AppearanceSection(themeService = themeService, onOpenAppearance = onOpenAppearance)
-        HorizontalDivider()
-        LanguageRow()
-        HorizontalDivider()
-        MapsSection(onOpenOfflineMaps = onOpenOfflineMaps)
-        HorizontalDivider()
-        DeviceSection(device = device, isBusy = isBusy, viewModel = viewModel, regionSelectionStore = regionSelectionStore, regionResolver = regionResolver)
+        SettingsCard {
+            ConnectionSection(onOpenDeviceSelection = onOpenDeviceSelection)
+        }
+        SettingsCard {
+            AppearanceSection(themeService = themeService, onOpenAppearance = onOpenAppearance)
+        }
+        SettingsCard {
+            LanguageRow()
+        }
+        SettingsCard {
+            MapsSection(onOpenOfflineMaps = onOpenOfflineMaps)
+        }
+        SettingsCard {
+            DeviceSection(device = device, isBusy = isBusy, viewModel = viewModel, regionSelectionStore = regionSelectionStore, regionResolver = regionResolver)
+        }
         if (device.supportsDefaultFloodScope) {
-            HorizontalDivider()
-            DefaultFloodScopeSection(device = device, isBusy = isBusy, viewModel = viewModel, onOpenRegionManagement = onOpenRegionManagement)
+            SettingsCard {
+                DefaultFloodScopeSection(device = device, isBusy = isBusy, viewModel = viewModel, onOpenRegionManagement = onOpenRegionManagement)
+            }
         }
-        HorizontalDivider()
-        LocationSection(
-            device = device,
-            deviceGpsState = deviceGpsState,
-            autoUpdateLocation = autoUpdateLocation,
-            gpsSource = gpsSource,
-            isBusy = isBusy,
-            viewModel = viewModel,
-            locationProvider = locationProvider,
-            onOpenLocationPicker = onOpenLocationPicker,
-        )
+        SettingsCard {
+            LocationSection(
+                device = device,
+                deviceGpsState = deviceGpsState,
+                autoUpdateLocation = autoUpdateLocation,
+                gpsSource = gpsSource,
+                isBusy = isBusy,
+                viewModel = viewModel,
+                locationProvider = locationProvider,
+                onOpenLocationPicker = onOpenLocationPicker,
+            )
+        }
         if (deviceGpsState?.isSupported == true) {
-            HorizontalDivider()
-            DeviceGpsSection(deviceGpsState = deviceGpsState, isBusy = isBusy, viewModel = viewModel)
+            SettingsCard {
+                DeviceGpsSection(deviceGpsState = deviceGpsState, isBusy = isBusy, viewModel = viewModel)
+            }
         }
-        HorizontalDivider()
-        NotificationsSection(preferences = notificationPreferences, store = notificationPreferencesStore)
-        HorizontalDivider()
-        NodesSection(device = device, isBusy = isBusy, viewModel = viewModel)
-        HorizontalDivider()
-        StaleNodeCleanupSection(
-            thresholdDays = staleNodeCleanupThresholdDays,
-            lastRun = staleNodeCleanupLastRun,
-            isBusy = isBusy,
-            viewModel = viewModel,
-        )
-        HorizontalDivider()
-        TelemetrySection(device = device, isBusy = isBusy, viewModel = viewModel)
-        HorizontalDivider()
-        DirectMessagesSection(device = device, isBusy = isBusy, viewModel = viewModel)
-        HorizontalDivider()
-        MessageInfoSection(prefs = prefs)
-        HorizontalDivider()
-        BlockingSection(onOpenBlockedChannelSenders = onOpenBlockedChannelSenders)
-        HorizontalDivider()
-        ConfigExportImportSection(onOpenConfigExport = onOpenConfigExport, onOpenConfigImport = onOpenConfigImport)
-        HorizontalDivider()
-        BackupRestoreSection(onOpenBackupRestore = onOpenBackupRestore)
-        HorizontalDivider()
-        DeviceIdentitySection(isBusy = isBusy, viewModel = viewModel)
-        HorizontalDivider()
-        DangerZoneEntry(onOpenDangerZone = onOpenDangerZone)
-        HorizontalDivider()
-        AboutSection(onOpenAbout = onOpenAbout, onOpenLicenses = onOpenLicenses)
+        SettingsCard {
+            NotificationsSection(preferences = notificationPreferences, store = notificationPreferencesStore)
+        }
+        SettingsCard {
+            NodesSection(device = device, isBusy = isBusy, viewModel = viewModel)
+        }
+        SettingsCard {
+            StaleNodeCleanupSection(
+                thresholdDays = staleNodeCleanupThresholdDays,
+                lastRun = staleNodeCleanupLastRun,
+                isBusy = isBusy,
+                viewModel = viewModel,
+            )
+        }
+        SettingsCard {
+            TelemetrySection(device = device, isBusy = isBusy, viewModel = viewModel)
+        }
+        SettingsCard {
+            DirectMessagesSection(device = device, isBusy = isBusy, viewModel = viewModel)
+        }
+        SettingsCard {
+            MessageInfoSection(prefs = prefs)
+        }
+        SettingsCard {
+            BlockingSection(onOpenBlockedChannelSenders = onOpenBlockedChannelSenders)
+        }
+        SettingsCard {
+            ConfigExportImportSection(onOpenConfigExport = onOpenConfigExport, onOpenConfigImport = onOpenConfigImport)
+        }
+        SettingsCard {
+            BackupRestoreSection(onOpenBackupRestore = onOpenBackupRestore)
+        }
+        SettingsCard {
+            DeviceIdentitySection(isBusy = isBusy, viewModel = viewModel)
+        }
+        SettingsCard {
+            DangerZoneEntry(onOpenDangerZone = onOpenDangerZone)
+        }
+        SettingsCard {
+            AboutSection(onOpenAbout = onOpenAbout, onOpenLicenses = onOpenLicenses)
+        }
         Spacer(modifier = Modifier.size(8.dp))
     }
+}
+
+/** One Settings section as a soft floating card — replaces the divider lines between sections. */
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    val shape = MaterialTheme.shapes.large
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(1.dp, shape, clip = false)
+            .clip(shape)
+            .background(cardSurfaceColor())
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        content = content,
+    )
 }
 
 /**

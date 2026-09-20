@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.about
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,7 +54,7 @@ fun LicensesScreen(onBack: () -> Unit, onOpenLicense: (assetPath: String, title:
         }
     }
 
-    Scaffold(topBar = { BackTopAppBar(stringResource(R.string.licenses_title), onBack) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { BackTopAppBar(stringResource(R.string.licenses_title), onBack) }) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -100,7 +101,7 @@ fun LicenseTextScreen(assetPath: String, title: String, onBack: () -> Unit) {
         }
     }
 
-    Scaffold(topBar = { BackTopAppBar(title, onBack) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = { BackTopAppBar(title, onBack) }) { padding ->
         val loaded = blocks
         if (loaded == null) {
             LoadingScreen(modifier = Modifier.padding(padding))

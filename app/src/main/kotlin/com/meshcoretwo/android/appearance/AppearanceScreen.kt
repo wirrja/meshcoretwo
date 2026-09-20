@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.android.appearance
 
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -74,8 +76,10 @@ fun AppearanceScreen(themeService: ThemeService, onBack: () -> Unit) {
     val preference by themeService.colorSchemePreference.collectAsStateWithLifecycle()
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 title = { Text(stringResource(R.string.appearance_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
