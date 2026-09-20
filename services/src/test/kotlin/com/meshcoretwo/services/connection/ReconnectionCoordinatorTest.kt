@@ -181,5 +181,9 @@ class ReconnectionCoordinatorTest {
         assertEquals(DeviceConnectionState.CONNECTING, delegate.connectionState)
         assertEquals(DEVICE_A, coordinator.reconnectingDeviceAddress)
         assertFalse(delegate.notifyConnectionLostCallCount > 0)
+
+        // The re-armed timer keeps re-arming until 60 s of *wall-clock* time pass, and runTest waits for it:
+        // without this the test took a full real minute and failed on a loaded machine (runTest's own limit).
+        coordinator.cancelTimeout()
     }
 }

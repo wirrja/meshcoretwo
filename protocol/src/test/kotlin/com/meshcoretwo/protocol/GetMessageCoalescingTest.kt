@@ -114,7 +114,7 @@ class GetMessageCoalescingTest {
         delay(50)
         follower.cancel()
 
-        withTimeout(2000) { follower.join() }
+        withTimeout(20_000) { follower.join() }
         assertTrue(follower.isCancelled)
 
         // The leader is unaffected by the follower's cancellation and still resolves via its

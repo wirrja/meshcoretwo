@@ -263,14 +263,16 @@ class SyncCoordinatorTest {
         assertEquals(0, coordinator.contactsVersion.value)
 
         val collected = mutableListOf<SyncDataEvent>()
-        val job = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
-            coordinator.dataEvents().collect { collected.add(it) }
-        }
-        Thread.sleep(20)
+        // UNDISPATCHED: subscribed by the time launch returns, so the emit below cannot be missed.
+        val job = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default)
+            .launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+                coordinator.dataEvents().collect { collected.add(it) }
+            }
 
         coordinator.notifyContactsChanged()
 
-        Thread.sleep(20)
+        val deadline = System.currentTimeMillis() + 10_000
+        while (collected.isEmpty() && System.currentTimeMillis() < deadline) Thread.sleep(5)
         job.cancel()
         assertEquals(1, coordinator.contactsVersion.value)
         assertTrue(collected.contains(SyncDataEvent.ContactsChanged))

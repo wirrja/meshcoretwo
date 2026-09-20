@@ -66,6 +66,19 @@ class TracePathServiceTest {
         database.close()
     }
 
+    /**
+     * Waits for the monitor to actually be collecting. The fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost; a fixed sleep covered that on a fast machine but
+     * not on a loaded CI runner.
+     */
+    private fun awaitEventSubscriber(timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!session.hasEventSubscriber) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `createSavedTracePath then fetchSavedTracePaths round-trips through the real store`() = runTest {
         service.createSavedTracePath(radioID, "Tower", byteArrayOf(1, 2), hashSize = 1, initialRun = null)
@@ -91,7 +104,7 @@ class TracePathServiceTest {
         val collector = GlobalScope.launch(Dispatchers.Default) { service.traceEvents.collect { received.add(it) } }
 
         service.startEventMonitoring()
-        Thread.sleep(100)
+        awaitEventSubscriber()
 
         session.emit(MeshEvent.TraceData(TraceInfo(tag = 5u, authCode = 0u, flags = 0u, pathLength = 0u, path = listOf(TraceNode(hashBytes = null, snr = 1.0)))))
 
@@ -108,6 +121,9 @@ class TracePathServiceTest {
 private class FakeTraceSessionOps : BinaryProtocolSessionOps {
     lateinit var sentInfo: MessageSentInfo
     var lastTraceTag: UInt? = null
+
+    /** True once something is collecting [events] — see the test's `awaitEventSubscriber`. */
+    val hasEventSubscriber: Boolean get() = eventsFlow.subscriptionCount.value > 0
 
     private val eventsFlow = MutableSharedFlow<MeshEvent>(extraBufferCapacity = 64)
 

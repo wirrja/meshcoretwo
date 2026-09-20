@@ -69,6 +69,19 @@ class BinaryProtocolServiceTest {
         service = BinaryProtocolService(session)
     }
 
+    /**
+     * Waits for the monitor to actually be collecting. The fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost; a fixed sleep covered that on a fast machine but
+     * not on a loaded CI runner.
+     */
+    private fun awaitEventSubscriber(timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!session.hasEventSubscriber) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `requestStatus returns the session's status response`() = runTest {
         session.status = statusResponse(battery = 4100)
@@ -210,7 +223,7 @@ class BinaryProtocolServiceTest {
         // subscribe before emitting — a SharedFlow with no replay drops events emitted before
         // a collector attaches.
         service.startEventMonitoring()
-        Thread.sleep(100)
+        awaitEventSubscriber()
 
         session.emit(MeshEvent.StatusResponseEvent(statusResponse()))
         session.emit(MeshEvent.TelemetryResponseEvent(TelemetryResponse(publicKeyPrefix = ByteArray(0), tag = null, rawData = ByteArray(0))))
@@ -227,7 +240,7 @@ class BinaryProtocolServiceTest {
         service.setTraceResponseHandler { traceReceived.add(it) }
 
         service.startEventMonitoring()
-        Thread.sleep(100)
+        awaitEventSubscriber()
 
         val info = TraceInfo(tag = 42u, authCode = 7u, flags = 0u, pathLength = 1u, path = listOf(TraceNode(hashBytes = null, snr = 5.0)))
         session.emit(MeshEvent.TraceData(info))
@@ -244,7 +257,7 @@ class BinaryProtocolServiceTest {
         service.setStatusResponseHandler { statusReceived.add(it) }
 
         service.startEventMonitoring()
-        Thread.sleep(100)
+        awaitEventSubscriber()
         service.stopEventMonitoring()
 
         session.emit(MeshEvent.StatusResponseEvent(statusResponse()))
@@ -287,6 +300,9 @@ private class FakeBinaryProtocolSessionOps : BinaryProtocolSessionOps {
     var lastMmaRange: Pair<Instant, Instant>? = null
     var lastTraceTag: UInt? = null
     var lastTraceAuthCode: UInt? = null
+
+    /** True once something is collecting [events] — see the test's `awaitEventSubscriber`. */
+    val hasEventSubscriber: Boolean get() = eventsFlow.subscriptionCount.value > 0
 
     private val eventsFlow = MutableSharedFlow<MeshEvent>(extraBufferCapacity = 64)
 

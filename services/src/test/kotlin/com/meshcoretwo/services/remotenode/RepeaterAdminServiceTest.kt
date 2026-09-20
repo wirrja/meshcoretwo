@@ -90,6 +90,19 @@ class RepeaterAdminServiceTest {
         return contactStore.fetchContact(radioID, publicKey)!!
     }
 
+    /**
+     * Waits for the monitor to actually be collecting. The fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost; a fixed sleep covered that on a fast machine but
+     * not on a loaded CI runner.
+     */
+    private fun awaitEventSubscriber(timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!session.hasEventSubscriber) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `fetchRepeaterSessions returns only repeater sessions`() = runTest {
         val repeaterContact = saveRepeaterContact()
@@ -200,7 +213,7 @@ class RepeaterAdminServiceTest {
         session.autoCompleteLoginPermissions = RoomPermissionLevel.ADMIN.rawValue
 
         remoteNodeService.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val result = service.connectAsAdmin(radioID, repeaterContact, password = "hunter2")
 

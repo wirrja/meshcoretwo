@@ -24,6 +24,7 @@ import com.meshcoretwo.services.persistence.RoomMessageDto
 import com.meshcoretwo.services.persistence.RoomMessageStore
 import com.meshcoretwo.services.persistence.RoomPermissionLevel
 import com.meshcoretwo.services.security.KeychainService
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -129,6 +130,19 @@ class RoomServerServiceTest {
 
     // MARK: - joinRoom
 
+    /**
+     * Waits for the monitor to actually be collecting. The fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost; a fixed sleep covered that on a fast machine but
+     * not on a loaded CI runner.
+     */
+    private fun awaitEventSubscriber(timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!session.hasEventSubscriber) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `joinRoom creates a session, logs in, and returns the updated session`() = runTest {
         saveRoomContact()
@@ -137,7 +151,7 @@ class RoomServerServiceTest {
         session.autoCompleteLoginPrefix = publicKey.copyOfRange(0, 6)
         session.autoCompleteLoginPermissions = RoomPermissionLevel.READ_WRITE.rawValue
         remoteNodeService.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val result = service.joinRoom(radioID, contact, password = "secret")
 
@@ -152,7 +166,7 @@ class RoomServerServiceTest {
         val contact = contactStore.fetchContact(radioID, publicKey)!!
         session.autoCompleteLoginPrefix = publicKey.copyOfRange(0, 6)
         remoteNodeService.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         service.joinRoom(radioID, contact, password = "secret", rememberPassword = true)
 
@@ -165,7 +179,7 @@ class RoomServerServiceTest {
         val contact = contactStore.fetchContact(radioID, publicKey)!!
         session.autoCompleteLoginPrefix = publicKey.copyOfRange(0, 6)
         remoteNodeService.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         service.joinRoom(radioID, contact, password = "secret", rememberPassword = false)
 
@@ -182,7 +196,7 @@ class RoomServerServiceTest {
         keychainService.storePassword("secret", publicKey)
         session.autoCompleteLoginPrefix = publicKey.copyOfRange(0, 6)
         remoteNodeService.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val result = service.reconnectRoom(created.id)
 
@@ -276,6 +290,10 @@ class RoomServerServiceTest {
         val created = remoteNodeService.createSession(radioID, contact)
         sessionStore.updateConnection(created.id, isConnected = true, permissionLevel = RoomPermissionLevel.READ_WRITE)
         session.sendMessageWithRetryResult = Result.success(null)
+        // Park the background send: this test is about what postMessage returns and persists
+        // *before* the send resolves, and an unparked send overtakes the assertions on a loaded machine.
+        val gate = CompletableDeferred<Unit>()
+        session.sendMessageWithRetryGate = gate
 
         val result = service.postMessage(created.id, "hello room")
 
@@ -289,6 +307,7 @@ class RoomServerServiceTest {
         assertEquals(result.id, persisted.id)
         assertEquals(result.status, persisted.status)
         assertEquals(result.text, persisted.text)
+        gate.complete(Unit)
     }
 
     @Test

@@ -24,7 +24,7 @@ import org.junit.Test
  */
 class BleScanPairingServiceTest {
     private suspend fun BleScanPairingService.awaitPresenting() =
-        withTimeout(2000) { isPresenting.first { it } }
+        withTimeout(20_000) { isPresenting.first { it } }
 
     @Test
     fun `discoverDevice presents the picker and resolves with the selected address`() = runBlocking {
@@ -107,7 +107,7 @@ class BleScanPairingServiceTest {
         } catch (e: CancellationException) {
             // expected
         }
-        withTimeout(2000) { isPresentingClearsEventually(service) }
+        withTimeout(20_000) { isPresentingClearsEventually(service) }
     }
 
     private suspend fun isPresentingClearsEventually(service: BleScanPairingService) {

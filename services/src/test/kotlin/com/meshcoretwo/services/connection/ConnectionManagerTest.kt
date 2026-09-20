@@ -222,16 +222,16 @@ class ConnectionManagerTest {
     @Test
     fun `pairNewDevice discovers, connects, and reaches at least SYNCING`() = runBlocking {
         val pairJob = launch { connectionManager.pairNewDevice() }
-        withTimeout(2000) { connectionManager.pairingService.isPresenting.first { it } }
+        withTimeout(20_000) { connectionManager.pairingService.isPresenting.first { it } }
 
         connectionManager.pairingService.select(DEVICE_A)
         // waitForOtherAppReconnection's up-to-6x400ms polling (stateMachine's default stub always
         // reports "not connected elsewhere") runs before the handshake starts sending, so the
         // generous per-call timeouts below (rather than answerConnectHandshake's tighter default)
         // are needed to not race that ~2s of real-time delay.
-        waitUntilSent(transport.mock, minCount = 1, timeoutMs = 5000)
+        waitUntilSent(transport.mock, minCount = 1, timeoutMs = 20_000)
         transport.mock.simulateReceive(makeSelfInfoPacket())
-        waitUntilSent(transport.mock, minCount = 2, timeoutMs = 5000)
+        waitUntilSent(transport.mock, minCount = 2, timeoutMs = 20_000)
         transport.mock.simulateReceive(makeDeviceInfoPacket())
         pairJob.join()
 
@@ -256,7 +256,7 @@ class ConnectionManagerTest {
                 caught = e
             }
         }
-        withTimeout(2000) { connectionManager.pairingService.isPresenting.first { it } }
+        withTimeout(20_000) { connectionManager.pairingService.isPresenting.first { it } }
 
         connectionManager.pairingService.cancel()
         pairJob.join()

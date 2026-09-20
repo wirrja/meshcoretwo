@@ -128,6 +128,18 @@ class IncomingMessageServiceTest {
         snr = 4.0,
     )
 
+    /**
+     * Waits for [IncomingMessageService]'s monitor to actually be collecting. [FakeSession.emit] goes to a
+     * zero-replay `SharedFlow`, so an event emitted before the monitor subscribes is dropped outright.
+     */
+    private fun awaitEventSubscriber(timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!session.hasEventSubscriber) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `pollAllMessages persists an incoming direct message for a known contact`() = runTest {
         val contact = saveContact()
@@ -442,17 +454,19 @@ class IncomingMessageServiceTest {
     fun `event-driven direct message is persisted and emitted while not polling`() = runTest {
         val contact = saveContact()
         service.startMessageEventMonitoring(radioID)
+        awaitEventSubscriber()
 
         val received = ArrayBlockingQueue<IncomingMessageEvent>(1)
         val collectorScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default)
-        val collectorJob = collectorScope.launch {
+        // UNDISPATCHED: the body runs up to its first suspension inline, so the collector is
+        // subscribed by the time launch returns — the event below has no replay to fall back on.
+        val collectorJob = collectorScope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
             received.put(service.receivedEvents().first())
         }
-        Thread.sleep(20) // let the collector subscribe before the event fires
 
         session.emit(MeshEvent.ContactMessageReceived(contactMessage(senderPrefix = contact.publicKey.copyOf(6))))
 
-        val event = received.poll(2, TimeUnit.SECONDS)
+        val event = received.poll(20, TimeUnit.SECONDS)
         collectorJob.cancel()
         assertTrue(event is IncomingMessageEvent.DirectMessageReceived)
         assertEquals(1, messageStore.fetchMessages(contact.id).size)
@@ -462,6 +476,7 @@ class IncomingMessageServiceTest {
     fun `stopMessageEventMonitoring stops delivering further events`() = runTest {
         val contact = saveContact()
         service.startMessageEventMonitoring(radioID)
+        awaitEventSubscriber()
         service.stopMessageEventMonitoring()
 
         session.emit(MeshEvent.ContactMessageReceived(contactMessage(senderPrefix = contact.publicKey.copyOf(6))))
@@ -960,6 +975,9 @@ private class FakeIncomingSession : MeshCoreSessionProtocol {
     val queuedMessages = ArrayDeque<MessageResult>()
     var autoFetchStarted = false
     var autoFetchStopped = false
+
+    /** True once the service's monitor is collecting — see the test's `awaitEventSubscriber`. */
+    val hasEventSubscriber: Boolean get() = eventsFlow.subscriptionCount.value > 0
 
     private val eventsFlow = MutableSharedFlow<MeshEvent>(extraBufferCapacity = 16)
 

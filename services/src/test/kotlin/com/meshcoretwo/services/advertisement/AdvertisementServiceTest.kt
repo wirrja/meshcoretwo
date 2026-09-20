@@ -341,20 +341,25 @@ class AdvertisementServiceTest {
 
     @Test
     fun `delta sync debounces multiple adverts into one handler call`() = runTest {
+        // A wide window instead of the fixture's 5 ms: on a slow CI runner two emits can land further
+        // apart than 5 ms, which would (correctly) trigger two rounds and make this test flaky.
+        val debouncing = AdvertisementService(session, contactStore, deviceStore, discoveredNodeStore, debounceMs = 1_000, minIntervalMs = 10, busyBackoffMs = 5)
         var handlerCalls = 0
-        service.setDeltaSyncHandler {
+        debouncing.setDeltaSyncHandler {
             handlerCalls++
             AdvertContactSyncOutcome.SYNCED
         }
         val keyA = ByteArray(32) { 0x71 }
         val keyB = ByteArray(32) { 0x72 }
 
-        service.startEventMonitoring(radioID)
+        debouncing.startEventMonitoring(radioID)
         session.emit(MeshEvent.Advertisement(keyA))
         session.emit(MeshEvent.Advertisement(keyB))
 
-        Thread.sleep(200) // well past the 5ms debounce; both adverts should coalesce into one round
+        awaitUntil { handlerCalls >= 1 }
+        Thread.sleep(300) // nothing further may follow: both adverts coalesced into the one round
         assertEquals(1, handlerCalls)
+        debouncing.stopEventMonitoring()
     }
 
     @Test

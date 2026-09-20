@@ -32,6 +32,7 @@ import com.meshcoretwo.services.persistence.RemoteNodeSessionStore
 import com.meshcoretwo.services.persistence.RoomPermissionLevel
 import com.meshcoretwo.services.security.KeychainService
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
@@ -67,10 +68,10 @@ import java.util.UUID
  * and its own retransmit loop both run on the service's real `Dispatchers.Default` scope (not
  * `runTest`'s virtual scheduler), so a `CompletableDeferred` resolved by a real background thread
  * is safe to `await()` directly from the test body — no `Thread.sleep`/polling needed there. Only
- * [service.startEventMonitoring] itself needs the [Thread.sleep] grace period established by
- * [com.meshcoretwo.services.advertisement.AdvertisementServiceTest] (subscribing to a zero-replay
- * `SharedFlow` takes a moment on a real dispatcher), and the parked-login teardown test still needs
- * [awaitUntil] because nothing ever resolves that particular login.
+ * [service.startEventMonitoring] itself needs [awaitEventSubscriber] (subscribing to a zero-replay
+ * `SharedFlow` takes a moment on a real dispatcher, and an event emitted before that is lost), and
+ * the parked-login teardown test still needs [awaitUntil] because nothing ever resolves that
+ * particular login.
  */
 @RunWith(RobolectricTestRunner::class)
 class RemoteNodeServiceTest {
@@ -1019,7 +1020,7 @@ class RemoteNodeServiceTest {
             }
         }
 
-        awaitUntil(timeoutMs = 3000) { thrown != null }
+        awaitUntil { thrown != null }
         assertTrue(thrown is RemoteNodeError.Timeout)
         assertFalse(session.resetPathCalled)
         job.cancel()
@@ -1145,6 +1146,13 @@ internal class FakeRemoteNodeSessionOps : RemoteNodeSessionOps {
         MessageSentInfo(route = 0u, expectedAck = byteArrayOf(1, 2, 3, 4), suggestedTimeoutMs = 1000u),
     )
     val sendMessageWithRetryInvocations = mutableListOf<Pair<ByteArray, String>>()
+
+    /**
+     * Holds the send until the test completes it. A caller that posts a message and then inspects the
+     * freshly-saved row races its own background send otherwise: on a loaded machine the send finishes
+     * first and the row is already past PENDING by the time the assertion reads it.
+     */
+    var sendMessageWithRetryGate: CompletableDeferred<Unit>? = null
     override suspend fun sendMessageWithRetry(
         destination: ByteArray,
         text: String,
@@ -1155,6 +1163,7 @@ internal class FakeRemoteNodeSessionOps : RemoteNodeSessionOps {
         timeout: Double?,
     ): MessageSentInfo? {
         sendMessageWithRetryInvocations.add(destination to text)
+        sendMessageWithRetryGate?.await()
         return sendMessageWithRetryResult.getOrThrow()
     }
 

@@ -127,6 +127,19 @@ class RxLogServiceTest {
         packetPayload = payload,
     )
 
+    /**
+     * Waits for the monitor to actually be collecting. The fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost; a fixed sleep covered that on a fast machine but
+     * not on a loaded CI runner.
+     */
+    private fun awaitEventSubscriber(minSubscribers: Int = 1, timeoutMs: Long = 10_000) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (session.eventsFlow.subscriptionCount.value < minSubscribers) {
+            check(System.currentTimeMillis() < deadline) { "no event subscriber within ${timeoutMs}ms" }
+            Thread.sleep(5)
+        }
+    }
+
     @Test
     fun `process persists a group-text packet as NO_MATCHING_KEY when no channel secret matches`() = runTest {
         service.startEventMonitoring(radioID)
@@ -143,8 +156,7 @@ class RxLogServiceTest {
         val secret = ByteArray(16) { it.toByte() }
         channelStore.saveChannel(radioID, ChannelInfo(0u, "General", secret))
         service.startEventMonitoring(radioID)
-        awaitUntil { true } // let startEventMonitoring's loadSecretsFromDatabase complete
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 1234u, txtType = 0, text = "hi")
         service.process(parsedGroupText(payload))
@@ -185,7 +197,7 @@ class RxLogServiceTest {
     @Test
     fun `updateChannels reprocesses recent NO_MATCHING_KEY entries once secrets arrive`() = runTest {
         service.startEventMonitoring(radioID)
-        Thread.sleep(50) // let startEventMonitoring's loadSecretsFromDatabase settle first — see the SUCCESS test above.
+        awaitEventSubscriber()
         val secret = ByteArray(16) { (it * 3).toByte() }
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 555u, txtType = 0, text = "late")
         service.process(parsedGroupText(payload)) // arrives before the secret is known -> NO_MATCHING_KEY
@@ -204,7 +216,7 @@ class RxLogServiceTest {
         val withHeardRepeats = RxLogService(session, rxLogStore, channelStore, contactStore, DiscoveredNodeStore(database), heardRepeats)
         channelStore.saveChannel(radioID, ChannelInfo(0u, "General", secret))
         withHeardRepeats.startEventMonitoring(radioID)
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 1234u, txtType = 0, text = "TestNode: hi")
         withHeardRepeats.process(parsedGroupText(payload))
@@ -236,7 +248,7 @@ class RxLogServiceTest {
         val heardRepeats = FakeHeardRepeatProcessing()
         val withHeardRepeats = RxLogService(session, rxLogStore, channelStore, contactStore, DiscoveredNodeStore(database), heardRepeats)
         withHeardRepeats.startEventMonitoring(radioID)
-        Thread.sleep(50) // let startEventMonitoring's loadSecretsFromDatabase settle first — see the SUCCESS test above.
+        awaitEventSubscriber()
         val secret = ByteArray(16) { (it * 3).toByte() }
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 555u, txtType = 0, text = "Node: late")
         // process()'s own unconditional forward already records one NO_MATCHING_KEY entry (decodedText null)
@@ -255,7 +267,7 @@ class RxLogServiceTest {
         val secret = ByteArray(16) { it.toByte() }
         channelStore.saveChannel(radioID, ChannelInfo(0u, "General", secret))
         service.startEventMonitoring(radioID)
-        Thread.sleep(50)
+        awaitEventSubscriber()
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 9000u, txtType = 0, text = "hop test")
         service.process(parsedGroupText(payload))
         awaitUntil { rxLogStore.fetchRecentEntriesByDecryptStatus(radioID, DecryptStatus.SUCCESS, Instant.EPOCH.plusSeconds(1)).isNotEmpty() }
@@ -337,8 +349,8 @@ class RxLogServiceTest {
             kotlinx.coroutines.runBlocking { it.saveChannel(radioID, ChannelInfo(0u, "General", secret)) }
         }, contactStore, DiscoveredNodeStore(database))
         reloaded.startEventMonitoring(radioID)
-        awaitUntil { true } // let startEventMonitoring's loadSecretsFromDatabase complete
-        Thread.sleep(50)
+        // Two monitors are live here: `service`'s is still collecting, so this waits for the second one.
+        awaitEventSubscriber(minSubscribers = 2)
 
         val entries = reloaded.loadExistingEntries()
 
@@ -515,8 +527,8 @@ class RxLogServiceTest {
         val secret = ByteArray(16) { it.toByte() }
         channelStore.saveChannel(radioID, ChannelInfo(0u, "General", secret))
         service.startEventMonitoring(radioID)
+        awaitEventSubscriber()
         service.updateKnownRegions(listOf(regionName))
-        Thread.sleep(50)
 
         // Plain FLOOD (not TC_FLOOD) never carries a transport code, regardless of known regions.
         val payload = encryptedChannelPayload(channelHashByte = 0x00, secret = secret, timestamp = 42u, txtType = 0, text = "hi")
@@ -539,7 +551,7 @@ class RxLogServiceTest {
         val withMessages = RxLogService(session, rxLogStore, channelStore, contactStore, DiscoveredNodeStore(database), messageStore = messageStore)
         channelStore.saveChannel(radioID, ChannelInfo(0u, "General", secret))
         withMessages.startEventMonitoring(radioID)
-        Thread.sleep(50) // let startEventMonitoring's loadSecretsFromDatabase settle first — see the SUCCESS test above.
+        awaitEventSubscriber()
 
         // Arrives before the region is known: decrypts fine (channel secret is already cached), but stays unresolved.
         withMessages.process(
