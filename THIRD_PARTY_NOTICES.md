@@ -98,20 +98,6 @@ Not a Maven dependency: the vector drawables in `app/src/main/res/drawable/ic_*.
 [google/material-design-icons](https://github.com/google/material-design-icons), Copyright Google
 Inc., licensed under Apache License 2.0 (full text: [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)).
 
-## Bundled color palettes
-
-Not a Maven dependency: three of the ten built-in themes reuse the
-accent/canvas/card color values of these upstream palettes, carried over from MeshCore One's own
-iOS asset catalog (`MC1/Resources/Assets.xcassets/Theme/{Solarized,Nord,Catppuccin}/`; license texts
-sourced from `MC1/Settings.bundle/Packages/*.plist`). This app's own `ColorScheme` roles derived
-from those seed colors (`ThemePalettes.kt`) are new data, not reproduced from the palettes.
-
-| Palette | Copyright | Full text |
-|---|---|---|
-| [Solarized](https://ethanschoonover.com/solarized/) | Copyright (c) 2011 Ethan Schoonover | [LICENSES/Solarized-MIT.txt](LICENSES/Solarized-MIT.txt) |
-| [Nord](https://www.nordtheme.com) | Copyright (c) 2016-present Sven Greb | [LICENSES/Nord-MIT.txt](LICENSES/Nord-MIT.txt) |
-| [Catppuccin](https://catppuccin.com) | Copyright (c) 2021 Catppuccin | [LICENSES/Catppuccin-MIT.txt](LICENSES/Catppuccin-MIT.txt) |
-
 ## Bundled emoji data
 
 Not a Maven dependency: the reaction emoji picker's labels/shortcodes (`app/.../chat/emoji/EmojiCatalog.kt`)

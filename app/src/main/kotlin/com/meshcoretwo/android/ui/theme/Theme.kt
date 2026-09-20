@@ -32,7 +32,7 @@ data class Theme(
     val accentColor: ThemeColor,
     val outgoingTextColor: ThemeColor,
     val hashtagColor: ThemeColor,
-    /** Forces one appearance regardless of [AppColorSchemePreference] — only [Ember] sets this. */
+    /** Forces one appearance regardless of [AppColorSchemePreference]; no built-in theme sets it. */
     val forcedDark: Boolean?,
     val surfaces: Surfaces?,
     /** The theme's identity-color space for contact avatars, channel sender names, and mentions. */
@@ -62,173 +62,80 @@ data class Theme(
             darkScheme = DefaultDarkColors,
         )
 
-        val Ember = Theme(
-            id = "ember",
-            displayName = "Ember",
-            accentColor = ThemeColor(Color(0xFFB81A1A), Color(0xFFB81A1A)),
-            outgoingTextColor = ThemeColor(Color(0xFFF2D9D9), Color(0xFFF2D9D9)),
-            hashtagColor = ThemeColor(Color(0xFFFFBF4C), Color(0xFFFFBF4C)),
-            forcedDark = true,
-            surfaces = Surfaces(canvas = ThemeColor(Color.Black, Color.Black), card = null),
-            identityGamut = IdentityGamut(listOf(0.0, 8.0, 12.0, 24.0, 18.0, 345.0), 0.50..0.82),
-            categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 0.0, repeater = 24.0, room = 345.0),
-            lightScheme = EmberLightColors,
-            darkScheme = EmberDarkColors,
-        )
-
-        val Fern = Theme(
-            id = "fern",
-            displayName = "Fern",
-            accentColor = ThemeColor(Color(0xFF2E662E), Color(0xFF8CCC80)),
-            outgoingTextColor = ThemeColor(Color.White, Color.Black),
-            hashtagColor = ThemeColor(Color(0xFF2E6B1F), Color(0xFF9ED973)),
+        /** Cool polar-lights teal on a mint-white / deep sea-green canvas. */
+        val Aurora = Theme(
+            id = "aurora",
+            displayName = "Aurora",
+            accentColor = ThemeColor(Color(0xFF0B7A72), Color(0xFF4FE0D0)),
+            outgoingTextColor = ThemeColor(Color(0xFFFFFFFF), Color(0xFF000000)),
+            hashtagColor = ThemeColor(Color(0xFF2B5FD0), Color(0xFF8FB4FF)),
             forcedDark = null,
             surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFF1F4EE), Color(0xFF050A06)),
-                card = ThemeColor(Color(0xFFFCFDFC), Color(0xFF151F18)),
+                canvas = ThemeColor(Color(0xFFF0F8F7), Color(0xFF071416)),
+                card = ThemeColor(Color(0xFFFFFFFF), Color(0xFF12262A)),
             ),
-            identityGamut = IdentityGamut(listOf(72.0, 90.0, 108.0, 128.0, 150.0, 165.0), 0.35..0.65),
+            identityGamut = IdentityGamut(listOf(160.0, 175.0, 190.0, 205.0, 225.0, 250.0, 275.0), 0.5..0.85),
             categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 90.0, repeater = 128.0, room = 165.0),
-            lightScheme = FernLightColors,
-            darkScheme = FernDarkColors,
+            categoryHues = CategoryHues(channel = 190.0, repeater = 160.0, room = 275.0),
+            lightScheme = AuroraLightColors,
+            darkScheme = AuroraDarkColors,
         )
 
-        val Marine = Theme(
-            id = "marine",
-            displayName = "Marine",
-            accentColor = ThemeColor(Color(0xFF1A408C), Color(0xFF385EBD)),
-            outgoingTextColor = ThemeColor(Color.White, Color.White),
-            hashtagColor = ThemeColor(Color(0xFF0F6B8F), Color(0xFF8CD9FF)),
+        /** Warm coral and peach on a cream / dark-plum canvas. */
+        val Sunrise = Theme(
+            id = "sunrise",
+            displayName = "Sunrise",
+            accentColor = ThemeColor(Color(0xFFC93C1A), Color(0xFFFF8A66)),
+            outgoingTextColor = ThemeColor(Color(0xFFFFFFFF), Color(0xFF000000)),
+            hashtagColor = ThemeColor(Color(0xFF9A5A00), Color(0xFFFFC46B)),
             forcedDark = null,
             surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFF0F4F8), Color(0xFF040C16)),
-                card = ThemeColor(Color(0xFFFCFCFD), Color(0xFF101926)),
+                canvas = ThemeColor(Color(0xFFFFF6EF), Color(0xFF1A0F12)),
+                card = ThemeColor(Color(0xFFFFFFFF), Color(0xFF2A1A1E)),
             ),
-            identityGamut = IdentityGamut(listOf(178.0, 188.0, 200.0, 215.0, 232.0, 245.0), 0.40..0.72),
+            identityGamut = IdentityGamut(listOf(8.0, 18.0, 28.0, 38.0, 48.0, 340.0, 352.0), 0.7..0.95),
             categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 215.0, repeater = 188.0, room = 245.0),
-            lightScheme = MarineLightColors,
-            darkScheme = MarineDarkColors,
+            categoryHues = CategoryHues(channel = 18.0, repeater = 38.0, room = 340.0),
+            lightScheme = SunriseLightColors,
+            darkScheme = SunriseDarkColors,
         )
 
-        val Olive = Theme(
-            id = "olive",
-            displayName = "Olive",
-            accentColor = ThemeColor(Color(0xFF4C662E), Color(0xFF8CA64C)),
-            outgoingTextColor = ThemeColor(Color.White, Color.Black),
-            hashtagColor = ThemeColor(Color(0xFF3D7024), Color(0xFF8CF28C)),
+        /** Near-monochrome minimalism: ink accent on light grey, white accent on true black (OLED). */
+        val Graphite = Theme(
+            id = "graphite",
+            displayName = "Graphite",
+            accentColor = ThemeColor(Color(0xFF1C1C22), Color(0xFFF2F2F5)),
+            outgoingTextColor = ThemeColor(Color(0xFFFFFFFF), Color(0xFF000000)),
+            hashtagColor = ThemeColor(Color(0xFF2F5DA8), Color(0xFF9DB8F0)),
             forcedDark = null,
             surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFF4F3EC), Color(0xFF090902)),
-                card = ThemeColor(Color(0xFFFDFDFB), Color(0xFF1B1A11)),
+                canvas = ThemeColor(Color(0xFFF4F4F5), Color(0xFF000000)),
+                card = ThemeColor(Color(0xFFFFFFFF), Color(0xFF161618)),
             ),
-            identityGamut = IdentityGamut(listOf(45.0, 55.0, 70.0, 85.0, 100.0, 112.0), 0.35..0.62),
+            identityGamut = IdentityGamut(listOf(210.0, 230.0, 250.0, 20.0, 40.0, 160.0), 0.2..0.45),
             categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 85.0, repeater = 112.0, room = 70.0),
-            lightScheme = OliveLightColors,
-            darkScheme = OliveDarkColors,
+            categoryHues = CategoryHues(channel = 210.0, repeater = 160.0, room = 20.0),
+            lightScheme = GraphiteLightColors,
+            darkScheme = GraphiteDarkColors,
         )
 
-        val Lavender = Theme(
-            id = "lavender",
-            displayName = "Lavender",
-            accentColor = ThemeColor(Color(0xFF6B47AD), Color(0xFFC7A6F2)),
-            outgoingTextColor = ThemeColor(Color.White, Color.Black),
-            hashtagColor = ThemeColor(Color(0xFF85529E), Color(0xFFE0B2F2)),
+        /** Vivid indigo-to-magenta on a lavender / night-indigo canvas. */
+        val Ultraviolet = Theme(
+            id = "ultraviolet",
+            displayName = "Ultraviolet",
+            accentColor = ThemeColor(Color(0xFF6A4CFF), Color(0xFFA99BFF)),
+            outgoingTextColor = ThemeColor(Color(0xFFFFFFFF), Color(0xFF000000)),
+            hashtagColor = ThemeColor(Color(0xFFB0157A), Color(0xFFFF9AD5)),
             forcedDark = null,
             surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFF4F1F8), Color(0xFF0B0512)),
-                card = ThemeColor(Color(0xFFFDFCFD), Color(0xFF1D1329)),
+                canvas = ThemeColor(Color(0xFFF5F2FF), Color(0xFF0C0A1C)),
+                card = ThemeColor(Color(0xFFFFFFFF), Color(0xFF1B1738)),
             ),
-            identityGamut = IdentityGamut(listOf(222.0, 238.0, 248.0, 265.0, 285.0, 302.0), 0.35..0.62),
+            identityGamut = IdentityGamut(listOf(225.0, 255.0, 270.0, 285.0, 300.0, 315.0, 330.0, 345.0), 0.45..0.8),
             categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 265.0, repeater = 222.0, room = 302.0),
-            lightScheme = LavenderLightColors,
-            darkScheme = LavenderDarkColors,
-        )
-
-        /** Proper noun (romanized Japanese), never translated — see `Theme+LocalizedName.swift`. */
-        val Sakura = Theme(
-            id = "sakura",
-            displayName = "Sakura",
-            accentColor = ThemeColor(Color(0xFF8C3373), Color(0xFFF2B2D1)),
-            outgoingTextColor = ThemeColor(Color.White, Color.Black),
-            hashtagColor = ThemeColor(Color(0xFF9E5C2E), Color(0xFFFFCC8C)),
-            forcedDark = null,
-            surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFF8F2F4), Color(0xFF10060A)),
-                card = ThemeColor(Color(0xFFFDFCFD), Color(0xFF22131A)),
-            ),
-            identityGamut = IdentityGamut(listOf(290.0, 305.0, 320.0, 335.0, 350.0, 8.0), 0.40..0.70),
-            categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 320.0, repeater = 290.0, room = 350.0),
-            lightScheme = SakuraLightColors,
-            darkScheme = SakuraDarkColors,
-        )
-
-        /** Proper noun — name of the upstream MIT-licensed palette (`THIRD_PARTY_NOTICES.md`). */
-        val Solarized = Theme(
-            id = "solarized",
-            displayName = "Solarized",
-            accentColor = ThemeColor(Color(0xFF1E77B5), Color(0xFF1E77B5)),
-            outgoingTextColor = ThemeColor(Color.White, Color.White),
-            hashtagColor = ThemeColor(Color(0xFF207B74), Color(0xFF31BCB2)),
-            forcedDark = null,
-            surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFEEE8D5), Color(0xFF001E26)),
-                card = ThemeColor(Color(0xFFFDF6E3), Color(0xFF0C4250)),
-            ),
-            identityGamut = IdentityGamut(listOf(1.0, 18.0, 45.0, 68.0, 175.0, 205.0, 237.0, 331.0), 0.50..0.80),
-            categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 205.0, repeater = 175.0, room = 331.0),
-            lightScheme = SolarizedLightColors,
-            darkScheme = SolarizedDarkColors,
-        )
-
-        /** Proper noun — name of the upstream MIT-licensed palette (`THIRD_PARTY_NOTICES.md`). */
-        val Nord = Theme(
-            id = "nord",
-            displayName = "Nord",
-            accentColor = ThemeColor(Color(0xFF4C6F9E), Color(0xFFA0D0DE)),
-            outgoingTextColor = ThemeColor(Color.White, Color.Black),
-            hashtagColor = ThemeColor(Color(0xFF567983), Color(0xFFE2B3DA)),
-            forcedDark = null,
-            surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFECEFF4), Color(0xFF262B35)),
-                card = ThemeColor(Color(0xFFFFFFFF), Color(0xFF454D60)),
-            ),
-            identityGamut = IdentityGamut(
-                listOf(14.0, 40.0, 92.0, 178.0, 193.0, 210.0, 213.0, 240.0, 280.0, 311.0, 354.0),
-                0.25..0.52,
-            ),
-            categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 210.0, repeater = 193.0, room = 280.0),
-            lightScheme = NordLightColors,
-            darkScheme = NordDarkColors,
-        )
-
-        /** Proper noun — name of the upstream MIT-licensed palette (`THIRD_PARTY_NOTICES.md`). */
-        val Catppuccin = Theme(
-            id = "catppuccin",
-            displayName = "Catppuccin",
-            accentColor = ThemeColor(Color(0xFF8839EF), Color(0xFFD9C0FB)),
-            outgoingTextColor = ThemeColor(Color.White, Color(0xFF0B0B14)),
-            hashtagColor = ThemeColor(Color(0xFF174FBE), Color(0xFFA6C8FF)),
-            forcedDark = null,
-            surfaces = Surfaces(
-                canvas = ThemeColor(Color(0xFFEFF1F5), Color(0xFF11111B)),
-                card = ThemeColor(Color(0xFFCCD0DA), Color(0xFF45475A)),
-            ),
-            identityGamut = IdentityGamut(
-                listOf(0.0, 10.0, 23.0, 41.0, 115.0, 170.0, 189.0, 199.0, 217.0, 232.0, 267.0, 316.0, 343.0, 351.0),
-                0.40..0.70,
-            ),
-            categoryAvatarOverride = null,
-            categoryHues = CategoryHues(channel = 267.0, repeater = 217.0, room = 316.0),
-            lightScheme = CatppuccinLightColors,
-            darkScheme = CatppuccinDarkColors,
+            categoryHues = CategoryHues(channel = 270.0, repeater = 225.0, room = 315.0),
+            lightScheme = UltravioletLightColors,
+            darkScheme = UltravioletDarkColors,
         )
     }
 }

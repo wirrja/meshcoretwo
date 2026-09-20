@@ -10,15 +10,10 @@ package com.meshcoretwo.android.ui.theme
 object ThemeRegistry {
     val allThemes: List<Theme> = listOf(
         Theme.Default,
-        Theme.Ember,
-        Theme.Fern,
-        Theme.Marine,
-        Theme.Olive,
-        Theme.Lavender,
-        Theme.Sakura,
-        Theme.Solarized,
-        Theme.Nord,
-        Theme.Catppuccin,
+        Theme.Aurora,
+        Theme.Sunrise,
+        Theme.Graphite,
+        Theme.Ultraviolet,
     )
 
     fun theme(id: String): Theme? = allThemes.firstOrNull { it.id == id }

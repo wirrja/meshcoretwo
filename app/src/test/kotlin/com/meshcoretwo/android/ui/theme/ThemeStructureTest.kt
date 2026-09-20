@@ -21,17 +21,9 @@ class ThemeStructureTest {
     }
 
     @Test
-    fun `Ember paints the canvas but not the card tier`() {
-        val surfaces = requireNotNull(Theme.Ember.surfaces)
-        assertEquals(androidx.compose.ui.graphics.Color.Black, surfaces.canvas.light)
-        assertEquals(androidx.compose.ui.graphics.Color.Black, surfaces.canvas.dark)
-        assertNull(surfaces.card)
-    }
-
-    @Test
     fun `Every painted theme defines both canvas and card tiers`() {
-        val painted = ThemeRegistry.allThemes.filter { it.id != Theme.Default.id && it.id != Theme.Ember.id }
-        assertEquals(8, painted.size)
+        val painted = ThemeRegistry.allThemes.filter { it.id != Theme.Default.id }
+        assertEquals(4, painted.size)
         for (theme in painted) {
             val surfaces = requireNotNull(theme.surfaces) { "${theme.id} must have surfaces" }
             assertTrue("${theme.id} must define card tier", surfaces.card != null)
@@ -62,7 +54,7 @@ class ThemeStructureTest {
     fun `Only the Default theme pins fixed category avatar colors`() {
         assertTrue("Default theme must pin category colors", Theme.Default.categoryAvatarOverride != null)
         val others = ThemeRegistry.allThemes.filter { it.id != Theme.Default.id }
-        assertEquals(9, others.size)
+        assertEquals(4, others.size)
         for (theme in others) {
             assertNull("${theme.id} must derive category colors from its gamut", theme.categoryAvatarOverride)
         }
@@ -70,7 +62,7 @@ class ThemeStructureTest {
 
     @Test
     fun `Migrated themes' outgoingTextColor resolves differently in light vs dark`() {
-        val migrated = listOf(Theme.Fern, Theme.Olive, Theme.Lavender, Theme.Sakura)
+        val migrated = listOf(Theme.Aurora, Theme.Sunrise, Theme.Graphite, Theme.Ultraviolet)
         for (theme in migrated) {
             assertNotEquals("${theme.id} outgoingText must differ across appearance", theme.outgoingTextColor.light, theme.outgoingTextColor.dark)
         }

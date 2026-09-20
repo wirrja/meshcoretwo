@@ -13,23 +13,22 @@ import org.junit.Test
  */
 class ThemeRegistryTest {
     @Test
-    fun `allThemes holds the ten built-ins`() {
-        assertEquals(10, ThemeRegistry.allThemes.size)
+    fun `allThemes holds the five built-ins`() {
+        assertEquals(5, ThemeRegistry.allThemes.size)
         assertEquals("default", ThemeRegistry.allThemes.first().id)
     }
 
     @Test
     fun `theme(id) resolves known IDs and returns null for unknown`() {
         assertEquals(Theme.Default.id, ThemeRegistry.theme("default")?.id)
-        assertEquals("ember", ThemeRegistry.theme("ember")?.id)
+        assertEquals("aurora", ThemeRegistry.theme("aurora")?.id)
+        assertNull(ThemeRegistry.theme("ember"))
         assertNull(ThemeRegistry.theme("does-not-exist"))
     }
 
     @Test
-    fun `only Ember forces a color scheme, and it forces dark`() {
-        assertEquals(true, Theme.Ember.forcedDark)
-        val others = ThemeRegistry.allThemes.filter { it.id != Theme.Ember.id }
-        assertTrue(others.all { it.forcedDark == null })
+    fun `no built-in theme forces a color scheme`() {
+        assertTrue(ThemeRegistry.allThemes.all { it.forcedDark == null })
     }
 
     @Test

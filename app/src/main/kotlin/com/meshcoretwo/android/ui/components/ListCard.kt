@@ -69,15 +69,21 @@ fun Modifier.listCard(onClick: () -> Unit, onLongClick: (() -> Unit)? = null, em
 }
 
 /** Soft accent wash fading into the canvas — painted behind the tab screens so the app has color at
- * the top instead of a flat sheet. */
+ * the top instead of a flat sheet. Scaled by how colorful the accent is, so near-monochrome themes
+ * (ink-on-paper Graphite) get a barely-there tint instead of a muddy grey wash. */
 @Composable
 fun Modifier.accentBackdrop(): Modifier {
     val isDark = LocalIsDarkTheme.current
     val canvas = MaterialTheme.colorScheme.background
     val accent = MaterialTheme.colorScheme.primary
+    // Colorfulness (channel spread), not HSV saturation: near-black ink accents are "saturated" in HSV
+    // yet colorless, and would otherwise paint a grey wash.
+    val chroma = remember(accent) { maxOf(accent.red, accent.green, accent.blue) - minOf(accent.red, accent.green, accent.blue) }
+    val strength = (chroma / 0.35f).coerceIn(0f, 1f).let { if (isDark) maxOf(it, 0.5f) else it }
+    val alpha = (if (isDark) 0.22f else 0.16f) * strength
     return this.background(
         Brush.verticalGradient(
-            0f to accent.copy(alpha = if (isDark) 0.22f else 0.16f).compositeOver(canvas),
+            0f to accent.copy(alpha = alpha).compositeOver(canvas),
             0.35f to canvas,
             1f to canvas,
         ),

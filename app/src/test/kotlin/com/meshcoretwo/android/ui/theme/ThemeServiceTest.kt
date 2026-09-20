@@ -35,17 +35,28 @@ class ThemeServiceTest {
     @Test
     fun `a persisted known theme ID is adopted without write-back`() {
         val prefs = FakeSharedPreferences()
-        prefs.edit().putString("selectedThemeID", Theme.Ember.id).apply()
+        prefs.edit().putString("selectedThemeID", Theme.Aurora.id).apply()
         val service = ThemeService(prefs)
-        assertEquals(Theme.Ember.id, service.current.value.id)
-        assertEquals(Theme.Ember.id, prefs.getString("selectedThemeID", null))
+        assertEquals(Theme.Aurora.id, service.current.value.id)
+        assertEquals(Theme.Aurora.id, prefs.getString("selectedThemeID", null))
+    }
+
+    @Test
+    fun `a retired theme ID falls back to Default and is overwritten`() {
+        for (retired in listOf("ember", "fern", "marine", "olive", "lavender", "sakura", "solarized", "nord", "catppuccin")) {
+            val prefs = FakeSharedPreferences()
+            prefs.edit().putString("selectedThemeID", retired).apply()
+            val service = ThemeService(prefs)
+            assertEquals(Theme.Default.id, service.current.value.id)
+            assertEquals(Theme.Default.id, prefs.getString("selectedThemeID", null))
+        }
     }
 
     @Test
     fun `setCurrent updates state and persists the theme ID`() {
         val service = ThemeService(FakeSharedPreferences())
-        service.setCurrent(Theme.Fern)
-        assertEquals(Theme.Fern.id, service.current.value.id)
+        service.setCurrent(Theme.Sunrise)
+        assertEquals(Theme.Sunrise.id, service.current.value.id)
     }
 
     @Test
@@ -83,9 +94,10 @@ class ThemeServiceTest {
     }
 
     @Test
-    fun `resolveIsDark Ember forces dark regardless of the preference`() {
-        assertEquals(true, resolveIsDark(Theme.Ember, AppColorSchemePreference.LIGHT, systemDark = false))
-        assertEquals(true, resolveIsDark(Theme.Ember, AppColorSchemePreference.SYSTEM, systemDark = false))
+    fun `resolveIsDark a theme that forces dark wins regardless of the preference`() {
+        val forcedDark = Theme.Default.copy(forcedDark = true)
+        assertEquals(true, resolveIsDark(forcedDark, AppColorSchemePreference.LIGHT, systemDark = false))
+        assertEquals(true, resolveIsDark(forcedDark, AppColorSchemePreference.SYSTEM, systemDark = false))
     }
 }
 
