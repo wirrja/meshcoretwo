@@ -15,7 +15,7 @@ import kotlinx.coroutines.withTimeout
  */
 
 /** Polls [condition] on a real (non-virtual) clock until it's true, or fails after [timeoutMs]. */
-internal suspend fun waitUntil(timeoutMs: Long = 2000, condition: suspend () -> Boolean) {
+internal suspend fun waitUntil(timeoutMs: Long = 10_000, condition: suspend () -> Boolean) {
     withTimeout(timeoutMs) {
         while (!condition()) {
             delay(5)

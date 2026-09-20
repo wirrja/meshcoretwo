@@ -86,7 +86,7 @@ class RxLogServiceTest {
         database.close()
     }
 
-    private fun awaitUntil(timeoutMs: Long = 2000, intervalMs: Long = 10, condition: suspend () -> Boolean) = kotlinx.coroutines.runBlocking {
+    private fun awaitUntil(timeoutMs: Long = 10_000, intervalMs: Long = 10, condition: suspend () -> Boolean) = kotlinx.coroutines.runBlocking {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             if (condition()) return@runBlocking

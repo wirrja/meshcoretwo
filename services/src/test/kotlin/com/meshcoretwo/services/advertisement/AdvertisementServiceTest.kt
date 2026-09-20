@@ -117,7 +117,7 @@ class AdvertisementServiceTest {
     )
 
     /** Polls a real (non-virtual) timeout since the service's listener/scheduler run on a real dispatcher. */
-    private suspend fun awaitUntil(timeoutMs: Long = 2000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
+    private suspend fun awaitUntil(timeoutMs: Long = 10_000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             if (condition()) return

@@ -118,7 +118,7 @@ class RoomServerServiceTest {
     private fun sentInfo(suggestedTimeoutMs: UInt = 500u) =
         MessageSentInfo(route = 0u, expectedAck = byteArrayOf(0x01, 0x02, 0x03, 0x04), suggestedTimeoutMs = suggestedTimeoutMs)
 
-    private suspend fun awaitUntil(timeoutMs: Long = 2000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
+    private suspend fun awaitUntil(timeoutMs: Long = 10_000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             if (condition()) return

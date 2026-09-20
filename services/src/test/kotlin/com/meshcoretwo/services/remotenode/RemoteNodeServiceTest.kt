@@ -136,7 +136,14 @@ class RemoteNodeServiceTest {
     private fun sentInfo(suggestedTimeoutMs: UInt = 500u) =
         MessageSentInfo(route = 0u, expectedAck = byteArrayOf(0x01), suggestedTimeoutMs = suggestedTimeoutMs)
 
-    private suspend fun awaitUntil(timeoutMs: Long = 2000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
+    /**
+     * Waits until the monitor is actually collecting: the fake's event flow has no replay, so an event
+     * emitted before the subscription exists is lost. A fixed sleep was enough on a fast machine but not
+     * on a slow CI runner.
+     */
+    private suspend fun awaitEventSubscriber() = awaitUntil(timeoutMs = 10_000) { session.hasEventSubscriber }
+
+    private suspend fun awaitUntil(timeoutMs: Long = 10_000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             if (condition()) return
@@ -401,7 +408,7 @@ class RemoteNodeServiceTest {
         session.autoCompleteLoginPermissions = 0x02u
 
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val result = service.login(created.id)
 
@@ -432,7 +439,7 @@ class RemoteNodeServiceTest {
         sessionStore.saveSession(staleSession)
 
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val result = service.login(created.id)
 
@@ -451,7 +458,7 @@ class RemoteNodeServiceTest {
         session.autoCompleteLoginFail = true
 
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         try {
             service.login(created.id)
@@ -623,7 +630,7 @@ class RemoteNodeServiceTest {
         session.autoCompleteLoginPermissions = RoomPermissionLevel.GUEST.rawValue
 
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         service.handleBLEReconnection(setOf(created.id))
 
@@ -642,7 +649,7 @@ class RemoteNodeServiceTest {
         session.autoCompleteLoginPermissions = RoomPermissionLevel.GUEST.rawValue
 
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         service.handleBLEReconnection(setOf(created.id))
 
@@ -789,7 +796,7 @@ class RemoteNodeServiceTest {
     fun `matching reply resolves the pending command`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendCLICommand(created.id, "get tx") }
@@ -806,7 +813,7 @@ class RemoteNodeServiceTest {
     fun `a reply of the wrong shape is dropped and a later matching reply resolves it`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendCLICommand(created.id, "get tx") }
@@ -825,7 +832,7 @@ class RemoteNodeServiceTest {
     fun `a mismatched reply is dropped and the command times out`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
         // A small suggestedTimeoutMs keeps cliTimeoutMs close to the requested 200ms per attempt —
         // no local contact exists, so a mesh timeout also triggers one path-reset retry (see
         // performWithDirectPathFloodRecovery's "missing contact counts as direct" rule); this must
@@ -854,7 +861,7 @@ class RemoteNodeServiceTest {
     fun `a second command waits for the slot until the first resolves`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var firstResult: String? = null
         val firstJob = launch(Dispatchers.Unconfined) { firstResult = service.sendCLICommand(created.id, "get tx") }
@@ -884,7 +891,7 @@ class RemoteNodeServiceTest {
     fun `sendRawCLICommand accepts a free-form reply`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendRawCLICommand(created.id, "region") }
@@ -901,7 +908,7 @@ class RemoteNodeServiceTest {
     fun `the command is sent with a hex wire prefix ahead of the command text`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val job = launch(Dispatchers.Unconfined) {
             try {
@@ -923,7 +930,7 @@ class RemoteNodeServiceTest {
     fun `a reply echoing the wire prefix resolves and is delivered stripped`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendCLICommand(created.id, "get tx") }
@@ -941,7 +948,7 @@ class RemoteNodeServiceTest {
     fun `a prefixed echo is authoritative even when the reply shape looks wrong`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendCLICommand(created.id, "get tx") }
@@ -961,7 +968,7 @@ class RemoteNodeServiceTest {
     fun `a reply echoing a foreign prefix is dropped even for raw commands`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         var result: String? = null
         val job = launch(Dispatchers.Unconfined) { result = service.sendRawCLICommand(created.id, "region") }
@@ -981,7 +988,7 @@ class RemoteNodeServiceTest {
     fun `clock sync is rewritten to time with the host epoch on the wire`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
 
         val before = Instant.now().epochSecond
         val job = launch(Dispatchers.Unconfined) { service.sendRawCLICommand(created.id, "clock sync") }
@@ -1000,7 +1007,7 @@ class RemoteNodeServiceTest {
     fun `reboot is fire-and-forget and does not reset the path on timeout`() = runTest {
         val created = makeAdminSession()
         service.startEventMonitoring()
-        Thread.sleep(50)
+        awaitEventSubscriber()
         session.sentInfoToReturn = sentInfo(suggestedTimeoutMs = 50u)
 
         var thrown: Throwable? = null
@@ -1197,6 +1204,8 @@ internal class FakeRemoteNodeSessionOps : RemoteNodeSessionOps {
     private val eventsFlow = MutableSharedFlow<MeshEvent>(extraBufferCapacity = 64)
 
     suspend fun emit(event: MeshEvent) = eventsFlow.emit(event)
+
+    val hasEventSubscriber: Boolean get() = eventsFlow.subscriptionCount.value > 0
 
     override val connectionState: Flow<ConnectionState> get() = error("not used by this vertical slice")
 

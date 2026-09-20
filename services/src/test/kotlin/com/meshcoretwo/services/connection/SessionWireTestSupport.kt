@@ -22,7 +22,7 @@ import kotlinx.coroutines.withTimeout
  */
 
 /** Polls [condition] on a real (non-virtual) clock until it's true, or fails after [timeoutMs]. */
-internal suspend fun waitUntilSent(mock: MockTransport, minCount: Int = 1, timeoutMs: Long = 2000) {
+internal suspend fun waitUntilSent(mock: MockTransport, minCount: Int = 1, timeoutMs: Long = 10_000) {
     withTimeout(timeoutMs) {
         while (mock.sentData().size < minCount) {
             delay(5)

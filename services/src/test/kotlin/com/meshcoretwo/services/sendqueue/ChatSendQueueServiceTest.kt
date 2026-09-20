@@ -140,7 +140,7 @@ class ChatSendQueueServiceTest {
         channelStore.saveChannel(radioID, ChannelInfo(index, "General", ByteArray(16)))
 
     /** Polls a real (non-virtual) timeout since the queue's drain jobs run on a real dispatcher. */
-    private suspend fun awaitUntil(timeoutMs: Long = 2000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
+    private suspend fun awaitUntil(timeoutMs: Long = 10_000, intervalMs: Long = 10, condition: suspend () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             if (condition()) return
@@ -201,7 +201,8 @@ class ChatSendQueueServiceTest {
         session.sendMessageError = MeshCoreError.ParseError("bad frame")
 
         val failedEvents = mutableListOf<UUID>()
-        backgroundScope.launch {
+        // UNDISPATCHED: the collector must be subscribed before enqueueDM emits (the flow has no replay).
+        backgroundScope.launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
             messageService.statusEvents().collect { event ->
                 if (event is com.meshcoretwo.services.messages.MessageStatusEvent.Failed) failedEvents.add(event.messageID)
             }
