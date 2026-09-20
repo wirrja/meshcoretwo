@@ -1,0 +1,62 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      BLE + notification permissions live here so any app module depending on
+      :services inherits them via manifest merge. usesPermissionFlags="neverForLocation":
+      the scan filter (BleStateMachine.startScanning) matches purely on the Nordic UART
+      service UUID — no name/manufacturer-data filtering and no RSSI-based positioning — so
+      this is the correct declaration. Without it, Android silently withholds all scan
+      results on API 31+ unless ACCESS_FINE_LOCATION is also granted (which PermissionsScreen
+      never requests on API 31+, since it already assumes the neverForLocation model); GPS
+      coordinates MeshCore contacts carry arrive over the established GATT connection/protocol
+      payload, not via BLE-scan-derived positioning, so neverForLocation doesn't affect them.
+    -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!--
+      Legacy permissions required on API 26-30 (BLUETOOTH_SCAN/BLUETOOTH_CONNECT above only
+      take effect on API 31+); minSdk 26 means both declarations must coexist.
+    -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+      Onboarding's Region step (AndroidLocationProvider) uses this to auto-detect the user's
+      country/state for radio-preset recommendation — coarse is enough for that granularity, so
+      ACCESS_FINE_LOCATION (already declared above, API <=30 BLE-only) isn't requested for it.
+      Present on all API levels, unlike the maxSdkVersion=30 BLE-era declarations above.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!--
+      OpenMeteoElevationService (Line of Sight tool) is this port's only direct HTTP call —
+      everything else goes over BLE/WiFi straight to the radio (see project constraints). `app` already
+      gets INTERNET/ACCESS_NETWORK_STATE/ACCESS_WIFI_STATE merged in from the MapLibre SDK
+      (Phase 5 slice 6), but that merge doesn't reach this module's own manifest, and
+      OpenMeteoElevationService lives here, not in `app`.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+
+    <application>
+        <!--
+          Target of the PendingIntents NotificationService attaches to quick-reply/mark-as-read
+          actions and notification taps. exported=false: only this app's own PendingIntents
+          (explicit component, not an implicit intent-filter match) can trigger it.
+        -->
+        <receiver
+            android:name="com.meshcoretwo.services.notifications.NotificationActionReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

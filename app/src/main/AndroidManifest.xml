@@ -1,0 +1,48 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name=".MeshCoreTwoApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.MeshCoreTwo"
+        android:localeConfig="@xml/locales_config"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.MeshCoreTwo">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- meshcore://channel/add?name=&secret=&region_scope= — see MainActivity's
+                 handleIntent/AddChannelScreen's initialLink. Scoped to channel/add only: contact
+                 and map links aren't parsed on Android yet (ChannelService.parseChannelURI has no
+                 counterpart), so the OS shouldn't offer this app for those hosts. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="meshcore"
+                    android:host="channel"
+                    android:pathPrefix="/add" />
+            </intent-filter>
+        </activity>
+
+        <!-- zxing-android-embedded's scanner declares sensorLandscape, which opens the camera sideways
+             on a phone held upright. Follow the device's real orientation instead (the ScanOptions
+             callers also call setOrientationLocked(false), which lifts the library's own lock). -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="android:screenOrientation" />
+    </application>
+
+</manifest>

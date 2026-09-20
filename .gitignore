@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+build/
+*/build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local machine config (SDK path, secrets) — never commit
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+captures/
+.cxx/
+.externalNativeBuild/
+
+# Signing
+*.jks
+*.keystore
+!debug.keystore
+keystore.properties
+keystore.properties.legacy
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# VS Code (some/ has a .vscode alongside sibling projects)
+.vscode/
+
+# Kotlin/Java
+*.hprof
+*.class
+
+
+# Kotlin compiler session state
+.kotlin/

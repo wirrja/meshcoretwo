@@ -1,0 +1,26 @@
+name: protocol tests
+
+# Минимальный CI: `:protocol:test` на каждый push — этот
+# модуль чистый JVM (без Android SDK), так что раннеру достаточно JDK 17.
+on:
+  push:
+  pull_request:
+
+jobs:
+  protocol-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # gradle.properties пришпиливает org.gradle.java.home к локальному Homebrew-пути
+      # песочницы разработки — на раннере такого пути нет, поэтому
+      # переопределяем его через -D значением, которое дал setup-java.
+      - name: Run protocol tests
+        run: ./gradlew :protocol:test -Dorg.gradle.java.home="$JAVA_HOME" --no-daemon

@@ -1,0 +1,8 @@
+<resources>
+    <!--
+      Minimal manifest-level theme (status bar / window background before
+      Compose takes over). Actual theming (light/dark, MeshCore palette) is
+      done in Compose via MaterialTheme — port of MC1/Theme.
+    -->
+    <style name="Theme.MeshCoreTwo" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
