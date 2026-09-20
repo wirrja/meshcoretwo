@@ -130,11 +130,11 @@ fun AboutScreen(
             Text("Map data: OpenFreeMap © OpenMapTiles Data from OpenStreetMap", style = MaterialTheme.typography.bodySmall)
             ExternalLinkRow(stringResource(R.string.about_osm_copyright), AppLinks.OPENSTREETMAP_COPYRIGHT)
             Text(
-                "Elevation data: Copernicus DEM GLO-90, read directly from the public AWS Open Data bucket",
+                "Elevation data: Copernicus DEM GLO-90 via Open-Meteo (CC BY 4.0)",
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(COPERNICUS_NOTICE, style = MaterialTheme.typography.labelSmall)
-            ExternalLinkRow("Copernicus DEM", AppLinks.COPERNICUS_DEM)
+            ExternalLinkRow("Open-Meteo", AppLinks.OPEN_METEO)
         }
     }
 }

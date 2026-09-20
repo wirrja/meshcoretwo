@@ -4,8 +4,11 @@ name: build
 # RuntimeModuleListTest (сверка runtime-зависимостей release с runtime-modules.txt — это и есть
 # автоматическая проверка на появление новых, в т.ч. GMS/Firebase, зависимостей).
 # Android SDK на ubuntu-latest предустановлен (ANDROID_HOME), эмулятор не нужен.
+# Только ветки: тег `v*` указывает на тот же коммит, что и push в main, а его APK собирает release-apk.yml —
+# без этого каждый релиз запускал бы одну и ту же полную сборку дважды.
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:

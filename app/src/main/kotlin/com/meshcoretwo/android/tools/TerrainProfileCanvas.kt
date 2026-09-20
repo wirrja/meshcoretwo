@@ -119,11 +119,11 @@ fun TerrainProfileCanvas(
             }
             Text(
                 buildAnnotatedString {
-                    append("Elevation data: ")
+                    append("Elevation data: Copernicus DEM GLO-90 via ")
                     val linkStart = length
-                    append("Copernicus DEM GLO-90")
+                    append("Open-Meteo")
                     addStyle(SpanStyle(textDecoration = TextDecoration.Underline), linkStart, length)
-                    addLink(LinkAnnotation.Url(AppLinks.COPERNICUS_DEM), linkStart, length)
+                    addLink(LinkAnnotation.Url(AppLinks.OPEN_METEO), linkStart, length)
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),

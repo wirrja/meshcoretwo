@@ -15,7 +15,6 @@ import com.meshcoretwo.services.connection.contactService
 import com.meshcoretwo.services.persistence.ContactDto
 import com.meshcoretwo.services.rf.ClearanceStatus
 import com.meshcoretwo.services.rf.ElevationSample
-import com.meshcoretwo.services.rf.CopernicusElevationService
 import com.meshcoretwo.services.rf.ElevationService
 import com.meshcoretwo.services.rf.FresnelZoneRenderer
 import com.meshcoretwo.services.rf.GeoCoordinate
@@ -215,7 +214,7 @@ fun coordinateAt(profile: List<ElevationSample>, pathFraction: Double): GeoCoord
  */
 class LineOfSightViewModel(
     private val connectionManager: ConnectionManager,
-    private val elevationService: ElevationService = CopernicusElevationService(),
+    private val elevationService: ElevationService = OpenMeteoElevationService(),
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         LineOfSightUiState(
@@ -753,7 +752,7 @@ class LineOfSightViewModel(
 
     class Factory(
         private val connectionManager: ConnectionManager,
-        private val elevationService: ElevationService = CopernicusElevationService(),
+        private val elevationService: ElevationService = OpenMeteoElevationService(),
         private val preselectedContact: ContactDto? = null,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

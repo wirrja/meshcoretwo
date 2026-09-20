@@ -30,6 +30,5 @@ object AppLinks {
     const val MESHCORE_WEBSITE = "https://meshcore.io"
     const val MESHCORE_ONLINE_MAP = "https://map.meshcore.io/"
     const val OPENSTREETMAP_COPYRIGHT = "https://www.openstreetmap.org/copyright"
-    const val COPERNICUS_DEM =
-        "https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"
+    const val OPEN_METEO = "https://open-meteo.com/"
 }

@@ -2,8 +2,10 @@ name: protocol tests
 
 # Минимальный CI: `:protocol:test` на каждый push — этот
 # модуль чистый JVM (без Android SDK), так что раннеру достаточно JDK 17.
+# Только ветки: тег `v*` указывает на тот же коммит, что и push в main (см. build.yml).
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
