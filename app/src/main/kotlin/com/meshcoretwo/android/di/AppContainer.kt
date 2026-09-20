@@ -38,6 +38,9 @@ class AppContainer(context: Context) {
     /** Single shared preferences file, mirroring iOS's single `UserDefaults.standard`. */
     val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    /** The `app_storage` file shared with the notification/theme stores; also holds the keep-alive toggle. */
+    val notificationPrefs = appContext.getSharedPreferences(NotificationPreferences.PREFS_NAME, Context.MODE_PRIVATE)
+
     private val stateMachine = BleStateMachine(appContext)
     private val transport = BleMeshTransport(stateMachine)
 

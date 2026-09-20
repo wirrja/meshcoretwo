@@ -1197,4 +1197,9 @@
     <string name="err_key_max_attempts">Impossible de générer une clé avec ce préfixe. Essayez-en un autre.</string>
     <string name="err_key_reserved">Ce préfixe est réservé et ne peut pas être utilisé.</string>
     <string name="err_key_invalid">La clé n\'est pas une clé privée Ed25519 valide.</string>
+    <string name="settings_keepalive_title">Garder la connexion en arrière-plan</string>
+    <string name="settings_keepalive_desc">Maintient la liaison radio écran éteint. Affiche une notification permanente.</string>
+    <string name="keepalive_channel_name">Connexion radio</string>
+    <string name="keepalive_notification_title">MeshCore Two est connecté</string>
+    <string name="keepalive_notification_text">Liaison radio maintenue</string>
 </resources>

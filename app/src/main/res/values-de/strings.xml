@@ -1195,4 +1195,9 @@
     <string name="err_key_max_attempts">Mit diesem Präfix konnte kein Schlüssel erzeugt werden. Bitte ein anderes versuchen.</string>
     <string name="err_key_reserved">Dieses Präfix ist reserviert und kann nicht verwendet werden.</string>
     <string name="err_key_invalid">Der Schlüssel ist kein gültiger privater Ed25519-Schlüssel.</string>
+    <string name="settings_keepalive_title">Verbindung im Hintergrund halten</string>
+    <string name="settings_keepalive_desc">Hält die Funkverbindung bei ausgeschaltetem Bildschirm aufrecht. Zeigt eine dauerhafte Benachrichtigung.</string>
+    <string name="keepalive_channel_name">Funkverbindung</string>
+    <string name="keepalive_notification_title">MeshCore Two ist verbunden</string>
+    <string name="keepalive_notification_text">Funkverbindung wird gehalten</string>
 </resources>

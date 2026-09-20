@@ -1195,4 +1195,9 @@
     <string name="err_key_max_attempts">Avainta ei voitu luoda tällä etuliitteellä. Kokeile toista.</string>
     <string name="err_key_reserved">Tämä etuliite on varattu, eikä sitä voi käyttää.</string>
     <string name="err_key_invalid">Avain ei ole kelvollinen Ed25519-yksityisavain.</string>
+    <string name="settings_keepalive_title">Pidä yhteys taustalla</string>
+    <string name="settings_keepalive_desc">Pitää radioyhteyden yllä näytön ollessa sammutettuna. Näyttää pysyvän ilmoituksen.</string>
+    <string name="keepalive_channel_name">Radioyhteys</string>
+    <string name="keepalive_notification_title">MeshCore Two on yhdistetty</string>
+    <string name="keepalive_notification_text">Radioyhteyttä ylläpidetään</string>
 </resources>

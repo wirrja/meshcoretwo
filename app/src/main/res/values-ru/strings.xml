@@ -11,9 +11,9 @@
 
     <plurals name="chat_heard_times">
         <item quantity="one">Услышано %1$d раз</item>
-        <item quantity="few">Услышано %1$d раз</item>
+        <item quantity="few">Услышано %1$d раза</item>
         <item quantity="many">Услышано %1$d раз</item>
-        <item quantity="other">Услышано %1$d раз</item>
+        <item quantity="other">Услышано %1$d раза</item>
     </plurals>
 
     <!-- Common (shared) -->
@@ -1199,4 +1199,9 @@
     <string name="err_key_max_attempts">Не удалось сгенерировать ключ с таким префиксом. Попробуйте другой.</string>
     <string name="err_key_reserved">Этот префикс зарезервирован и не может быть использован.</string>
     <string name="err_key_invalid">Ключ не является допустимым закрытым ключом Ed25519.</string>
+    <string name="settings_keepalive_title">Держать связь в фоне</string>
+    <string name="settings_keepalive_desc">Радио остаётся на связи при выключенном экране. Показывает постоянное уведомление.</string>
+    <string name="keepalive_channel_name">Связь с радио</string>
+    <string name="keepalive_notification_title">MeshCore Two на связи</string>
+    <string name="keepalive_notification_text">Связь с радио поддерживается</string>
 </resources>

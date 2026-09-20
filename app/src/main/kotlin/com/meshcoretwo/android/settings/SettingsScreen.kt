@@ -948,6 +948,8 @@ private fun <T> RadioParamPicker(label: String, valueText: String, options: List
 private fun NotificationsSection(preferences: NotificationPreferences, store: NotificationPreferencesStore) {
     SettingsGroupLabel(stringResource(R.string.common_notifications))
     NotificationPermissionRow()
+    KeepAliveRow()
+    HorizontalDivider()
     SwitchRow(stringResource(R.string.settings_notif_direct), preferences.contactMessagesEnabled, store::setContactMessagesEnabled)
     HorizontalDivider()
     SwitchRow(stringResource(R.string.settings_notif_channel), preferences.channelMessagesEnabled, store::setChannelMessagesEnabled)
@@ -1585,3 +1587,25 @@ private fun PathHashModeRow(pathHashMode: UByte, isBusy: Boolean, onSelect: (UBy
 }
 
 
+
+/**
+ * Toggle for [com.meshcoretwo.android.KeepAliveService]: with it on, the radio link stays up with the
+ * screen off (at the cost of one ongoing notification). Applied by the service's own pref listener.
+ */
+@Composable
+private fun KeepAliveRow() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val prefs = remember { (context.applicationContext as com.meshcoretwo.android.MeshCoreTwoApplication).container.notificationPrefs }
+    var enabled by remember { mutableStateOf(prefs.getBoolean(com.meshcoretwo.android.KeepAliveService.KEEP_ALIVE_PREF_KEY, true)) }
+    SettingsListRow(
+        title = stringResource(R.string.settings_keepalive_title),
+        value = stringResource(R.string.settings_keepalive_desc),
+        singleLineValue = false,
+        trailing = {
+            Switch(checked = enabled, onCheckedChange = {
+                enabled = it
+                prefs.edit().putBoolean(com.meshcoretwo.android.KeepAliveService.KEEP_ALIVE_PREF_KEY, it).apply()
+            })
+        },
+    )
+}

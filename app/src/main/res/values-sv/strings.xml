@@ -1195,4 +1195,9 @@
     <string name="err_key_max_attempts">Det gick inte att generera en nyckel med det prefixet. Prova ett annat.</string>
     <string name="err_key_reserved">Det prefixet är reserverat och kan inte användas.</string>
     <string name="err_key_invalid">Nyckeln är inte en giltig privat Ed25519-nyckel.</string>
+    <string name="settings_keepalive_title">Behåll anslutningen i bakgrunden</string>
+    <string name="settings_keepalive_desc">Håller radioanslutningen uppe med skärmen avstängd. Visar en permanent avisering.</string>
+    <string name="keepalive_channel_name">Radioanslutning</string>
+    <string name="keepalive_notification_title">MeshCore Two är ansluten</string>
+    <string name="keepalive_notification_text">Radioanslutningen hålls uppe</string>
 </resources>

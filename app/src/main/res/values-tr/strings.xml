@@ -1195,4 +1195,9 @@
     <string name="err_key_max_attempts">Bu önekle anahtar oluşturulamadı. Lütfen başka bir önek deneyin.</string>
     <string name="err_key_reserved">Bu önek ayrılmıştır ve kullanılamaz.</string>
     <string name="err_key_invalid">Anahtar geçerli bir Ed25519 özel anahtarı değil.</string>
+    <string name="settings_keepalive_title">Bağlantıyı arka planda tut</string>
+    <string name="settings_keepalive_desc">Ekran kapalıyken telsiz bağlantısını canlı tutar. Kalıcı bir bildirim gösterir.</string>
+    <string name="keepalive_channel_name">Telsiz bağlantısı</string>
+    <string name="keepalive_notification_title">MeshCore Two bağlı</string>
+    <string name="keepalive_notification_text">Telsiz bağlantısı korunuyor</string>
 </resources>

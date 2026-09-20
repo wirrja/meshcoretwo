@@ -1193,4 +1193,9 @@
     <string name="err_key_max_attempts">无法生成带该前缀的密钥，请尝试其他前缀。</string>
     <string name="err_key_reserved">该前缀已被保留，无法使用。</string>
     <string name="err_key_invalid">该密钥不是有效的 Ed25519 私钥。</string>
+    <string name="settings_keepalive_title">在后台保持连接</string>
+    <string name="settings_keepalive_desc">熄屏时保持电台连接。会显示一条常驻通知。</string>
+    <string name="keepalive_channel_name">电台连接</string>
+    <string name="keepalive_notification_title">MeshCore Two 已连接</string>
+    <string name="keepalive_notification_text">正在保持电台连接</string>
 </resources>

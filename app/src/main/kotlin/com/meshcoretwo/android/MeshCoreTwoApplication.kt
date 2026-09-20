@@ -7,6 +7,7 @@ import android.content.Context
 import android.util.Log
 import com.meshcoretwo.android.di.AppContainer
 import com.meshcoretwo.android.ui.i18n.AppLanguageManager
+import com.meshcoretwo.services.connection.DeviceConnectionState
 import com.meshcoretwo.services.connection.activate
 import com.meshcoretwo.services.connection.appDidBecomeActive
 import com.meshcoretwo.services.connection.checkSyncHealth
@@ -44,6 +45,7 @@ class MeshCoreTwoApplication : Application() {
         NotificationService.registerChannels(this)
         container = AppContainer(this)
         scope.launch { container.connectionManager.activate() }
+        KeepAliveService.observe(this, scope, container.connectionManager, container.notificationPrefs)
         registerActivityLifecycleCallbacks(AppForegroundTracker(::handleEnterBackground, ::handleReturnToForeground))
     }
 
@@ -54,8 +56,9 @@ class MeshCoreTwoApplication : Application() {
      *
      * Deliberately *not* ported: `ConnectionManager.appDidEnterBackground()`, which stops the BLE
      * reconnection watchdog and marks the app inactive. On iOS that's right (the OS suspends the
-     * process and restores the link); this app has no foreground service, and the watchdog is what
+     * process and restores the link); the watchdog is what
      * brings the link back while the phone is in a pocket — which incoming notifications depend on.
+     * [KeepAliveService] is what keeps that watchdog's process alive in the background.
      * Room keepalives are likewise left running.
      */
     private fun handleEnterBackground() {
@@ -78,6 +81,13 @@ class MeshCoreTwoApplication : Application() {
     private fun handleReturnToForeground() {
         Log.i(TAG, "app returned to foreground: reconciling connection")
         scope.launch {
+            // A start refused while backgrounded gets its retry here, where it is always allowed.
+            val manager = container.connectionManager
+            if (container.notificationPrefs.getBoolean(KeepAliveService.KEEP_ALIVE_PREF_KEY, true) &&
+                (manager.connectionState != DeviceConnectionState.DISCONNECTED || manager.connectionIntent.wantsConnection)
+            ) {
+                KeepAliveService.start(this@MeshCoreTwoApplication)
+            }
             container.connectionManager.appDidBecomeActive()
             container.connectionManager.checkSyncHealth()
             Log.i(TAG, "foreground reconciliation done")

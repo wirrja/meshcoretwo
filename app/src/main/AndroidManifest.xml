@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Keeps the BLE link alive with the screen off (KeepAliveService, user-switchable in Settings). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- Also declared in :services; lint needs it visible in this manifest for connectedDevice. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
     <application
         android:name=".MeshCoreTwoApplication"
         android:allowBackup="false"
@@ -35,6 +41,11 @@
                     android:pathPrefix="/add" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
 
         <!-- zxing-android-embedded's scanner declares sensorLandscape, which opens the camera sideways
              on a phone held upright. Follow the device's real orientation instead (the ScanOptions
