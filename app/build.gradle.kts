@@ -33,8 +33,8 @@ android {
         applicationId = "com.meshcoretwo.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.1.6"
+        versionCode = 10
+        versionName = "1.1.7"
         // The UI is translated into exactly these languages (see AppLanguage.kt / locales_config.xml);
         // library-supplied resources for other locales are dropped from the APK.
         resourceConfigurations += listOf("en", "ru", "fr", "de", "zh-rCN", "tr", "fi", "sv")
