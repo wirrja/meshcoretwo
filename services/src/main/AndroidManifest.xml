@@ -37,11 +37,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!--
-      OpenMeteoElevationService (Line of Sight tool) is this port's only direct HTTP call —
+      CopernicusElevationService (Line of Sight tool) is this port's only direct HTTP call —
       everything else goes over BLE/WiFi straight to the radio (see project constraints). `app` already
       gets INTERNET/ACCESS_NETWORK_STATE/ACCESS_WIFI_STATE merged in from the MapLibre SDK
       (Phase 5 slice 6), but that merge doesn't reach this module's own manifest, and
-      OpenMeteoElevationService lives here, not in `app`.
+      CopernicusElevationService lives here, not in `app`.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
 

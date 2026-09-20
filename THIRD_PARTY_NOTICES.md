@@ -134,7 +134,7 @@ licenses of this program's code.
 | Data | Source | Terms |
 |---|---|---|
 | Map tiles (map, neighbor map, line of sight) | [OpenFreeMap](https://openfreemap.org) "liberty" style © [OpenMapTiles](https://openmaptiles.org), data from [OpenStreetMap](https://www.openstreetmap.org/copyright) | OpenStreetMap data: Open Database License (ODbL) 1.0 |
-| Elevation profile (line of sight) | Copernicus DEM GLO-90 via the [Open-Meteo](https://open-meteo.com) Elevation API | Open-Meteo data: CC BY 4.0; the free API is for non-commercial use only. Copernicus DEM notice below (required by the [DEM licence](https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf), Article 6) |
+| Elevation profile (line of sight) | [Copernicus DEM](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM) GLO-90 (90 m), 1°×1° GeoTIFF tiles fetched directly from the public [AWS Open Data bucket](https://registry.opendata.aws/copernicus-dem/) | Free for the general public under the Copernicus DEM licence, which requires the notice below ([licence text](https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf), Article 6) |
 | Battery discharge (OCV) curve presets | Values from the [Meshtastic firmware](https://github.com/meshtastic/firmware) (GPL-3.0), via MeshCore One | Numeric reference data |
 | Chile radio preset | Community settings of the [MeshChile](https://meshchile.cl) network, via MeshCore One | Numeric reference data |
 

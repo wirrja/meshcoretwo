@@ -73,16 +73,6 @@ jobs:
           cat > notes.md <<'NOTES'
           Signed APK for sideloading. Unofficial port; see the README for origin and license.
 
-          ### Upgrading from an earlier build
-          Releases are now signed with a new key. An APK signed with the old key cannot be updated
-          in place (Android reports a signature conflict). To move over without losing data:
-          1. In the old app: Settings → Backup & Restore → export.
-          2. Uninstall the old app.
-          3. Install this APK.
-          4. Import the backup.
-
-          Uninstalling without exporting deletes the local database, messages and channel keys.
-
           ### Notes
           - The app now keeps the radio link alive with the screen off and shows one ongoing
             notification while it does. Switch it off in Settings → Notifications → "Keep connection in background".
