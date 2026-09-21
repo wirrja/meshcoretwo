@@ -334,6 +334,8 @@ private const val LINE_LAYER_ID = "message-path-line-layer"
 private const val POINTS_SOURCE_ID = "message-path-points"
 private const val POINTS_CIRCLE_LAYER_ID = "message-path-points-circle"
 private const val POINTS_LABEL_LAYER_ID = "message-path-points-label"
+/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
+private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_LABEL = "label"
 private const val PROP_COLOR = "color"
 private const val PROP_STROKE_COLOR = "strokeColor"
@@ -414,6 +416,7 @@ private class MessagePathMapController {
             style.addLayer(
                 SymbolLayer(POINTS_LABEL_LAYER_ID, POINTS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
+                    PropertyFactory.textFont(LABEL_FONT),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),

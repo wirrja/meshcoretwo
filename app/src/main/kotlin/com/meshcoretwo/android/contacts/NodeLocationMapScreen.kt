@@ -74,6 +74,8 @@ fun NodeLocationMapScreen(latitude: Double, longitude: Double, name: String?, on
 private const val LOCATION_SOURCE_ID = "node-location-point"
 private const val LOCATION_CIRCLE_LAYER_ID = "node-location-point-circle"
 private const val LOCATION_LABEL_LAYER_ID = "node-location-point-label"
+/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
+private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val LOCATION_PROP_LABEL = "label"
 
 /** Swift frames a single fix with a 0.05° span, roughly zoom 12 at mid latitudes. */
@@ -113,6 +115,7 @@ private class NodeLocationMapController(
             style.addLayer(
                 SymbolLayer(LOCATION_LABEL_LAYER_ID, LOCATION_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(LOCATION_PROP_LABEL)),
+                    PropertyFactory.textFont(LABEL_FONT),
                     PropertyFactory.textSize(12f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),

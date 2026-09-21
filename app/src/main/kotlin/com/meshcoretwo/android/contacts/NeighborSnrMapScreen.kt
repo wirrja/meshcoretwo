@@ -246,6 +246,8 @@ private const val POINTS_CIRCLE_LAYER_ID = "neighbor-snr-points-circle"
 private const val POINTS_LABEL_LAYER_ID = "neighbor-snr-points-label"
 private const val BADGES_SOURCE_ID = "neighbor-snr-badges"
 private const val BADGES_LABEL_LAYER_ID = "neighbor-snr-badges-label"
+/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
+private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_LABEL = "label"
 private const val PROP_COLOR = "color"
 private const val PROP_STROKE_COLOR = "strokeColor"
@@ -323,6 +325,7 @@ private class NeighborSnrMapController {
             style.addLayer(
                 SymbolLayer(BADGES_LABEL_LAYER_ID, BADGES_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_TEXT)),
+                    PropertyFactory.textFont(LABEL_FONT),
                     PropertyFactory.textSize(10f),
                     PropertyFactory.textColor("#374151"),
                     PropertyFactory.textHaloColor("#FFFFFF"),
@@ -345,6 +348,7 @@ private class NeighborSnrMapController {
             style.addLayer(
                 SymbolLayer(POINTS_LABEL_LAYER_ID, POINTS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
+                    PropertyFactory.textFont(LABEL_FONT),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),
