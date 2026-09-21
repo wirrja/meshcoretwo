@@ -115,7 +115,7 @@ object CLICompletionEngine {
         else -> emptyList()
     }
 
-    private fun availableCommands(): List<String> = builtInCommands + repeaterCommands
+    private fun availableCommands(): List<String> = (builtInCommands + repeaterCommands).distinct()
 
     private fun completeSetValue(param: String, prefix: String): List<String> = when (param) {
         "path.hash.mode" -> pathHashModeValues.filter { it.startsWith(prefix) }.sorted()
