@@ -179,7 +179,13 @@ internal fun NodeRadioSettingsSection(
 // MARK: - Identity & Location
 
 @Composable
-internal fun NodeIdentitySection(state: NodeSettingsUiState, settings: NodeSettingsViewModel, onReload: () -> Unit, onApply: () -> Unit) {
+internal fun NodeIdentitySection(
+    state: NodeSettingsUiState,
+    settings: NodeSettingsViewModel,
+    onReload: () -> Unit,
+    onApply: () -> Unit,
+    onPickLocation: () -> Unit,
+) {
     ExpandableSectionCard(
         title = stringResource(R.string.nodeadmin_identity_location),
         expanded = state.isIdentityExpanded,
@@ -204,8 +210,25 @@ internal fun NodeIdentitySection(state: NodeSettingsUiState, settings: NodeSetti
                     supportingText = state.nameError?.let { message -> { Text(message.asString()) } },
                     modifier = Modifier.fillMaxWidth(),
                 )
-                DoubleFieldRow(stringResource(R.string.nodeadmin_latitude), state.latitude, settings::setLatitude, error = state.latitudeError)
-                DoubleFieldRow(stringResource(R.string.nodeadmin_longitude), state.longitude, settings::setLongitude, error = state.longitudeError)
+                DoubleFieldRow(
+                    stringResource(R.string.nodeadmin_latitude),
+                    state.latitude,
+                    settings::setLatitude,
+                    error = state.latitudeError,
+                    loadKey = state.originalLatitude to state.identityFieldsResyncToken,
+                )
+                DoubleFieldRow(
+                    stringResource(R.string.nodeadmin_longitude),
+                    state.longitude,
+                    settings::setLongitude,
+                    error = state.longitudeError,
+                    loadKey = state.originalLongitude to state.identityFieldsResyncToken,
+                )
+                OutlinedButton(onClick = onPickLocation, modifier = Modifier.fillMaxWidth()) {
+                    Icon(painterResource(R.drawable.ic_map), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(stringResource(R.string.nodeadmin_pick_on_map))
+                }
                 AsyncApplyButton(
                     stringResource(R.string.nodeadmin_apply_identity),
                     isLoading = state.isApplying,
@@ -369,9 +392,21 @@ private fun ActionRow(label: String, isBusy: Boolean, enabled: Boolean, onClick:
 
 // MARK: - Shared Field Rows
 
+/**
+ * [loadKey] should be the field's *loaded baseline* (e.g. `NodeSettingsUiState.originalLatitude`),
+ * not [value] itself — [remember] has no way to tell "the user typed a character" apart from "the
+ * async fetch just landed" other than by being keyed on something that only changes for the latter.
+ * Keying on [value] directly seemed simpler but re-derives `text` from `value?.toString()` on every
+ * keystroke too, fighting whatever the user is mid-typing (e.g. "-3" briefly parses to `-3.0`, then
+ * immediately gets stomped back to the string `"-3.0"`). Keying on nothing (the bug this replaced)
+ * is worse: when this row first composes before its value has loaded (a real sequence for
+ * [NodeIdentitySection] — see [NodeSettingsUiState.identityLoaded]'s doc), the remembered `text`
+ * locks onto `""` and never updates even after the real value arrives, since recomposition alone
+ * doesn't re-run an unkeyed `remember` initializer — the field then reads as permanently empty.
+ */
 @Composable
-internal fun DoubleFieldRow(label: String, value: Double?, onValueChange: (Double?) -> Unit, error: UiText? = null) {
-    var text by remember { mutableStateOf(value?.toString() ?: "") }
+internal fun DoubleFieldRow(label: String, value: Double?, onValueChange: (Double?) -> Unit, error: UiText? = null, loadKey: Any? = value) {
+    var text by remember(loadKey) { mutableStateOf(value?.toString() ?: "") }
     OutlinedTextField(
         value = text,
         onValueChange = { input -> text = input; onValueChange(input.toDoubleOrNull()) },

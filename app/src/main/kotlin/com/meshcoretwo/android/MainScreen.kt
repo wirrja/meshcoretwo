@@ -104,7 +104,7 @@ import com.meshcoretwo.android.map.OfflineMapService
 import com.meshcoretwo.android.settings.BackupRestoreScreen
 import com.meshcoretwo.android.settings.BlockedChannelSendersScreen
 import com.meshcoretwo.android.settings.DeviceSelectionScreen
-import com.meshcoretwo.android.settings.LocationPickerScreen
+import com.meshcoretwo.android.settings.DeviceLocationPickerScreen
 import com.meshcoretwo.android.settings.NodeConfigExportScreen
 import com.meshcoretwo.android.settings.NodeConfigImportScreen
 import com.meshcoretwo.android.settings.OfflineMapSettingsScreen
@@ -565,7 +565,7 @@ fun MainScreen(
                 )
             }
             composable(MainRoute.LOCATION_PICKER) {
-                LocationPickerScreen(
+                DeviceLocationPickerScreen(
                     connectionManager = connectionManager,
                     locationProvider = locationProvider,
                     devicePreferenceStore = devicePreferenceStore,
@@ -814,6 +814,7 @@ fun MainScreen(
                 val sessionId = UUID.fromString(backStack.arguments?.getString("sessionId"))
                 RepeaterSettingsScreen(
                     connectionManager = connectionManager,
+                    locationProvider = locationProvider,
                     sessionId = sessionId,
                     onBack = { navController.popBackStack() },
                 )
@@ -825,6 +826,7 @@ fun MainScreen(
                 val sessionId = UUID.fromString(backStack.arguments?.getString("sessionId"))
                 RoomSettingsScreen(
                     connectionManager = connectionManager,
+                    locationProvider = locationProvider,
                     sessionId = sessionId,
                     onBack = { navController.popBackStack() },
                 )

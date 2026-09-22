@@ -276,6 +276,7 @@
 
     <!-- Chat conversation -->
     <string name="chat_channel_info">Kanalinfo</string>
+    <string name="chat_new_messages_divider">Nya meddelanden</string>
     <string name="chat_conv_unavailable">Den här konversationen är inte längre tillgänglig.</string>
     <string name="chat_route_hide">Dölj ruttdetaljer</string>
     <string name="chat_route_show">Visa ruttdetaljer</string>
@@ -545,6 +546,7 @@
     <string name="nodeadmin_identity_location">Identitet &amp; plats</string>
     <string name="nodeadmin_latitude">Latitud</string>
     <string name="nodeadmin_longitude">Longitud</string>
+    <string name="nodeadmin_pick_on_map">Välj på karta</string>
     <string name="nodeadmin_apply_identity">Tillämpa identitetsinställningar</string>
     <string name="nodeadmin_contact_info">Kontaktinfo</string>
     <string name="nodeadmin_contact_hint">Frekvens, operatörens namn, webbplats …</string>
@@ -770,7 +772,6 @@
     <string name="devices_err_load">Det gick inte att läsa in sparade enheter.</string>
     <string name="blocked_senders_none">Inga blockerade avsändare</string>
     <string name="blocked_senders_none_desc">Kanalavsändare du blockerar visas här.</string>
-    <string name="location_drop_pin">Placera nål</string>
     <string name="location_clear">Rensa plats</string>
     <string name="location_err_set">Det gick inte att ställa in platsen.</string>
     <string name="notif_blocked_title">Aviseringar är blockerade</string>

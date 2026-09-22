@@ -277,6 +277,7 @@
 
     <!-- Chat conversation -->
     <string name="chat_channel_info">Infos sur le canal</string>
+    <string name="chat_new_messages_divider">Nouveaux messages</string>
     <string name="chat_conv_unavailable">Cette conversation n’est plus disponible.</string>
     <string name="chat_route_hide">Masquer les détails de la route</string>
     <string name="chat_route_show">Afficher les détails de la route</string>
@@ -547,6 +548,7 @@
     <string name="nodeadmin_identity_location">Identité et position</string>
     <string name="nodeadmin_latitude">Latitude</string>
     <string name="nodeadmin_longitude">Longitude</string>
+    <string name="nodeadmin_pick_on_map">Choisir sur la carte</string>
     <string name="nodeadmin_apply_identity">Appliquer les réglages d’identité</string>
     <string name="nodeadmin_contact_info">Infos de contact</string>
     <string name="nodeadmin_contact_hint">Fréquence, nom de l’opérateur, site web…</string>
@@ -772,7 +774,6 @@
     <string name="devices_err_load">Impossible de charger les appareils enregistrés.</string>
     <string name="blocked_senders_none">Aucun expéditeur bloqué</string>
     <string name="blocked_senders_none_desc">Les expéditeurs de canaux que vous bloquez apparaîtront ici.</string>
-    <string name="location_drop_pin">Placer une épingle</string>
     <string name="location_clear">Effacer la position</string>
     <string name="location_err_set">Impossible de définir la position.</string>
     <string name="notif_blocked_title">Les notifications sont bloquées</string>

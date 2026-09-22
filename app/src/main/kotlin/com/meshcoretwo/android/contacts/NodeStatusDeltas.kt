@@ -127,8 +127,17 @@ fun StatusDeltaLabel(delta: Double, higherIsBetter: Boolean, unit: String, fract
         NodeStatusDeltas.isImprovement(delta, higherIsBetter) -> extended.success
         else -> extended.warning
     }
+    // `delta > 0 ? up : down` (Swift's own `StatusDeltaView` logic, ported as-is) always chose "▼"
+    // for delta == 0 — an unchanged reading then read as "decreased by 0", which is what a reading
+    // that hasn't moved since the last snapshot looks like on every single refresh. Neutral here
+    // instead, matching the row's own neutral color for the same negligible-delta case just above.
+    val arrow = when {
+        NodeStatusDeltas.isNegligible(delta) -> "–"
+        delta > 0 -> "▲"
+        else -> "▼"
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(if (delta > 0) "▲" else "▼", style = MaterialTheme.typography.bodySmall, color = color)
+        Text(arrow, style = MaterialTheme.typography.bodySmall, color = color)
         Text(NodeStatusDeltas.deltaMagnitude(delta, unit, fractionDigits), style = MaterialTheme.typography.bodySmall, color = color)
     }
 }

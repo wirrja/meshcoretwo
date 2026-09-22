@@ -8,6 +8,7 @@ import com.meshcoretwo.android.ui.components.RefreshOnResume
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -106,7 +107,7 @@ fun ContactsListScreen(
     val viewModel: ContactsListViewModel = viewModel(factory = ContactsListViewModel.Factory(connectionManager))
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     RefreshOnResume(viewModel::refresh)
-    var segment by remember { mutableStateOf(ContactSegment.CONTACTS) }
+    var segment by remember { mutableStateOf(ContactSegment.FAVORITES) }
     var query by remember { mutableStateOf("") }
     var sortOrder by remember { mutableStateOf(NodeSortOrder.LAST_HEARD) }
     var userLocation by remember { mutableStateOf<LocationFix?>(null) }
@@ -345,34 +346,42 @@ internal fun ContactRow(
         )
         Spacer(modifier = Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = contact.displayName,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                if (contact.isBlocked) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painterResource(R.drawable.ic_block),
-                        contentDescription = stringResource(R.string.common_blocked),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            // `Arrangement.SpaceBetween`, not a trailing `Spacer(Modifier.weight(1f))`: with two
+            // same-weight flexible children, the name and that spacer used to split the row's
+            // leftover width 50/50 regardless of whether the name actually needed it, so a
+            // longer/localized name truncated to ellipsis at half the room it could've used,
+            // leaving a dead gap before the timestamp — the "name reads as squeezed/cut off"
+            // look this fixes. The name+badges group is now the row's only flex participant.
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f, fill = false)) {
+                    Text(
+                        text = contact.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
+                    if (contact.isBlocked) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painterResource(R.drawable.ic_block),
+                            contentDescription = stringResource(R.string.common_blocked),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (contact.isFavorite) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painterResource(R.drawable.ic_star),
+                            contentDescription = stringResource(R.string.common_favorite),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.tertiary,
+                        )
+                    }
                 }
-                if (contact.isFavorite) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        painterResource(R.drawable.ic_star),
-                        contentDescription = stringResource(R.string.common_favorite),
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.tertiary,
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
                 contact.lastHeardTimestamp.toInstantOrNull()?.let { date ->
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = formatRelativeTimestamp(date),
                         style = MaterialTheme.typography.labelSmall,

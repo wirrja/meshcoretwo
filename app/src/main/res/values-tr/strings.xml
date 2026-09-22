@@ -276,6 +276,7 @@
 
     <!-- Chat conversation -->
     <string name="chat_channel_info">Kanal bilgisi</string>
+    <string name="chat_new_messages_divider">Yeni Mesajlar</string>
     <string name="chat_conv_unavailable">Bu konuşma artık mevcut değil.</string>
     <string name="chat_route_hide">Rota ayrıntılarını gizle</string>
     <string name="chat_route_show">Rota ayrıntılarını göster</string>
@@ -545,6 +546,7 @@
     <string name="nodeadmin_identity_location">Kimlik ve konum</string>
     <string name="nodeadmin_latitude">Enlem</string>
     <string name="nodeadmin_longitude">Boylam</string>
+    <string name="nodeadmin_pick_on_map">Haritada seç</string>
     <string name="nodeadmin_apply_identity">Kimlik ayarlarını uygula</string>
     <string name="nodeadmin_contact_info">Kişi bilgisi</string>
     <string name="nodeadmin_contact_hint">Frekans, operatör adı, web sitesi…</string>
@@ -770,7 +772,6 @@
     <string name="devices_err_load">Kayıtlı cihazlar yüklenemedi.</string>
     <string name="blocked_senders_none">Engellenen gönderici yok</string>
     <string name="blocked_senders_none_desc">Engellediğiniz kanal göndericileri burada görünür.</string>
-    <string name="location_drop_pin">İğne bırak</string>
     <string name="location_clear">Konumu temizle</string>
     <string name="location_err_set">Konum ayarlanamadı.</string>
     <string name="notif_blocked_title">Bildirimler engellendi</string>

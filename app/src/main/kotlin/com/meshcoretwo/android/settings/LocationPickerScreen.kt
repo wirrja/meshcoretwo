@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -79,20 +79,15 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point as GeoPoint
 
 /**
- * "Set Location" map picker, ported from `LocationPickerView.swift`. Tap-anywhere-to-drop-pin (plus
- * a "Drop Pin" button for the current camera center) stands in for MapKit's press-and-drag pin,
- * since MapLibre's GL view has no built-in draggable point annotation — the same "no Annotation
- * plugin" trade-off `MapScreen.kt` already made for its own markers. Reached from Settings'
- * `LocationSection` ("Set Location" row).
- *
- * Camera seeding mirrors `LocationPickerView.loadCurrentLocation()`: starts on the device's existing
- * lat/lon if non-zero, otherwise tries the phone's current location via [LocationProvider] purely to
- * center the initial camera — it never auto-drops a pin there, same as Swift. Also not ported: the
- * shared map-controls toolbar (style/labels/north lock) no map in this port has yet.
+ * "Set Location" map picker for the *locally connected* device, ported from `LocationPickerView
+ * .forLocalDevice` — a thin wrapper around the generic [LocationPickerScreen] below that seeds it
+ * from [ConnectionManager.connectedDeviceRecord] and saves straight to the radio via
+ * [LocationPickerViewModel]. Reached from Settings' `LocationSection` ("Set Location" row). See
+ * [LocationPickerScreen]'s doc for the map/UI itself, [RemoteNodeLocationPickerScreen] for the other
+ * `LocationPickerView` call site (repeater/room identity's "Pick on Map").
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LocationPickerScreen(
+fun DeviceLocationPickerScreen(
     connectionManager: ConnectionManager,
     locationProvider: LocationProvider,
     devicePreferenceStore: DevicePreferenceStore,
@@ -105,16 +100,14 @@ fun LocationPickerScreen(
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val initialFix = remember {
         connectionManager.connectedDeviceRecord?.let { device ->
             if (device.latitude != 0.0 || device.longitude != 0.0) LatLng(device.latitude, device.longitude) else null
         }
     }
-    var selected by remember { mutableStateOf(initialFix) }
-    val controller = remember { LocationPickerMapController(initialFix, scope, locationProvider) }
 
-    val context = LocalContext.current
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
             snackbarHostState.showSnackbar(it.resolve(context))
@@ -122,8 +115,53 @@ fun LocationPickerScreen(
         }
     }
 
+    LocationPickerScreen(
+        initial = initialFix,
+        locationProvider = locationProvider,
+        isSaving = isSaving,
+        snackbarHostState = snackbarHostState,
+        onSave = { latLng -> scope.launch { if (viewModel.save(latLng.latitude, latLng.longitude)) onBack() } },
+        onBack = onBack,
+    )
+}
+
+/**
+ * Generic map picker: tap-anywhere-to-drop-pin (plus a "Drop Pin" button for the current camera
+ * center) stands in for MapKit's press-and-drag pin, since MapLibre's GL view has no built-in
+ * draggable point annotation — the same "no Annotation plugin" trade-off `MapScreen.kt` already
+ * made for its own markers. Ported from `LocationPickerView.swift`, which is itself this generic —
+ * `initialCoordinate`/`onSave` closure, no radio access of its own — with [DeviceLocationPickerScreen]
+ * and [RemoteNodeLocationPickerScreen] as its two `LocationPickerView.forLocalDevice`-style callers.
+ *
+ * Camera seeding mirrors `LocationPickerView.loadCurrentLocation()`: starts on [initial] if given,
+ * otherwise tries the phone's current location via [LocationProvider] purely to center the initial
+ * camera — it never auto-drops a pin there, same as Swift. Also not ported: the shared map-controls
+ * toolbar (style/labels/north lock) no map in this port has yet.
+ *
+ * [containerColor] defaults to this codebase's usual `Color.Transparent` (the NavHost's single
+ * shared `accentBackdrop()` shows through — see MainScreen.kt's doc), right for
+ * [DeviceLocationPickerScreen]'s ordinary nav-pushed route. [RemoteNodeLocationPickerScreen] passes
+ * an opaque color instead: it presents this as a same-destination overlay, not a push, so a
+ * transparent container there let the settings screen underneath show through and its TopAppBar
+ * title double up with this one's.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LocationPickerScreen(
+    initial: LatLng?,
+    locationProvider: LocationProvider,
+    isSaving: Boolean,
+    snackbarHostState: SnackbarHostState,
+    onSave: (LatLng) -> Unit,
+    onBack: () -> Unit,
+    containerColor: Color = Color.Transparent,
+) {
+    var selected by remember { mutableStateOf(initial) }
+    val scope = rememberCoroutineScope()
+    val controller = remember { LocationPickerMapController(initial, scope, locationProvider) }
+
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = containerColor,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
@@ -134,12 +172,7 @@ fun LocationPickerScreen(
                 actions = {
                     TextButton(
                         enabled = selected != null && !isSaving,
-                        onClick = {
-                            val latLng = selected ?: return@TextButton
-                            scope.launch {
-                                if (viewModel.save(latLng.latitude, latLng.longitude)) onBack()
-                            }
-                        },
+                        onClick = { selected?.let(onSave) },
                     ) { Text(stringResource(R.string.common_save)) }
                 },
             )
@@ -167,10 +200,19 @@ fun LocationPickerScreen(
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { controller.dropPinAtCenter { latLng -> selected = latLng } }) { Text(stringResource(R.string.location_drop_pin)) }
-                    if (selected != null) {
-                        OutlinedButton(onClick = { selected = null; controller.clearPin() }) { Text(stringResource(R.string.location_clear)) }
+                // No "Drop Pin" button: the map already places the pin on tap (see `attach`'s
+                // click listener below), so a second button that instead drops it at the current
+                // camera center was a redundant, confusing second way to set the same value — tap
+                // a spot, then tap this, and the pin visibly jumped from where you tapped to
+                // wherever the camera happened to be centered. Destructive-styled (filled, error
+                // color) since it's the one remaining action here that discards a choice.
+                if (selected != null) {
+                    Button(
+                        onClick = { selected = null; controller.clearPin() },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.location_clear))
                     }
                 }
             }
@@ -318,12 +360,6 @@ private class LocationPickerMapController(
 
     fun clearPin() {
         source?.setGeoJson(FeatureCollection.fromFeatures(emptyArray()))
-    }
-
-    fun dropPinAtCenter(onDrop: (LatLng) -> Unit) {
-        val target = map?.cameraPosition?.target ?: return
-        setPin(target)
-        onDrop(target)
     }
 
     private fun pinFeatureCollection(latLng: LatLng) =

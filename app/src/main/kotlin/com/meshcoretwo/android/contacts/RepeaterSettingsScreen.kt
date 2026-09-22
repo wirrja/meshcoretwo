@@ -46,6 +46,7 @@ import com.meshcoretwo.android.R
 import com.meshcoretwo.android.ui.components.ExpandableSectionCard
 import com.meshcoretwo.android.ui.theme.AvatarCategory
 import com.meshcoretwo.services.connection.ConnectionManager
+import com.meshcoretwo.services.location.LocationProvider
 import com.meshcoretwo.services.utilities.isAtLeastVersion
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -69,6 +70,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RepeaterSettingsScreen(
     connectionManager: ConnectionManager,
+    locationProvider: LocationProvider,
     sessionId: UUID,
     onBack: () -> Unit,
 ) {
@@ -76,6 +78,7 @@ fun RepeaterSettingsScreen(
     val settingsState by viewModel.settings.uiState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var showingLocationPicker by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -120,6 +123,7 @@ fun RepeaterSettingsScreen(
                     settings = viewModel.settings,
                     onReload = { scope.launch { viewModel.settings.fetchIdentity() } },
                     onApply = { scope.launch { viewModel.settings.applyIdentitySettings() } },
+                    onPickLocation = { showingLocationPicker = true },
                 )
             }
 
@@ -167,6 +171,19 @@ fun RepeaterSettingsScreen(
             title = { Text(stringResource(R.string.common_success)) },
             text = { Text(settingsState.successMessage?.asString() ?: stringResource(R.string.nodeset_settings_applied)) },
             confirmButton = { TextButton(onClick = viewModel.settings::dismissSuccessAlert) { Text(stringResource(R.string.common_ok)) } },
+        )
+    }
+
+    // Full-screen, not a pushed nav destination — same reasoning `LocationPickerScreen`'s own doc
+    // gives for skipping a nav-result round trip: this picker only ever needs to hand one coordinate
+    // pair back to the screen that opened it.
+    if (showingLocationPicker) {
+        RemoteNodeLocationPickerScreen(
+            initialLatitude = settingsState.latitude,
+            initialLongitude = settingsState.longitude,
+            locationProvider = locationProvider,
+            onSave = { latitude, longitude -> viewModel.settings.setLocationFromPicker(latitude, longitude); showingLocationPicker = false },
+            onCancel = { showingLocationPicker = false },
         )
     }
 }

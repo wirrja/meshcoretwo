@@ -63,6 +63,10 @@ sealed class ConversationUiState {
         /** Flood region this channel currently sends with (per-channel override, else the device default);
          * `null` for DMs and for an "All regions"/un-scoped channel. Shown in the footer of outgoing messages. */
         val sendRegion: String? = null,
+        /** Whether history older than [messages] still exists — the "scrolled near the top" list trigger
+         * calls [ConversationViewModel.loadOlderMessages] while this is true, same growing-window
+         * approach [ConversationViewModel.loadedMessageLimit]'s doc describes. */
+        val hasMoreOlderMessages: Boolean = false,
     ) : ConversationUiState()
 }
 
@@ -130,6 +134,25 @@ class ConversationViewModel(
      * unchanged scope. Ported from `ChatViewModel.lastSetRegionScope`. */
     private var lastSyncedFloodScope: Pair<ChannelFloodScope, String?>? = null
 
+    /**
+     * How many of the most recent messages [reload] fetches — starts at [MESSAGE_LOAD_LIMIT] and
+     * grows by a page each time [loadOlderMessages] runs, so a later [reload] (triggered by any
+     * incoming event, same as before) keeps whatever window the user has scrolled open instead of
+     * snapping back down to the newest 100. Not true offset pagination — see [loadOlderMessages].
+     */
+    private var loadedMessageLimit: Int = MESSAGE_LOAD_LIMIT
+    private var hasMoreOlderMessages: Boolean = true
+    private var isLoadingOlderMessages: Boolean = false
+
+    /** The contact/channel's unread count captured on this screen's first [reload], before that same
+     * call clears it via `markConversationRead` — the chat list's one-shot "jump to first unread"
+     * scroll target on open. Ported from `ChatMessageBakeState.computeDividerPosition`'s divider math
+     * (`messages.count - unreadCount`), without the divider row/baking machinery — see
+     * [ChatConversationScreen]'s `NewMessagesDivider`. */
+    var initialUnreadCount: Int = 0
+        private set
+    private var hasCapturedInitialUnreadCount = false
+
     init {
         var eventJob: Job? = null
         var slotJob: Job? = null
@@ -196,8 +219,13 @@ class ConversationViewModel(
                     return
                 }
                 contact = resolvedContact
-                val messages = messageService.getMessages(target.contactId, limit = MESSAGE_LOAD_LIMIT)
-                    .filterNot { it.isHiddenOutgoingReaction(isDM = true) }
+                if (!hasCapturedInitialUnreadCount) {
+                    initialUnreadCount = resolvedContact.unreadCount
+                    hasCapturedInitialUnreadCount = true
+                }
+                val fetched = messageService.getMessages(target.contactId, limit = loadedMessageLimit)
+                hasMoreOlderMessages = fetched.size >= loadedMessageLimit
+                val messages = fetched.filterNot { it.isHiddenOutgoingReaction(isDM = true) }
                 _uiState.value = ConversationUiState.Loaded(
                     title = resolvedContact.displayName,
                     subtitle = resolvedContact.routeLabel(),
@@ -207,6 +235,7 @@ class ConversationViewModel(
                     selfName = selfName,
                     mentionCandidates = mentionCandidates,
                     recentEmojis = recentEmojis,
+                    hasMoreOlderMessages = hasMoreOlderMessages,
                 )
                 connectionManager.notificationService?.setActiveConversation(contactID = target.contactId)
                 connectionManager.contactService?.markConversationRead(target.contactId)
@@ -218,8 +247,13 @@ class ConversationViewModel(
                     return
                 }
                 channel = resolvedChannel
-                val messages = messageService.getMessages(radioID, target.index, limit = MESSAGE_LOAD_LIMIT)
-                    .filterNot { it.isHiddenOutgoingReaction(isDM = false) }
+                if (!hasCapturedInitialUnreadCount) {
+                    initialUnreadCount = resolvedChannel.unreadCount
+                    hasCapturedInitialUnreadCount = true
+                }
+                val fetched = messageService.getMessages(radioID, target.index, limit = loadedMessageLimit)
+                hasMoreOlderMessages = fetched.size >= loadedMessageLimit
+                val messages = fetched.filterNot { it.isHiddenOutgoingReaction(isDM = false) }
                 val nodeNameBytes = (connectionManager.connectedDeviceRecord?.nodeName ?: "").toByteArray(Charsets.UTF_8).size
                 _uiState.value = ConversationUiState.Loaded(
                     title = resolvedChannel.name,
@@ -230,6 +264,7 @@ class ConversationViewModel(
                     messages = messages,
                     maxMessageBytes = MessageService.maxChannelMessageLength(nodeNameBytes),
                     recentEmojis = recentEmojis,
+                    hasMoreOlderMessages = hasMoreOlderMessages,
                     sendRegion = when (val scope = resolvedChannel.floodScope) {
                         is ChannelFloodScope.Region -> scope.name
                         is ChannelFloodScope.Inherit -> connectionManager.connectedDeviceRecord?.defaultFloodScopeName
@@ -263,6 +298,26 @@ class ConversationViewModel(
             // Logged nowhere yet (no logger threaded into this ViewModel) — matches this
             // being a best-effort sync; the next reload retries since lastSyncedFloodScope
             // was not updated.
+        }
+    }
+
+    /**
+     * Grows the loaded window by one page and re-fetches — the chat list's "scrolled near the top"
+     * trigger, mirroring Swift's `ChatViewModel.loadOlderMessages`/`onLoadOlder`. No-op while a page
+     * is already in flight or [hasMoreOlderMessages] says the conversation's full history is already
+     * in the window (set from the previous [reload]'s fetch size vs. the limit it asked for).
+     */
+    fun loadOlderMessages() {
+        if (isLoadingOlderMessages || !hasMoreOlderMessages) return
+        if (_uiState.value !is ConversationUiState.Loaded) return
+        isLoadingOlderMessages = true
+        loadedMessageLimit += MESSAGE_LOAD_LIMIT
+        viewModelScope.launch {
+            try {
+                reload()
+            } finally {
+                isLoadingOlderMessages = false
+            }
         }
     }
 

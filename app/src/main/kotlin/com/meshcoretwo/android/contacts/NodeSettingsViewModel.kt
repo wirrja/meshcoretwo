@@ -46,6 +46,17 @@ data class NodeSettingsUiState(
     val nameError: UiText? = null,
     val latitudeError: UiText? = null,
     val longitudeError: UiText? = null,
+    /**
+     * Bumped by [NodeSettingsViewModel.setLocationFromPicker] so [DoubleFieldRow]'s `loadKey` for
+     * latitude/longitude re-syncs its local text to the just-picked value. It can't reuse
+     * [originalLatitude]/[originalLongitude] for that — those two deliberately stay at the
+     * *applied* value (see [identitySettingsModified]) so a picked-but-not-yet-applied location
+     * still shows "Apply" as enabled — so a pick needs its own signal to distinguish "the field
+     * changed because of an external event" (load or pick — DoubleFieldRow must re-render) from
+     * "the field changed because the user is typing in it" (must not, or every keystroke fights
+     * the user — see [DoubleFieldRow]'s doc).
+     */
+    val identityFieldsResyncToken: Int = 0,
 
     // Radio
     val frequency: Double? = null,
@@ -88,7 +99,15 @@ data class NodeSettingsUiState(
 
     val deviceTime: String? get() = deviceTimeUTC?.let { NodeSettingsViewModel.convertUTCToLocal(it) }
 
-    val identityLoaded: Boolean get() = originalLatitude != null || originalLongitude != null
+    /**
+     * `fetchIdentity` fetches name/lat/lon as three separate sequential CLI round-trips (each a
+     * real over-the-air request/response, so seconds apart on a multi-hop link), each committing
+     * its own field to state as it lands rather than waiting for all three. Gating on `&&` here
+     * (not `||`) keeps the section's loading spinner up until every field has actually arrived, so
+     * [SharedNodeSettingsSections.NodeIdentitySection] never mounts a field whose value hasn't
+     * loaded yet — see [DoubleFieldRow]'s doc for what went wrong when it did.
+     */
+    val identityLoaded: Boolean get() = originalLatitude != null && originalLongitude != null
 
     val identitySettingsModified: Boolean
         get() = (name != null && name != originalName) ||
@@ -249,9 +268,19 @@ class NodeSettingsViewModel {
         _uiState.update { it.copy(isSecurityExpanded = expanded) }
     }
 
-    /** Setting from Location picker. */
+    /**
+     * Applies a map-picked coordinate to the editable identity fields — the "Pick on Map" button's
+     * result, ported from `LocationPickerView`'s `onSave` closure in `RepeaterSettingsView.swift`/
+     * `RoomSettingsView.swift` (`settings.latitude = $0`/`settings.longitude = $0`). A local field
+     * write only, same as typing the two boxes by hand: it does not touch [originalLatitude]/
+     * [originalLongitude] or talk to the radio — the existing "Apply Identity Settings" button sends
+     * the actual `set lat`/`set lon` commands once the user confirms. See
+     * [NodeSettingsUiState.identityFieldsResyncToken]'s doc for why this bumps it.
+     */
     fun setLocationFromPicker(latitude: Double, longitude: Double) {
-        _uiState.update { it.copy(latitude = latitude, longitude = longitude) }
+        _uiState.update {
+            it.copy(latitude = latitude, longitude = longitude, identityFieldsResyncToken = it.identityFieldsResyncToken + 1)
+        }
     }
 
     /**

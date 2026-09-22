@@ -276,6 +276,7 @@
 
     <!-- Chat conversation -->
     <string name="chat_channel_info">Kanavan tiedot</string>
+    <string name="chat_new_messages_divider">Uudet viestit</string>
     <string name="chat_conv_unavailable">Tämä keskustelu ei ole enää saatavilla.</string>
     <string name="chat_route_hide">Piilota reitin tiedot</string>
     <string name="chat_route_show">Näytä reitin tiedot</string>
@@ -545,6 +546,7 @@
     <string name="nodeadmin_identity_location">Tunnistetiedot ja sijainti</string>
     <string name="nodeadmin_latitude">Leveysaste</string>
     <string name="nodeadmin_longitude">Pituusaste</string>
+    <string name="nodeadmin_pick_on_map">Valitse kartalta</string>
     <string name="nodeadmin_apply_identity">Ota tunnistetietoasetukset käyttöön</string>
     <string name="nodeadmin_contact_info">Yhteystiedot</string>
     <string name="nodeadmin_contact_hint">Taajuus, ylläpitäjän nimi, verkkosivusto…</string>
@@ -770,7 +772,6 @@
     <string name="devices_err_load">Tallennettujen laitteiden lataus epäonnistui.</string>
     <string name="blocked_senders_none">Ei estettyjä lähettäjiä</string>
     <string name="blocked_senders_none_desc">Estämäsi kanavalähettäjät näkyvät täällä.</string>
-    <string name="location_drop_pin">Pudota nasta</string>
     <string name="location_clear">Tyhjennä sijainti</string>
     <string name="location_err_set">Sijainnin asettaminen epäonnistui.</string>
     <string name="notif_blocked_title">Ilmoitukset on estetty</string>

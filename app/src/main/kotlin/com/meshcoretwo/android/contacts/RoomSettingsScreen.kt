@@ -24,7 +24,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,6 +39,7 @@ import com.meshcoretwo.android.R
 import com.meshcoretwo.android.ui.components.ExpandableSectionCard
 import com.meshcoretwo.android.ui.theme.AvatarCategory
 import com.meshcoretwo.services.connection.ConnectionManager
+import com.meshcoretwo.services.location.LocationProvider
 import java.util.UUID
 import kotlinx.coroutines.launch
 
@@ -50,6 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RoomSettingsScreen(
     connectionManager: ConnectionManager,
+    locationProvider: LocationProvider,
     sessionId: UUID,
     onBack: () -> Unit,
 ) {
@@ -57,6 +62,7 @@ fun RoomSettingsScreen(
     val settingsState by viewModel.settings.uiState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var showingLocationPicker by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -95,6 +101,7 @@ fun RoomSettingsScreen(
                     settings = viewModel.settings,
                     onReload = { scope.launch { viewModel.settings.fetchIdentity() } },
                     onApply = { scope.launch { viewModel.settings.applyIdentitySettings() } },
+                    onPickLocation = { showingLocationPicker = true },
                 )
             }
 
@@ -142,6 +149,16 @@ fun RoomSettingsScreen(
             title = { Text(stringResource(R.string.common_success)) },
             text = { Text(settingsState.successMessage?.asString() ?: stringResource(R.string.nodeset_settings_applied)) },
             confirmButton = { TextButton(onClick = viewModel.settings::dismissSuccessAlert) { Text(stringResource(R.string.common_ok)) } },
+        )
+    }
+
+    if (showingLocationPicker) {
+        RemoteNodeLocationPickerScreen(
+            initialLatitude = settingsState.latitude,
+            initialLongitude = settingsState.longitude,
+            locationProvider = locationProvider,
+            onSave = { latitude, longitude -> viewModel.settings.setLocationFromPicker(latitude, longitude); showingLocationPicker = false },
+            onCancel = { showingLocationPicker = false },
         )
     }
 }

@@ -278,6 +278,7 @@
 
     <!-- Chat conversation -->
     <string name="chat_channel_info">О канале</string>
+    <string name="chat_new_messages_divider">Новые сообщения</string>
     <string name="chat_conv_unavailable">Этот разговор больше не доступен.</string>
     <string name="chat_route_hide">Скрыть сведения о маршруте</string>
     <string name="chat_route_show">Показать сведения о маршруте</string>
@@ -549,6 +550,7 @@
     <string name="nodeadmin_identity_location">Идентификация и местоположение</string>
     <string name="nodeadmin_latitude">Широта</string>
     <string name="nodeadmin_longitude">Долгота</string>
+    <string name="nodeadmin_pick_on_map">Указать на карте</string>
     <string name="nodeadmin_apply_identity">Применить настройки идентификации</string>
     <string name="nodeadmin_contact_info">Контактные данные</string>
     <string name="nodeadmin_contact_hint">Частота, имя оператора, сайт…</string>
@@ -774,7 +776,6 @@
     <string name="devices_err_load">Не удалось загрузить сохранённые устройства.</string>
     <string name="blocked_senders_none">Нет заблокированных отправителей</string>
     <string name="blocked_senders_none_desc">Здесь появятся заблокированные вами отправители в каналах.</string>
-    <string name="location_drop_pin">Поставить метку</string>
     <string name="location_clear">Убрать местоположение</string>
     <string name="location_err_set">Не удалось задать местоположение.</string>
     <string name="notif_blocked_title">Уведомления заблокированы</string>

@@ -51,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -179,6 +180,34 @@ fun ChatConversationScreen(
         }
     }
 
+    // One-shot: on this screen's first loaded snapshot, jump straight to the first unread message
+    // instead of the bottom — ported from `ChatInitialScrollPolicy`'s divider target, trimmed to a
+    // plain scroll (no baked "New Messages" row machinery, just the divider line below). Keyed on
+    // "have messages arrived yet" so it fires exactly once, even though reload() re-runs on every
+    // incoming event afterward.
+    val initialMessages = (state as? ConversationUiState.Loaded)?.messages
+    var newMessagesDividerId by remember { mutableStateOf<UUID?>(null) }
+    LaunchedEffect(initialMessages != null) {
+        val messages = initialMessages ?: return@LaunchedEffect
+        val unread = viewModel.initialUnreadCount
+        if (unread <= 0 || messages.isEmpty()) return@LaunchedEffect
+        val dividerIndex = (messages.size - unread).coerceIn(0, messages.size - 1)
+        newMessagesDividerId = messages[dividerIndex].id
+        listState.scrollToItem(messages.size - 1 - dividerIndex)
+    }
+
+    // Loads another page once the user scrolls near the top (the oldest end, under reverseLayout).
+    LaunchedEffect(listState, (state as? ConversationUiState.Loaded)?.hasMoreOlderMessages) {
+        val loaded = state as? ConversationUiState.Loaded ?: return@LaunchedEffect
+        if (!loaded.hasMoreOlderMessages) return@LaunchedEffect
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex >= listState.layoutInfo.totalItemsCount - 5) {
+                    viewModel.loadOlderMessages()
+                }
+            }
+    }
+
     fun onLinkClick(token: LinkToken) {
         when (token.kind) {
             LinkToken.Kind.URL -> try {
@@ -261,20 +290,28 @@ fun ChatConversationScreen(
                     itemsIndexed(newestFirst, key = { _, it -> it.id }) { index, message ->
                         // The chronologically earlier neighbor sits at index + 1 in this
                         // newest-first list (it renders above this bubble under reverseLayout).
-                        MessageBubble(
-                            message = message,
-                            previous = newestFirst.getOrNull(index + 1),
-                            isChannel = isChannel,
-                            selfName = current.selfName,
-                            showIncomingPath = showIncomingPath,
-                            showIncomingHopCount = showIncomingHopCount,
-                            showIncomingRegion = showIncomingRegion,
-                            sendRegion = current.sendRegion,
-                            onLinkClick = ::onLinkClick,
-                            onLongPress = { actionsMessage = message },
-                            onReact = { emoji -> viewModel.sendReaction(emoji, message) },
-                            onShowReactionDetails = { reactionDetailsMessage = message },
-                        )
+                        Column {
+                            // Sits above this bubble in the cell's own top-down layout, which reads
+                            // as "above" on screen even under the list's reverseLayout — same visual
+                            // position Swift's NewMessagesDividerView renders at.
+                            if (message.id == newMessagesDividerId) {
+                                NewMessagesDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            }
+                            MessageBubble(
+                                message = message,
+                                previous = newestFirst.getOrNull(index + 1),
+                                isChannel = isChannel,
+                                selfName = current.selfName,
+                                showIncomingPath = showIncomingPath,
+                                showIncomingHopCount = showIncomingHopCount,
+                                showIncomingRegion = showIncomingRegion,
+                                sendRegion = current.sendRegion,
+                                onLinkClick = ::onLinkClick,
+                                onLongPress = { actionsMessage = message },
+                                onReact = { emoji -> viewModel.sendReaction(emoji, message) },
+                                onShowReactionDetails = { reactionDetailsMessage = message },
+                            )
+                        }
                     }
                 }
             }
@@ -370,6 +407,22 @@ private fun isNewBlock(message: MessageDto, previous: MessageDto?, isChannel: Bo
  * true` branch (opaque system red) has no port yet, since this app doesn't read the
  * increased-contrast accessibility setting. Also reused by [RoomConversationScreen]. */
 internal val OutgoingBubbleFailedColor = Color(0xFFFF3B30).copy(alpha = 0.8f)
+
+/** Horizontal rule with a centered "New Messages" label — ported from `NewMessagesDividerView.swift`. */
+@Composable
+private fun NewMessagesDivider(modifier: Modifier = Modifier) {
+    Row(modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        HorizontalDivider(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(R.string.chat_new_messages_divider),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 8.dp),
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f))
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
