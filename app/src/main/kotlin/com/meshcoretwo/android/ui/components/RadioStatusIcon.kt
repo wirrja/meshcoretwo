@@ -15,6 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
@@ -37,8 +38,10 @@ import com.meshcoretwo.android.ui.theme.LocalMeshExtendedColors
 import com.meshcoretwo.protocol.BatteryInfo
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.DeviceConnectionState
+import com.meshcoretwo.services.connection.DisconnectReason
 import com.meshcoretwo.services.connection.advertisementService
 import com.meshcoretwo.services.connection.connectedDeviceRecord
+import com.meshcoretwo.services.connection.disconnect
 import com.meshcoretwo.services.connection.settingsService
 import com.meshcoretwo.services.persistence.activeOCVArray
 import kotlinx.coroutines.CancellationException
@@ -58,8 +61,8 @@ import kotlinx.coroutines.launch
  * only distinguishes disconnected/connecting/ready, matching [DeviceConnectionState]'s cases
  * 1:1 minus that repeat-mode override.
  *
- * Tapping it opens [RadioStatusMenu] (battery, zero-hop/flood advert, change device), a scoped-down
- * `BLEStatusIndicatorView` menu: no disconnect/advanced-settings entries.
+ * Tapping it opens [RadioStatusMenu] (battery, change device, disconnect, zero-hop/flood advert), a
+ * scoped-down `BLEStatusIndicatorView` menu: no advanced-settings entry.
  *
  * Ported from `BLEStatusToolbarItem.swift`: every top-level section (`bleStatusToolbarItem()`
  * call sites — Chats/Contacts/Map/Tools/Settings) surfaces this unconditionally at its
@@ -101,7 +104,7 @@ fun RadioStatusIcon(connectionManager: ConnectionManager) {
 /**
  * Popup menu behind [RadioStatusIcon]. Ported from `BLEStatusIndicatorView.swift`'s `menuContent`:
  * device name + battery (`NN% (X.XXV)`, OCV-curve percentage), change device, zero-hop and flood
- * self-advert. Disconnected shows only "Connect". Advert items are enabled only at
+ * self-advert, and disconnect at the bottom. Disconnected shows only "Connect". Advert items are enabled only at
  * [DeviceConnectionState.READY] and while no advert is in flight.
  */
 @Composable
@@ -185,6 +188,19 @@ private fun RadioStatusMenu(
             leadingIcon = { Icon(painterResource(R.drawable.ic_sensors), contentDescription = null) },
             enabled = canAdvert,
             onClick = { sendAdvert(flood = true) },
+        )
+        HorizontalDivider()
+        // Ported from the menu's destructive "Disconnect" button; last, below a divider, so it is not
+        // hit by accident. Only drops the link: the device stays saved, and the user-disconnected
+        // intent keeps auto-reconnect from bringing it back.
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.radio_disconnect_device, device.nodeName)) },
+            leadingIcon = { Icon(painterResource(R.drawable.ic_link_off), contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            colors = MenuDefaults.itemColors(textColor = MaterialTheme.colorScheme.error),
+            onClick = {
+                onDismiss()
+                scope.launch { connectionManager.disconnect(DisconnectReason.STATUS_MENU_DISCONNECT_TAP) }
+            },
         )
     }
 }

@@ -98,7 +98,7 @@ fun RegionManagementScreen(connectionManager: ConnectionManager, onBack: () -> U
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when (val current = state) {
-            is RegionManagementUiState.Connecting -> ConnectingState(modifier = Modifier.padding(padding))
+            is RegionManagementUiState.Connecting -> ConnectingState(connectionManager, modifier = Modifier.padding(padding))
             is RegionManagementUiState.Ready -> {
                 val sortedRegions = remember(current.regions, searchText) {
                     val sorted = current.regions.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })

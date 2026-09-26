@@ -93,6 +93,9 @@
     <string name="radio_advert_failed">Advert konnte nicht gesendet werden: %1$s</string>
     <string name="radio_unknown_error">unbekannter Fehler</string>
     <string name="radio_change_device">Gerät wechseln</string>
+    <string name="radio_disconnect_device">%1$s trennen</string>
+    <string name="radio_not_connected">Funkgerät nicht verbunden</string>
+    <string name="radio_not_connected_desc">Du hast die Verbindung zum Funkgerät getrennt. Die App verbindet sich erst wieder, wenn du auf „Verbinden“ tippst.</string>
     <string name="radio_send_zero_hop_advert">Zero-Hop-Advert senden</string>
     <string name="radio_send_flood_advert">Flood-Advert senden</string>
 

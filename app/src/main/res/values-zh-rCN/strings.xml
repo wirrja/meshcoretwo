@@ -92,6 +92,9 @@
     <string name="radio_advert_failed">无法发送广播：%1$s</string>
     <string name="radio_unknown_error">未知错误</string>
     <string name="radio_change_device">更换设备</string>
+    <string name="radio_disconnect_device">断开 %1$s</string>
+    <string name="radio_not_connected">电台未连接</string>
+    <string name="radio_not_connected_desc">你已断开与电台的连接。在你点击“连接”之前，应用不会重新连接。</string>
     <string name="radio_send_zero_hop_advert">发送 zero-hop 广播</string>
     <string name="radio_send_flood_advert">发送 flood 广播</string>
 

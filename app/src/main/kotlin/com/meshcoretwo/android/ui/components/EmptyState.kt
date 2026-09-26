@@ -35,9 +35,17 @@ import androidx.compose.ui.unit.dp
  * `primaryContainer`, [com.meshcoretwo.android.ui.components.SettingsListRow]'s token) because
  * Phase 15 found `primaryContainer` mirrors `primary` in this app's `ThemePalettes.kt` on every
  * theme, while `secondaryContainer` is the one that's genuinely pale everywhere.
+ *
+ * [action] (like `ContentUnavailableView`'s `actions:`) goes under the description, e.g. a button.
  */
 @Composable
-fun EmptyState(@DrawableRes icon: Int, title: String, description: String, modifier: Modifier = Modifier) {
+fun EmptyState(
+    @DrawableRes icon: Int,
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
+) {
     Column(
         modifier = modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -63,5 +71,9 @@ fun EmptyState(@DrawableRes icon: Int, title: String, description: String, modif
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        if (action != null) {
+            Spacer(modifier = Modifier.size(16.dp))
+            action()
+        }
     }
 }

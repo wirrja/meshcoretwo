@@ -173,7 +173,7 @@ fun DiscoveryScreen(connectionManager: ConnectionManager, locationProvider: Loca
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when (val current = state) {
-            is DiscoveryUiState.Connecting -> ConnectingState(modifier = Modifier.padding(padding))
+            is DiscoveryUiState.Connecting -> ConnectingState(connectionManager, modifier = Modifier.padding(padding))
             is DiscoveryUiState.Ready -> {
                 Column(modifier = Modifier.padding(padding).fillMaxSize()) {
                     SearchPillField(

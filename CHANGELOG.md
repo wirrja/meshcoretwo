@@ -3,6 +3,28 @@
 Notable user-facing changes to MeshCore Two, release by release, in Russian and English
 (from 1.1.19). Dates are UTC+3 (Moscow).
 
+## 1.1.21 — 2026-09-26
+
+### Русский
+
+- **Отключение от радио без удаления:** в меню значка радиостанции (вверху справа) внизу
+  появился пункт «Отключить <имя устройства>». Он только разрывает связь: устройство остаётся
+  в сохранённых, Bluetooth-сопряжение не снимается, а приложение не подключается само — ни в
+  фоне, ни после перезапуска, — пока вы не нажмёте «Подключить».
+- **Честный статус подключения:** надпись «Подключение к устройству…» теперь показывается, только
+  когда подключение действительно идёт. Если вы отключились сами, экран пишет «Радио не
+  подключено» и предлагает кнопку «Подключить».
+
+### English
+
+- **Disconnect from the radio without removing it:** the radio icon's menu (top right) now ends
+  with "Disconnect <device name>". It only drops the link: the device stays saved, its Bluetooth
+  pairing is kept, and the app won't reconnect on its own — in the background or after a
+  restart — until you tap Connect.
+- **Honest connection status:** "Connecting to device…" now appears only while a connection is
+  actually being made. After you disconnect, the screen says "Radio not connected" and offers a
+  Connect button.
+
 ## 1.1.20 — 2026-09-26
 
 ### Русский

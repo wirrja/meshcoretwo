@@ -93,6 +93,9 @@
     <string name="radio_advert_failed">Advert gönderilemedi: %1$s</string>
     <string name="radio_unknown_error">bilinmeyen hata</string>
     <string name="radio_change_device">Cihazı değiştir</string>
+    <string name="radio_disconnect_device">%1$s bağlantısını kes</string>
+    <string name="radio_not_connected">Telsiz bağlı değil</string>
+    <string name="radio_not_connected_desc">Telsizle bağlantıyı kestiniz. Bağlan’a dokunana kadar uygulama yeniden bağlanmaz.</string>
     <string name="radio_send_zero_hop_advert">Zero-hop advert gönder</string>
     <string name="radio_send_flood_advert">Flood advert gönder</string>
 

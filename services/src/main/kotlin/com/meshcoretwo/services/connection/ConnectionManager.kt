@@ -175,7 +175,20 @@ class ConnectionManager(
     /** Records the last attempted channel sync (including partial/failed). Used to cool down immediate channel-only retry loops. */
     internal var lastAttemptedChannelSync: Pair<UUID, Instant>? = null
 
-    override var connectionIntent: ConnectionIntent = ConnectionIntent.restored(prefs)
+    private val _connectionIntentEvents = MutableStateFlow(ConnectionIntent.restored(prefs))
+
+    /**
+     * Broadcasts every [connectionIntent] change, so the UI can tell a user-chosen disconnect from
+     * a link that is being brought back. Not in the Swift source, whose views read `AppState`
+     * directly.
+     */
+    val connectionIntentEvents: StateFlow<ConnectionIntent> = _connectionIntentEvents.asStateFlow()
+
+    override var connectionIntent: ConnectionIntent
+        get() = _connectionIntentEvents.value
+        set(value) {
+            _connectionIntentEvents.value = value
+        }
 
     /** The device being actively connected via [connectImpl]. `null` during auto-reconnect (tracked by [reconnectionCoordinator] instead). */
     internal var connectingDeviceAddress: String? = null

@@ -93,6 +93,9 @@
     <string name="radio_advert_failed">Mainosta ei voitu lähettää: %1$s</string>
     <string name="radio_unknown_error">tuntematon virhe</string>
     <string name="radio_change_device">Vaihda laite</string>
+    <string name="radio_disconnect_device">Katkaise yhteys: %1$s</string>
+    <string name="radio_not_connected">Radio ei ole yhdistetty</string>
+    <string name="radio_not_connected_desc">Katkaisit yhteyden radioon. Sovellus ei yhdistä uudelleen ennen kuin napautat Yhdistä.</string>
     <string name="radio_send_zero_hop_advert">Lähetä zero-hop-mainos</string>
     <string name="radio_send_flood_advert">Lähetä flood-mainos</string>
 

@@ -168,7 +168,7 @@ fun ContactsListScreen(
         },
     ) { padding ->
         when (val current = state) {
-            is ContactsListUiState.Connecting -> ConnectingState(modifier = Modifier.padding(padding))
+            is ContactsListUiState.Connecting -> ConnectingState(connectionManager, modifier = Modifier.padding(padding))
             is ContactsListUiState.Ready -> {
                 val filtered = filterContacts(current.contacts, segment, query)
                 val sorted = sortContacts(filtered, sortOrder, userLocation, current.inboundHopByKey)

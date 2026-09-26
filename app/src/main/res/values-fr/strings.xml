@@ -94,6 +94,9 @@
     <string name="radio_advert_failed">Impossible d’envoyer l’annonce : %1$s</string>
     <string name="radio_unknown_error">erreur inconnue</string>
     <string name="radio_change_device">Changer d’appareil</string>
+    <string name="radio_disconnect_device">Déconnecter %1$s</string>
+    <string name="radio_not_connected">Radio non connectée</string>
+    <string name="radio_not_connected_desc">Vous vous êtes déconnecté de la radio. L’app ne se reconnectera pas tant que vous n’aurez pas touché « Connecter ».</string>
     <string name="radio_send_zero_hop_advert">Envoyer une annonce zero-hop</string>
     <string name="radio_send_flood_advert">Envoyer une annonce flood</string>
 

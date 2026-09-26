@@ -95,6 +95,9 @@
     <string name="radio_advert_failed">Не удалось отправить объявление: %1$s</string>
     <string name="radio_unknown_error">неизвестная ошибка</string>
     <string name="radio_change_device">Сменить устройство</string>
+    <string name="radio_disconnect_device">Отключить %1$s</string>
+    <string name="radio_not_connected">Радио не подключено</string>
+    <string name="radio_not_connected_desc">Вы отключились от радио. Приложение не будет подключаться, пока вы не нажмёте «Подключить».</string>
     <string name="radio_send_zero_hop_advert">Отправить zero-hop-объявление</string>
     <string name="radio_send_flood_advert">Отправить flood-объявление</string>
 

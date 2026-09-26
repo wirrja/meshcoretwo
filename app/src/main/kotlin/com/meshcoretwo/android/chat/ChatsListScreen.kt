@@ -104,7 +104,7 @@ fun ChatsListScreen(connectionManager: ConnectionManager, onOpenConversation: (C
         },
     ) { padding ->
         when (val current = state) {
-            is ChatListUiState.Connecting -> ConnectingState(modifier = Modifier.padding(padding))
+            is ChatListUiState.Connecting -> ConnectingState(connectionManager, modifier = Modifier.padding(padding))
             is ChatListUiState.Ready -> {
                 if (current.items.isEmpty()) {
                     EmptyChatsContent(modifier = Modifier.padding(padding))
