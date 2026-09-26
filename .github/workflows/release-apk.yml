@@ -65,19 +65,32 @@ jobs:
           name: apk
           path: dist/*.apk
 
+      # Notes come from CHANGELOG.md's `## <version> — <date>` section for this tag, not a
+      # hardcoded block here — a fixed block silently goes stale (it did: this used to describe
+      # a feature from several releases back). Missing entry falls back to a generic note rather
+      # than failing the release outright.
       - name: Publish GitHub Release
         if: steps.signing.outputs.signed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat > notes.md <<'NOTES'
-          Signed APK for sideloading. Unofficial port; see the README for origin and license.
-
-          ### Notes
-          - The app now keeps the radio link alive with the screen off and shows one ongoing
-            notification while it does. Switch it off in Settings → Notifications → "Keep connection in background".
-          NOTES
-          sed -i 's/^          //' notes.md
+          version="${GITHUB_REF_NAME#v}"
+          {
+            echo "Подписанный APK для установки вручную. Неофициальный порт; происхождение и лицензия — в README."
+            echo "Signed APK for sideloading. Unofficial port; see the README for origin and license."
+            echo
+            if grep -q "^## $version " CHANGELOG.md; then
+              echo "## Что нового / What's new"
+              awk -v ver="$version" '
+                $0 ~ "^## " ver " " { found=1; next }
+                found && /^## / { exit }
+                found { print }
+              ' CHANGELOG.md
+            else
+              echo "::warning::No CHANGELOG.md entry for $version — release notes are generic." >&2
+              echo "See CHANGELOG.md for details."
+            fi
+          } > notes.md
           gh release create "$GITHUB_REF_NAME" dist/*.apk \
             --title "MeshCore Two ${GITHUB_REF_NAME}" \
             --notes-file notes.md

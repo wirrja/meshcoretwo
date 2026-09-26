@@ -23,6 +23,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/** What a running discovery is doing right now, for the progress line under the region list. */
+sealed class RegionDiscoveryProgress {
+    data class Listening(val responders: Int) : RegionDiscoveryProgress()
+    data class Querying(val answered: Int, val total: Int, val newRegions: Int) : RegionDiscoveryProgress()
+}
+
 sealed class RegionManagementUiState {
     data object Connecting : RegionManagementUiState()
     data class Ready(val regions: List<String>) : RegionManagementUiState()
@@ -48,6 +54,9 @@ class RegionManagementViewModel(private val connectionManager: ConnectionManager
 
     private val _isDiscovering = MutableStateFlow(false)
     val isDiscovering: StateFlow<Boolean> = _isDiscovering.asStateFlow()
+
+    private val _discoveryProgress = MutableStateFlow<RegionDiscoveryProgress?>(null)
+    val discoveryProgress: StateFlow<RegionDiscoveryProgress?> = _discoveryProgress.asStateFlow()
 
     private val _discoveryMessage = MutableStateFlow<UiText?>(null)
     val discoveryMessage: StateFlow<UiText?> = _discoveryMessage.asStateFlow()
@@ -101,14 +110,35 @@ class RegionManagementViewModel(private val connectionManager: ConnectionManager
         }
     }
 
-    /** Ported from `DefaultFloodScopeSection.runDiscovery`/`RegionManagementView`'s shared discover action. */
+    /**
+     * Ported from `DefaultFloodScopeSection.runDiscovery`/`RegionManagementView`'s shared discover
+     * action. Unlike Swift, which adds everything at the end, each repeater's new regions are added
+     * to the list as soon as it answers, with [discoveryProgress] driving a progress line, and
+     * [stopDiscovery] can end the run early — regions added up to that point are kept.
+     */
     fun runDiscovery() {
         discoveryJob?.cancel()
         discoveryJob = viewModelScope.launch {
             _isDiscovering.value = true
             _discoveryMessage.value = null
+            _discoveryProgress.value = null
+            var addedCount = 0
             try {
-                when (val outcome = connectionManager.discoverRegions()) {
+                val outcome = connectionManager.discoverRegions { progress ->
+                    when (progress) {
+                        is RegionDiscoveryService.Progress.Listening ->
+                            _discoveryProgress.value = RegionDiscoveryProgress.Listening(progress.responders)
+                        is RegionDiscoveryService.Progress.Querying -> {
+                            if (progress.newRegions.isNotEmpty()) {
+                                progress.newRegions.forEach { connectionManager.addKnownRegion(it) }
+                                addedCount += progress.newRegions.size
+                                refresh()
+                            }
+                            _discoveryProgress.value = RegionDiscoveryProgress.Querying(progress.answered, progress.total, addedCount)
+                        }
+                    }
+                }
+                when (outcome) {
                     RegionDiscoveryService.Outcome.SendFailed -> {}
                     RegionDiscoveryService.Outcome.NoRepeatersResponded ->
                         _discoveryMessage.value = UiText.of(R.string.regions_msg_no_repeaters)
@@ -119,9 +149,6 @@ class RegionManagementViewModel(private val connectionManager: ConnectionManager
                             _discoveryMessage.value = UiText.of(R.string.regions_msg_table_full)
                         } else if (outcome.newRegions.isEmpty()) {
                             _discoveryMessage.value = UiText.of(R.string.regions_msg_none_new)
-                        } else {
-                            outcome.newRegions.forEach { connectionManager.addKnownRegion(it) }
-                            refresh()
                         }
                     }
                 }
@@ -131,8 +158,17 @@ class RegionManagementViewModel(private val connectionManager: ConnectionManager
                 _errorMessage.value = error.toUiText(UiText.of(R.string.settings_err_generic))
             } finally {
                 _isDiscovering.value = false
+                _discoveryProgress.value = null
             }
         }
+    }
+
+    /** Ends a running discovery; regions it already added stay in the list. */
+    fun stopDiscovery() {
+        val job = discoveryJob ?: return
+        if (!job.isActive) return
+        job.cancel()
+        _discoveryMessage.value = UiText.of(R.string.regions_msg_stopped)
     }
 
     override fun onCleared() {

@@ -2,6 +2,9 @@
 
 package com.meshcoretwo.protocol
 
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
+
 // MARK: - Region Requests
 
 /**
@@ -16,51 +19,43 @@ package com.meshcoretwo.protocol
 suspend fun MeshCoreSession.requestRegions(contact: MeshContact): List<String> {
     val isFloodRouted = contact.outPathLength == 0xFFu.toUByte()
 
-    // Firmware requires isRouteDirect() for region requests. For flood-routed contacts,
-    // temporarily set the contact to zero-hop direct on the firmware, matching the Python
-    // reference (base.py:269-273). The zero-hop write, the region exchange, and the restore
-    // are each their own serialized exchange so none nests inside the request/response
-    // serializer the others acquire.
-    if (isFloodRouted) {
-        // Route through PacketBuilder.updateContact so the raw type byte survives instead of
-        // being coerced; the restore below only touches out_path_len, so any coercion here
-        // would be permanent.
-        val directContact = MeshContact(
-            id = contact.id,
-            publicKey = contact.publicKey,
-            type = contact.type,
-            typeRawValue = contact.typeRawValue,
-            flags = contact.flags,
-            outPathLength = 0u,
-            outPath = ByteArray(0),
-            advertisedName = contact.advertisedName,
-            lastAdvertisement = contact.lastAdvertisement,
-            latitude = contact.latitude,
-            longitude = contact.longitude,
-            lastModified = contact.lastModified,
-        )
-        sendSimpleCommand(PacketBuilder.updateContact(directContact))
-    }
-
+    // Firmware requires isRouteDirect() for region requests. For flood-routed contacts, the
+    // contact is temporarily set to zero-hop direct on the firmware and restored afterwards; the
+    // restore runs NonCancellable so a caller cancelling mid-request (region discovery's "Stop")
+    // can't leave the contact stuck on the zero-hop path. The setup write sits inside the same
+    // try, since restoring a flood contact to flood is harmless if the setup never landed.
     return try {
-        val result = requestResponseSerializer.withSerialization { performRegionsRequest(contact) }
         if (isFloodRouted) {
-            try {
-                resetPathImpl(contact.publicKey)
-            } catch (error: Throwable) {
-                // Best-effort restore; the exchange already succeeded.
+            // Route through PacketBuilder.updateContact so the raw type byte survives instead of
+            // being coerced; the restore below only touches out_path_len, so any coercion here
+            // would be permanent.
+            val directContact = MeshContact(
+                id = contact.id,
+                publicKey = contact.publicKey,
+                type = contact.type,
+                typeRawValue = contact.typeRawValue,
+                flags = contact.flags,
+                outPathLength = 0u,
+                outPath = ByteArray(0),
+                advertisedName = contact.advertisedName,
+                lastAdvertisement = contact.lastAdvertisement,
+                latitude = contact.latitude,
+                longitude = contact.longitude,
+                lastModified = contact.lastModified,
+            )
+            sendSimpleCommand(PacketBuilder.updateContact(directContact))
+        }
+        requestResponseSerializer.withSerialization { performRegionsRequest(contact) }
+    } finally {
+        if (isFloodRouted) {
+            withContext(NonCancellable) {
+                try {
+                    resetPathImpl(contact.publicKey)
+                } catch (error: Throwable) {
+                    // Best-effort restore; the exchange's own outcome is what the caller sees.
+                }
             }
         }
-        result
-    } catch (error: Throwable) {
-        if (isFloodRouted) {
-            try {
-                resetPathImpl(contact.publicKey)
-            } catch (restoreError: Throwable) {
-                // Best-effort restore; the original error is what propagates.
-            }
-        }
-        throw error
     }
 }
 

@@ -20,7 +20,6 @@
     <string name="common_continue">Продолжить</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Неофициальный порт · не связан с приложением MeshCore One для iOS</string>
     <string name="onboarding_welcome_tagline">Обмен сообщениями вне сети по LoRa mesh-радио — без сотовой связи и интернета.</string>
     <string name="onboarding_get_started">Начать</string>
 
@@ -38,6 +37,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Страна</string>
+    <string name="region_set">Выбрать регион</string>
     <string name="region_state_province">Штат/область</string>
     <string name="region_finding">Определяем ваш регион…</string>
     <string name="region_choose_title">Выберите регион</string>
@@ -288,6 +288,7 @@
     <string name="chat_multi_regions_body">Транспортному коду этого пакета соответствует более одного региона из вашего списка. Приложение не может определить, какой из них использовался.\n\n%1$s</string>
     <string name="chat_reconnecting">Переподключение…</string>
     <string name="chat_send">Отправить</string>
+    <string name="chat_scroll_to_bottom">К последнему сообщению</string>
     <string name="chat_heard_by_repeater">Услышано репитером</string>
     <string name="chat_path_map">Карта пути</string>
     <string name="chat_repeat_details">Сведения о ретрансляциях</string>
@@ -769,6 +770,12 @@
     <string name="danger_delete_data">Удалить данные</string>
     <string name="danger_keep_data">Сохранить данные</string>
     <string name="devices_none">Нет сохранённых устройств</string>
+    <string name="devices_remove_title">Удалить %1$s?</string>
+    <string name="devices_remove_body_ble">Радиостанция будет удалена из сохранённых устройств, а её сопряжение с Bluetooth телефона — снято. Сообщения и контакты останутся в приложении.</string>
+    <string name="devices_remove_body_wifi">Радиостанция будет удалена из сохранённых устройств. Сообщения и контакты останутся в приложении.</string>
+    <string name="devices_unpair_failed_title">Не удалось снять сопряжение</string>
+    <string name="devices_unpair_failed_body">Android не разрешил приложению удалить сопряжение Bluetooth. Откройте настройки Bluetooth и выберите «Забыть» для %1$s.</string>
+    <string name="devices_open_bt_settings">Открыть настройки Bluetooth</string>
     <string name="devices_none_desc">Найдите радиостанцию поблизости или подключитесь по WiFi.</string>
     <string name="devices_scan">Искать устройства</string>
     <string name="devices_connected_elsewhere">Подключено в другом приложении</string>
@@ -793,6 +800,10 @@
     <string name="regions_none">Регионы не добавлены</string>
     <string name="regions_none_desc">Найдите регионы у ближайших репитеров или добавьте их вручную.</string>
     <string name="regions_discovering">Поиск…</string>
+    <string name="regions_progress_listening">Ищем репитеры… ответили: %1$d</string>
+    <string name="regions_progress_querying">Опрашиваем репитеры: %1$d из %2$d · новых регионов: %3$d</string>
+    <string name="regions_stop">Остановить</string>
+    <string name="regions_msg_stopped">Поиск остановлен</string>
     <string name="regions_discover_nearby">Найти ближайшие регионы</string>
     <string name="regions_add_manually">Добавить вручную</string>
     <string name="regions_msg_no_repeaters">Ни один репитер не ответил</string>

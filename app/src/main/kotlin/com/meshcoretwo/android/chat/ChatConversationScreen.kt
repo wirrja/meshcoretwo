@@ -15,6 +15,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -281,38 +282,41 @@ fun ChatConversationScreen(
                 // getMessages() returns oldest-first; reverse to newest-first so reverseLayout
                 // keeps the newest message pinned at the bottom of the viewport.
                 val newestFirst = current.messages.asReversed()
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.padding(padding).fillMaxSize(),
-                    reverseLayout = true,
-                    contentPadding = PaddingValues(vertical = 12.dp),
-                ) {
-                    itemsIndexed(newestFirst, key = { _, it -> it.id }) { index, message ->
-                        // The chronologically earlier neighbor sits at index + 1 in this
-                        // newest-first list (it renders above this bubble under reverseLayout).
-                        Column {
-                            // Sits above this bubble in the cell's own top-down layout, which reads
-                            // as "above" on screen even under the list's reverseLayout — same visual
-                            // position Swift's NewMessagesDividerView renders at.
-                            if (message.id == newMessagesDividerId) {
-                                NewMessagesDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        reverseLayout = true,
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                    ) {
+                        itemsIndexed(newestFirst, key = { _, it -> it.id }) { index, message ->
+                            // The chronologically earlier neighbor sits at index + 1 in this
+                            // newest-first list (it renders above this bubble under reverseLayout).
+                            Column {
+                                // Sits above this bubble in the cell's own top-down layout, which reads
+                                // as "above" on screen even under the list's reverseLayout — same visual
+                                // position Swift's NewMessagesDividerView renders at.
+                                if (message.id == newMessagesDividerId) {
+                                    NewMessagesDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                }
+                                MessageBubble(
+                                    message = message,
+                                    previous = newestFirst.getOrNull(index + 1),
+                                    isChannel = isChannel,
+                                    selfName = current.selfName,
+                                    showIncomingPath = showIncomingPath,
+                                    showIncomingHopCount = showIncomingHopCount,
+                                    showIncomingRegion = showIncomingRegion,
+                                    sendRegion = current.sendRegion,
+                                    onLinkClick = ::onLinkClick,
+                                    onLongPress = { actionsMessage = message },
+                                    onReact = { emoji -> viewModel.sendReaction(emoji, message) },
+                                    onShowReactionDetails = { reactionDetailsMessage = message },
+                                )
                             }
-                            MessageBubble(
-                                message = message,
-                                previous = newestFirst.getOrNull(index + 1),
-                                isChannel = isChannel,
-                                selfName = current.selfName,
-                                showIncomingPath = showIncomingPath,
-                                showIncomingHopCount = showIncomingHopCount,
-                                showIncomingRegion = showIncomingRegion,
-                                sendRegion = current.sendRegion,
-                                onLinkClick = ::onLinkClick,
-                                onLongPress = { actionsMessage = message },
-                                onReact = { emoji -> viewModel.sendReaction(emoji, message) },
-                                onShowReactionDetails = { reactionDetailsMessage = message },
-                            )
                         }
                     }
+                    ScrollToBottomButton(listState = listState, modifier = Modifier.align(Alignment.BottomEnd))
                 }
             }
         }

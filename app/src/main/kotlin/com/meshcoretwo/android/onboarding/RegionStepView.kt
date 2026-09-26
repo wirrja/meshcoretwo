@@ -97,6 +97,16 @@ fun RegionStepView(appViewModel: AppViewModel, onContinue: () -> Unit) {
         onContinue()
     }
 
+    // Manual radio settings finish onboarding here, skipping the preset step; a region picked or
+    // detected so far is still kept for Settings' preset location.
+    val manualSettings: @Composable () -> Unit = {
+        ManualRadioSettingsButton(appViewModel = appViewModel, onApplied = {
+            val region = (uiState as? RegionStepUiState.Detected)?.region ?: manualSelection
+            region?.let(appViewModel::setRegionSelection)
+            appViewModel.onboardingState.completeOnboarding()
+        })
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         when (val state = uiState) {
             is RegionStepUiState.Resolving -> ResolvingContent()
@@ -104,6 +114,7 @@ fun RegionStepView(appViewModel: AppViewModel, onContinue: () -> Unit) {
                 region = state.region,
                 onChooseAnother = { uiState = RegionStepUiState.ManualPicker },
                 onUseThisRegion = { commit(state.region) },
+                manualSettings = manualSettings,
             )
             is RegionStepUiState.ManualPicker -> ManualPickerContent(
                 selection = manualSelection,
@@ -111,6 +122,7 @@ fun RegionStepView(appViewModel: AppViewModel, onContinue: () -> Unit) {
                 showUseMyLocation = locationGranted,
                 onUseMyLocation = { resolveAttempt++ },
                 onContinue = { manualSelection?.let(::commit) },
+                manualSettings = manualSettings,
             )
         }
     }
@@ -130,7 +142,12 @@ private fun ResolvingContent() {
 }
 
 @Composable
-private fun DetectedContent(region: RegionSelection, onChooseAnother: () -> Unit, onUseThisRegion: () -> Unit) {
+private fun DetectedContent(
+    region: RegionSelection,
+    onChooseAnother: () -> Unit,
+    onUseThisRegion: () -> Unit,
+    manualSettings: @Composable () -> Unit,
+) {
     Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(24.dp)) {
         Text(stringResource(R.string.region_choose_title), style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(8.dp))
@@ -156,6 +173,8 @@ private fun DetectedContent(region: RegionSelection, onChooseAnother: () -> Unit
         }
         Spacer(modifier = Modifier.height(12.dp))
         TextButton(onClick = onChooseAnother) { Text(stringResource(R.string.region_choose_different)) }
+        Spacer(modifier = Modifier.height(12.dp))
+        manualSettings()
         Spacer(modifier = Modifier.weight(1f))
         Button(onClick = onUseThisRegion, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
             Text(stringResource(R.string.region_use_this))
@@ -170,6 +189,7 @@ private fun ManualPickerContent(
     showUseMyLocation: Boolean,
     onUseMyLocation: () -> Unit,
     onContinue: () -> Unit,
+    manualSettings: @Composable () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(24.dp)) {
         Text(stringResource(R.string.region_choose_title), style = MaterialTheme.typography.headlineMedium)
@@ -186,6 +206,9 @@ private fun ManualPickerContent(
             Spacer(modifier = Modifier.height(12.dp))
             TextButton(onClick = onUseMyLocation, contentPadding = PaddingValues(vertical = 8.dp)) { Text(stringResource(R.string.region_use_my_location)) }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        manualSettings()
 
         Spacer(modifier = Modifier.weight(1f))
         Button(onClick = onContinue, enabled = selection != null, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {

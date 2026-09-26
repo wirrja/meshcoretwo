@@ -8,8 +8,10 @@ import android.location.Geocoder
 import android.os.Build
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 import kotlin.coroutines.resume
@@ -58,13 +60,24 @@ class AndroidRegionGeocoder(context: Context) : RegionGeocoder {
             )
         }
 
+    /**
+     * Pre-33 `getFromLocation` blocks (often a binder call into the OS geocoder, which on GMS-less
+     * Huawei builds can hang for tens of seconds) and can't be interrupted. Running it inside
+     * `withContext` would make [RegionResolver]'s `withTimeoutOrNull` wait for it anyway, so it runs
+     * detached in [blockingScope] and only the cancellable [kotlinx.coroutines.Deferred.await] is
+     * timed out; a late answer is simply dropped.
+     */
     private suspend fun fetchAddressBlocking(latitude: Double, longitude: Double): Address? =
-        withContext(Dispatchers.IO) {
+        blockingScope.async {
             try {
                 @Suppress("DEPRECATION")
                 geocoder.getFromLocation(latitude, longitude, 1)?.firstOrNull()
             } catch (error: IOException) {
                 null
+            } catch (error: IllegalArgumentException) {
+                null
             }
-        }
+        }.await()
+
+    private val blockingScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 }

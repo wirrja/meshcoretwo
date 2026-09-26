@@ -17,7 +17,6 @@
     <string name="common_continue">继续</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">非官方移植版 · 与 MeshCore One iOS 应用无关</string>
     <string name="onboarding_welcome_tagline">通过 LoRa mesh 无线电离网通信——无需手机信号，无需互联网。</string>
     <string name="onboarding_get_started">开始使用</string>
 
@@ -35,6 +34,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">国家/地区</string>
+    <string name="region_set">设置地区</string>
     <string name="region_state_province">州/省</string>
     <string name="region_finding">正在查找你所在的地区…</string>
     <string name="region_choose_title">选择你的地区</string>
@@ -285,6 +285,7 @@
     <string name="chat_multi_regions_body">你的列表中有多个地区与此数据包的传输码匹配。应用无法判断实际使用的是哪一个。\n\n%1$s</string>
     <string name="chat_reconnecting">正在重新连接…</string>
     <string name="chat_send">发送</string>
+    <string name="chat_scroll_to_bottom">滚动到最新消息</string>
     <string name="chat_heard_by_repeater">已被中继器收到</string>
     <string name="chat_path_map">路径地图</string>
     <string name="chat_repeat_details">转发详情</string>
@@ -763,6 +764,12 @@
     <string name="danger_delete_data">删除数据</string>
     <string name="danger_keep_data">保留数据</string>
     <string name="devices_none">没有已保存的设备</string>
+    <string name="devices_remove_title">移除 %1$s？</string>
+    <string name="devices_remove_body_ble">该电台将从已保存设备中移除，并解除与本手机蓝牙的配对。其消息和联系人仍保留在应用中。</string>
+    <string name="devices_remove_body_wifi">该电台将从已保存设备中移除。其消息和联系人仍保留在应用中。</string>
+    <string name="devices_unpair_failed_title">无法解除配对</string>
+    <string name="devices_unpair_failed_body">Android 不允许应用移除蓝牙配对。请打开蓝牙设置，为 %1$s 选择“取消配对”。</string>
+    <string name="devices_open_bt_settings">打开蓝牙设置</string>
     <string name="devices_none_desc">搜索附近的无线电设备，或通过 WiFi 连接。</string>
     <string name="devices_scan">搜索设备</string>
     <string name="devices_connected_elsewhere">已在其他应用中连接</string>
@@ -787,6 +794,10 @@
     <string name="regions_none">未添加地区</string>
     <string name="regions_none_desc">从附近的中继器发现地区，或手动添加。</string>
     <string name="regions_discovering">正在发现…</string>
+    <string name="regions_progress_listening">正在查找中继器…已响应 %1$d 个</string>
+    <string name="regions_progress_querying">正在询问中继器：%1$d / %2$d · 新地区：%3$d</string>
+    <string name="regions_stop">停止</string>
+    <string name="regions_msg_stopped">已停止搜索</string>
     <string name="regions_discover_nearby">发现附近的地区</string>
     <string name="regions_add_manually">手动添加</string>
     <string name="regions_msg_no_repeaters">没有中继器响应</string>

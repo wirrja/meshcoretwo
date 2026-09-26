@@ -24,7 +24,6 @@
     <string name="common_continue">Continue</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Unofficial port · not affiliated with the MeshCore One iOS app</string>
     <string name="onboarding_welcome_tagline">Off-grid messaging over LoRa mesh radio — no cell signal, no internet required.</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_welcome_title" translatable="false">MeshCore Two for Android</string>
@@ -44,6 +43,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Country</string>
+    <string name="region_set">Set region</string>
     <string name="region_state_province">State/Province</string>
     <string name="region_finding">Finding your region…</string>
     <string name="region_choose_title">Choose your region</string>
@@ -294,6 +294,7 @@
     <string name="chat_multi_regions_body">More than one region in your list matches this packet’s transport code. The app cannot tell which one was used.\n\n%1$s</string>
     <string name="chat_reconnecting">Reconnecting…</string>
     <string name="chat_send">Send</string>
+    <string name="chat_scroll_to_bottom">Scroll to latest message</string>
     <string name="chat_heard_by_repeater">Heard by a repeater</string>
     <string name="chat_path_map">Path Map</string>
     <string name="chat_repeat_details">Repeat Details</string>
@@ -773,6 +774,12 @@
     <string name="danger_delete_data">Delete data</string>
     <string name="danger_keep_data">Keep data</string>
     <string name="devices_none">No saved devices</string>
+    <string name="devices_remove_title">Remove %1$s?</string>
+    <string name="devices_remove_body_ble">The radio will be removed from saved devices and unpaired from this phone\'s Bluetooth. Its messages and contacts stay in the app.</string>
+    <string name="devices_remove_body_wifi">The radio will be removed from saved devices. Its messages and contacts stay in the app.</string>
+    <string name="devices_unpair_failed_title">Couldn\'t unpair</string>
+    <string name="devices_unpair_failed_body">Android didn\'t let the app remove the Bluetooth pairing. Open Bluetooth settings and choose “Forget” for %1$s.</string>
+    <string name="devices_open_bt_settings">Open Bluetooth settings</string>
     <string name="devices_none_desc">Scan for a nearby radio or connect over WiFi.</string>
     <string name="devices_scan">Scan for Devices</string>
     <string name="devices_connected_elsewhere">Connected in another app</string>
@@ -797,6 +804,10 @@
     <string name="regions_none">No regions added</string>
     <string name="regions_none_desc">Discover regions from nearby repeaters or add them manually.</string>
     <string name="regions_discovering">Discovering…</string>
+    <string name="regions_progress_listening">Looking for repeaters… %1$d responded</string>
+    <string name="regions_progress_querying">Asking repeaters: %1$d of %2$d · new regions: %3$d</string>
+    <string name="regions_stop">Stop</string>
+    <string name="regions_msg_stopped">Search stopped</string>
     <string name="regions_discover_nearby">Discover Nearby Regions</string>
     <string name="regions_add_manually">Add Manually</string>
     <string name="regions_msg_no_repeaters">No repeaters responded</string>

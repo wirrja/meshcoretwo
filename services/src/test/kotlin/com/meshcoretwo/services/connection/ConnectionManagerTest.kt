@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.services.connection
 
+import com.meshcoretwo.services.pairing.BondRemovalResult
 import android.content.Context
 import androidx.room.Room
 import com.meshcoretwo.protocol.ContactFlags
@@ -302,7 +303,8 @@ class ConnectionManagerTest {
 
     @Test
     fun `deleteDevice completes without error for non-existent device`() = runBlocking {
-        connectionManager.deleteDevice(UUID.randomUUID())
+        // Nothing stored for this id, so there's no BLE address and no bond to drop.
+        assertEquals(BondRemovalResult.NOT_BONDED, connectionManager.deleteDevice(UUID.randomUUID()))
     }
 
     @Test

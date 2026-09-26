@@ -2,6 +2,16 @@
 
 package com.meshcoretwo.android.ui.components
 
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
 import com.meshcoretwo.android.ui.i18n.toUiText
 import com.meshcoretwo.android.ui.i18n.UiText
 import androidx.compose.foundation.layout.Column
@@ -20,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,42 +55,40 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun ConnectViaWiFiDialog(connectionManager: ConnectionManager, onDismiss: () -> Unit, onConnected: () -> Unit) {
-    var ipAddress by remember { mutableStateOf("") }
-    var port by remember { mutableStateOf("5000") }
-    var isConnecting by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    // The connect itself runs in a ViewModel scoped to the current back-stack entry, so an Activity
+    // recreation mid-connect (rotation) neither cancels it nor loses its result; callers keep their
+    // "dialog shown" flag in rememberSaveable so the dialog comes back to collect that result.
+    val viewModel: WiFiConnectViewModel = viewModel(factory = WiFiConnectViewModel.Factory(connectionManager))
+    val status by viewModel.status.collectAsStateWithLifecycle()
+    var ipAddress by rememberSaveable { mutableStateOf("") }
+    var port by rememberSaveable { mutableStateOf("5000") }
+    var validationError by rememberSaveable { mutableStateOf<String?>(null) }
     val context = LocalContext.current
+    val isConnecting = status is WiFiConnectStatus.Connecting
+    val errorMessage = validationError ?: (status as? WiFiConnectStatus.Failed)?.error
+        ?.toUiText(UiText.Plain(stringResource(R.string.wifi_connect_failed)))?.resolve(context)
+
+    LaunchedEffect(status) {
+        if (status is WiFiConnectStatus.Connected) {
+            viewModel.reset()
+            onConnected()
+        }
+    }
 
     val isValidInput = WiFiAddressValidation.isValidHost(ipAddress) && WiFiAddressValidation.isValidPort(port)
 
     fun connect() {
         val portNumber = port.toIntOrNull()
         if (portNumber == null) {
-            errorMessage = context.getString(R.string.wifi_invalid_port)
+            validationError = context.getString(R.string.wifi_invalid_port)
             return
         }
-        isConnecting = true
-        errorMessage = null
-        scope.launch {
-            try {
-                connectionManager.connectViaWiFi(
-                    host = WiFiAddressValidation.normalizedHost(ipAddress),
-                    port = portNumber,
-                    forceFullSync = true,
-                )
-                onConnected()
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                errorMessage = error.toUiText(UiText.Plain(context.getString(R.string.wifi_connect_failed))).resolve(context)
-                isConnecting = false
-            }
-        }
+        validationError = null
+        viewModel.connect(WiFiAddressValidation.normalizedHost(ipAddress), portNumber)
     }
 
     AlertDialog(
-        onDismissRequest = { if (!isConnecting) onDismiss() },
+        onDismissRequest = { if (!isConnecting) { viewModel.reset(); onDismiss() } },
         title = { Text(stringResource(R.string.pair_connect_wifi)) },
         text = {
             Column {
@@ -117,7 +124,46 @@ fun ConnectViaWiFiDialog(connectionManager: ConnectionManager, onDismiss: () -> 
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isConnecting) { Text(stringResource(R.string.common_cancel)) }
+            TextButton(onClick = { viewModel.reset(); onDismiss() }, enabled = !isConnecting) { Text(stringResource(R.string.common_cancel)) }
         },
     )
+}
+
+sealed interface WiFiConnectStatus {
+    data object Idle : WiFiConnectStatus
+    data object Connecting : WiFiConnectStatus
+    data object Connected : WiFiConnectStatus
+    data class Failed(val error: Exception) : WiFiConnectStatus
+}
+
+/** Owns [ConnectViaWiFiDialog]'s connect call so it outlives an Activity recreation. */
+class WiFiConnectViewModel(private val connectionManager: ConnectionManager) : ViewModel() {
+    private val _status = MutableStateFlow<WiFiConnectStatus>(WiFiConnectStatus.Idle)
+    val status: StateFlow<WiFiConnectStatus> = _status.asStateFlow()
+
+    fun connect(host: String, port: Int) {
+        if (_status.value is WiFiConnectStatus.Connecting) return
+        _status.value = WiFiConnectStatus.Connecting
+        viewModelScope.launch {
+            _status.value = try {
+                connectionManager.connectViaWiFi(host = host, port = port, forceFullSync = true)
+                WiFiConnectStatus.Connected
+            } catch (error: CancellationException) {
+                _status.value = WiFiConnectStatus.Idle
+                throw error
+            } catch (error: Exception) {
+                WiFiConnectStatus.Failed(error)
+            }
+        }
+    }
+
+    /** Back to idle once the dialog has consumed a result or been dismissed. */
+    fun reset() {
+        if (_status.value !is WiFiConnectStatus.Connecting) _status.value = WiFiConnectStatus.Idle
+    }
+
+    class Factory(private val connectionManager: ConnectionManager) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = WiFiConnectViewModel(connectionManager) as T
+    }
 }

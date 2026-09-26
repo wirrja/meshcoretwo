@@ -60,13 +60,6 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
             )
-            // Unofficial port (README.md): say so up front rather than pass as the upstream iOS app.
-            Text(
-                stringResource(R.string.onboarding_welcome_disclaimer),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 stringResource(R.string.onboarding_welcome_tagline),

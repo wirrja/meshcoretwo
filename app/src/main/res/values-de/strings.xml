@@ -18,7 +18,6 @@
     <string name="common_continue">Weiter</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Inoffizieller Port · nicht mit der iOS-App MeshCore One verbunden</string>
     <string name="onboarding_welcome_tagline">Nachrichten abseits des Netzes über LoRa-Mesh-Funk – ohne Mobilfunk und Internet.</string>
     <string name="onboarding_get_started">Los geht’s</string>
 
@@ -36,6 +35,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Land</string>
+    <string name="region_set">Region festlegen</string>
     <string name="region_state_province">Bundesland/Provinz</string>
     <string name="region_finding">Region wird ermittelt …</string>
     <string name="region_choose_title">Region wählen</string>
@@ -286,6 +286,7 @@
     <string name="chat_multi_regions_body">Mehr als eine Region in deiner Liste passt zum Transportcode dieses Pakets. Die App kann nicht feststellen, welche verwendet wurde.\n\n%1$s</string>
     <string name="chat_reconnecting">Verbindung wird wiederhergestellt …</string>
     <string name="chat_send">Senden</string>
+    <string name="chat_scroll_to_bottom">Zur neuesten Nachricht</string>
     <string name="chat_heard_by_repeater">Von einem Repeater gehört</string>
     <string name="chat_path_map">Pfadkarte</string>
     <string name="chat_repeat_details">Wiederholungsdetails</string>
@@ -765,6 +766,12 @@
     <string name="danger_delete_data">Daten löschen</string>
     <string name="danger_keep_data">Daten behalten</string>
     <string name="devices_none">Keine gespeicherten Geräte</string>
+    <string name="devices_remove_title">%1$s entfernen?</string>
+    <string name="devices_remove_body_ble">Das Funkgerät wird aus den gespeicherten Geräten entfernt und die Bluetooth-Kopplung mit diesem Telefon aufgehoben. Nachrichten und Kontakte bleiben in der App.</string>
+    <string name="devices_remove_body_wifi">Das Funkgerät wird aus den gespeicherten Geräten entfernt. Nachrichten und Kontakte bleiben in der App.</string>
+    <string name="devices_unpair_failed_title">Kopplung konnte nicht aufgehoben werden</string>
+    <string name="devices_unpair_failed_body">Android hat der App nicht erlaubt, die Bluetooth-Kopplung zu entfernen. Öffne die Bluetooth-Einstellungen und wähle „Entkoppeln“ für %1$s.</string>
+    <string name="devices_open_bt_settings">Bluetooth-Einstellungen öffnen</string>
     <string name="devices_none_desc">Suche nach einem Funkgerät in der Nähe oder verbinde dich per WiFi.</string>
     <string name="devices_scan">Nach Geräten suchen</string>
     <string name="devices_connected_elsewhere">In einer anderen App verbunden</string>
@@ -789,6 +796,10 @@
     <string name="regions_none">Keine Regionen hinzugefügt</string>
     <string name="regions_none_desc">Entdecke Regionen von Repeatern in der Nähe oder füge sie manuell hinzu.</string>
     <string name="regions_discovering">Suche läuft …</string>
+    <string name="regions_progress_listening">Suche Repeater… %1$d geantwortet</string>
+    <string name="regions_progress_querying">Frage Repeater ab: %1$d von %2$d · neue Regionen: %3$d</string>
+    <string name="regions_stop">Stoppen</string>
+    <string name="regions_msg_stopped">Suche gestoppt</string>
     <string name="regions_discover_nearby">Regionen in der Nähe entdecken</string>
     <string name="regions_add_manually">Manuell hinzufügen</string>
     <string name="regions_msg_no_repeaters">Kein Repeater hat geantwortet</string>

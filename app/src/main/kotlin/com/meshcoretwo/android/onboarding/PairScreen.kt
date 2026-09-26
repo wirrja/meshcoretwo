@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.onboarding
 
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.meshcoretwo.android.ui.i18n.toUiText
 import com.meshcoretwo.android.ui.i18n.UiText
 import android.content.Intent
@@ -32,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,9 +55,7 @@ import com.meshcoretwo.android.ui.components.DeviceScanSheet
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.clearStalePairings
 import com.meshcoretwo.services.connection.pairNewDevice
-import com.meshcoretwo.services.pairing.DevicePairingError
 import com.meshcoretwo.services.pairing.PairingError
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /**
@@ -80,32 +80,24 @@ import kotlinx.coroutines.launch
 @Composable
 fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
     val connectionManager = appViewModel.connectionManager
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var uiState by remember { mutableStateOf<PairUiState>(PairUiState.Idle) }
     var showTroubleshooting by remember { mutableStateOf(false) }
     var showNoDeviceConfirm by remember { mutableStateOf(false) }
-    var showWiFiConnection by remember { mutableStateOf(false) }
+    var showWiFiConnection by rememberSaveable { mutableStateOf(false) }
     val isPresenting by connectionManager.pairingService.isPresenting.collectAsStateWithLifecycle()
 
-    fun startPairing() {
-        scope.launch {
-            uiState = PairUiState.Pairing
-            try {
-                connectionManager.pairNewDevice()
-                onPaired()
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: DevicePairingError.Cancelled) {
-                uiState = PairUiState.Idle
-            } catch (error: DevicePairingError.AlreadyInProgress) {
-                uiState = PairUiState.Idle
-            } catch (error: PairingError) {
-                uiState = PairUiState.Error(error.toUiText(UiText.Plain(context.getString(R.string.pair_connect_failed))).resolve(context))
-            } catch (error: Exception) {
-                uiState = PairUiState.Error(error.toUiText(UiText.Plain(context.getString(R.string.pair_failed))).resolve(context))
-            }
+    // Pairing runs in AppViewModel's scope so an Activity recreation mid-pair (rotation, the system
+    // PIN dialog) neither cancels it nor loses its result; this screen only renders and consumes it.
+    val pairing by appViewModel.pairing.collectAsStateWithLifecycle()
+    LaunchedEffect(pairing) {
+        if (pairing is PairingStatus.Paired) {
+            appViewModel.consumePairingResult()
+            onPaired()
         }
+    }
+    val errorMessage = (pairing as? PairingStatus.Failed)?.error?.let { error ->
+        val fallback = if (error is PairingError) R.string.pair_connect_failed else R.string.pair_failed
+        error.toUiText(UiText.Plain(stringResource(fallback))).resolve(context)
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -135,9 +127,9 @@ fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            if (uiState is PairUiState.Error) {
+            if (errorMessage != null) {
                 Text(
-                    (uiState as PairUiState.Error).message,
+                    errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
@@ -146,11 +138,11 @@ fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
             }
 
             Button(
-                onClick = ::startPairing,
-                enabled = uiState !is PairUiState.Pairing,
+                onClick = appViewModel::startPairing,
+                enabled = pairing !is PairingStatus.Pairing,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             ) {
-                if (uiState is PairUiState.Pairing) {
+                if (pairing is PairingStatus.Pairing) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
                 } else {
                     Text(stringResource(R.string.pair_add_device))
@@ -212,10 +204,12 @@ fun PairScreen(appViewModel: AppViewModel, onPaired: () -> Unit) {
     }
 }
 
-private sealed class PairUiState {
-    object Idle : PairUiState()
-    object Pairing : PairUiState()
-    data class Error(val message: String) : PairUiState()
+/** Bluetooth pairing progress, owned by [AppViewModel.startPairing] and rendered by [PairScreen]. */
+sealed interface PairingStatus {
+    data object Idle : PairingStatus
+    data object Pairing : PairingStatus
+    data object Paired : PairingStatus
+    data class Failed(val error: Exception) : PairingStatus
 }
 
 /** Mirrors `TroubleshootingSheet.swift`. */

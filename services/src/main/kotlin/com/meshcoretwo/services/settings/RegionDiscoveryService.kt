@@ -17,8 +17,10 @@ import com.meshcoretwo.services.persistence.DiscoveredNodeDto
 import com.meshcoretwo.services.persistence.DiscoveredNodeStore
 import com.meshcoretwo.services.persistence.toMeshContact
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 
@@ -59,6 +61,18 @@ object RegionDiscoveryService {
         data class Completed(val newRegions: List<String>, val allRepeatersTableFull: Boolean) : Outcome()
     }
 
+    /** Live progress for [discover], so the UI can show more than a bare spinner. */
+    sealed class Progress {
+        /** Probe sent; [responders] repeaters have answered so far. */
+        data class Listening(val responders: Int) : Progress()
+
+        /**
+         * Asking responders for their regions: [answered] of [total] done. [newRegions] are the
+         * regions first seen in the latest answer (not in `knownRegions`, not reported before).
+         */
+        data class Querying(val answered: Int, val total: Int, val newRegions: List<String>) : Progress()
+    }
+
     /**
      * Runs the discovery probe and aggregates regions from all responders.
      *
@@ -66,6 +80,9 @@ object RegionDiscoveryService {
      *   (firmware v1.16+, [com.meshcoretwo.services.persistence.DeviceDto.supportsAdHocRepeaterRequest]).
      *   When `false`, only responders the user has already added as contacts are queried;
      *   anonymous requests to non-contact keys would be rejected by the local radio.
+     * @param onProgress Called as responders answer and as each region query finishes. Not in the
+     *   Swift original, which only reports the final [Outcome]. Cancelling the calling coroutine
+     *   stops discovery; regions already reported through [Progress.Querying] stay reported.
      */
     suspend fun discover(
         session: MeshCoreSession,
@@ -74,16 +91,18 @@ object RegionDiscoveryService {
         radioID: UUID,
         knownRegions: List<String>,
         supportsAdHocRequest: Boolean,
+        onProgress: suspend (Progress) -> Unit = {},
     ): Outcome {
         val discoveredPubkeys: Set<String>
         try {
             val tag = session.sendNodeDiscoverRequest(filter = REPEATERS_FILTER, prefixOnly = false)
             val tagBytes = tag.toLittleEndianBytes()
             val keys = mutableSetOf<String>()
+            onProgress(Progress.Listening(responders = 0))
             withTimeoutOrNull(LISTEN_DURATION_MS) {
                 session.events().collect { event ->
                     if (event is MeshEvent.DiscoverResponseEvent && event.response.tag.contentEquals(tagBytes)) {
-                        keys += event.response.publicKey.hexString
+                        if (keys.add(event.response.publicKey.hexString)) onProgress(Progress.Listening(responders = keys.size))
                     }
                 }
             }
@@ -110,12 +129,19 @@ object RegionDiscoveryService {
         if (queryTargets.isEmpty()) return Outcome.NoRepeatersResponded
 
         val allRegions = mutableSetOf<String>()
+        val knownSet = knownRegions.toSet()
         var anyTableFull = false
+        var answered = 0
+        val resultLock = Mutex()
+        onProgress(Progress.Querying(answered = 0, total = queryTargets.size, newRegions = emptyList()))
 
+        // Each result is folded in (and reported) as soon as its query finishes, rather than in
+        // target order after all of them, so the UI can show regions while slower repeaters are
+        // still being asked.
         coroutineScope {
-            val results = queryTargets.map { target ->
-                async {
-                    try {
+            queryTargets.forEach { target ->
+                launch {
+                    val outcome = try {
                         RegionQueryOutcome.Regions(session.requestRegions(target))
                     } catch (error: MeshCoreError.DeviceError) {
                         if (error.code == TABLE_FULL_ERROR_CODE) RegionQueryOutcome.TableFull else RegionQueryOutcome.OtherFailure
@@ -124,18 +150,23 @@ object RegionDiscoveryService {
                     } catch (error: Exception) {
                         RegionQueryOutcome.OtherFailure
                     }
-                }
-            }
-            results.forEach { deferred ->
-                when (val outcome = deferred.await()) {
-                    is RegionQueryOutcome.Regions -> allRegions += outcome.regions
-                    RegionQueryOutcome.TableFull -> anyTableFull = true
-                    RegionQueryOutcome.OtherFailure -> {}
+                    resultLock.withLock {
+                        val fresh = when (outcome) {
+                            is RegionQueryOutcome.Regions -> outcome.regions.filter { it !in knownSet && allRegions.add(it) }.sorted()
+                            RegionQueryOutcome.TableFull -> {
+                                anyTableFull = true
+                                emptyList()
+                            }
+                            RegionQueryOutcome.OtherFailure -> emptyList()
+                        }
+                        answered++
+                        onProgress(Progress.Querying(answered = answered, total = queryTargets.size, newRegions = fresh))
+                    }
                 }
             }
         }
 
-        val newRegions = (allRegions - knownRegions.toSet()).sorted()
+        val newRegions = allRegions.sorted()
         return Outcome.Completed(newRegions = newRegions, allRepeatersTableFull = anyTableFull)
     }
 

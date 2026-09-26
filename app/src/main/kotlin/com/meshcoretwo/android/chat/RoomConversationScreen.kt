@@ -11,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -100,6 +102,7 @@ fun RoomConversationScreen(
     var actionsMessage by remember { mutableStateOf<RoomMessageDto?>(null) }
     var sendDMSenderName by remember { mutableStateOf<String?>(null) }
     var pendingReplyMentionName by remember { mutableStateOf<String?>(null) }
+    val listState = rememberLazyListState()
 
     // Rooms have no channel/hashtag/contact-share context to route these to (unlike
     // ChatConversationScreen's onLinkClick) — a plain URL still opens, everything else is
@@ -156,22 +159,26 @@ fun RoomConversationScreen(
                 // fetchMessages() returns oldest-first; reverse to newest-first so reverseLayout
                 // keeps the newest message pinned at the bottom of the viewport.
                 val newestFirst = current.messages.asReversed()
-                LazyColumn(
-                    modifier = Modifier.padding(padding).fillMaxSize(),
-                    reverseLayout = true,
-                    contentPadding = PaddingValues(vertical = 12.dp),
-                ) {
-                    itemsIndexed(newestFirst, key = { _, it -> it.id }) { index, message ->
-                        RoomMessageBubble(
-                            message = message,
-                            // The chronologically earlier neighbor sits at index + 1 in this
-                            // newest-first list (it renders above this bubble under reverseLayout).
-                            previous = newestFirst.getOrNull(index + 1),
-                            selfName = current.selfName,
-                            onLinkClick = ::onLinkClick,
-                            onLongPress = { actionsMessage = message },
-                        )
+                Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        reverseLayout = true,
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                    ) {
+                        itemsIndexed(newestFirst, key = { _, it -> it.id }) { index, message ->
+                            RoomMessageBubble(
+                                message = message,
+                                // The chronologically earlier neighbor sits at index + 1 in this
+                                // newest-first list (it renders above this bubble under reverseLayout).
+                                previous = newestFirst.getOrNull(index + 1),
+                                selfName = current.selfName,
+                                onLinkClick = ::onLinkClick,
+                                onLongPress = { actionsMessage = message },
+                            )
+                        }
                     }
+                    ScrollToBottomButton(listState = listState, modifier = Modifier.align(Alignment.BottomEnd))
                 }
             }
         }

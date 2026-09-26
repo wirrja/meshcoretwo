@@ -64,6 +64,7 @@ fun RegionManagementScreen(connectionManager: ConnectionManager, onBack: () -> U
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isDiscovering by viewModel.isDiscovering.collectAsStateWithLifecycle()
     val discoveryMessage by viewModel.discoveryMessage.collectAsStateWithLifecycle()
+    val discoveryProgress by viewModel.discoveryProgress.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
 
     var searchText by remember { mutableStateOf("") }
@@ -129,8 +130,10 @@ fun RegionManagementScreen(connectionManager: ConnectionManager, onBack: () -> U
                     }
                     DiscoveryActionsSection(
                         isDiscovering = isDiscovering,
+                        discoveryProgress = discoveryProgress,
                         discoveryMessage = discoveryMessage,
                         onDiscoverTapped = viewModel::runDiscovery,
+                        onStopTapped = viewModel::stopDiscovery,
                         onAddManuallyTapped = { showAddDialog = true },
                     )
                 }
@@ -167,15 +170,29 @@ private fun RegionRow(name: String, onDelete: () -> Unit) {
 @Composable
 private fun DiscoveryActionsSection(
     isDiscovering: Boolean,
+    discoveryProgress: RegionDiscoveryProgress?,
     discoveryMessage: UiText?,
     onDiscoverTapped: () -> Unit,
+    onStopTapped: () -> Unit,
     onAddManuallyTapped: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (isDiscovering) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
-                Text(stringResource(R.string.regions_discovering), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    when (discoveryProgress) {
+                        null -> stringResource(R.string.regions_discovering)
+                        is RegionDiscoveryProgress.Listening -> stringResource(R.string.regions_progress_listening, discoveryProgress.responders)
+                        is RegionDiscoveryProgress.Querying -> stringResource(
+                            R.string.regions_progress_querying,
+                            discoveryProgress.answered,
+                            discoveryProgress.total,
+                            discoveryProgress.newRegions,
+                        )
+                    },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         } else if (discoveryMessage != null) {
             Text(
@@ -185,9 +202,16 @@ private fun DiscoveryActionsSection(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
-        OutlinedButton(onClick = onDiscoverTapped, enabled = !isDiscovering, modifier = Modifier.fillMaxWidth()) {
-            Icon(painterResource(R.drawable.ic_cell_tower), contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-            Text(stringResource(R.string.regions_discover_nearby))
+        if (isDiscovering) {
+            OutlinedButton(onClick = onStopTapped, modifier = Modifier.fillMaxWidth()) {
+                Icon(painterResource(R.drawable.ic_close), contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text(stringResource(R.string.regions_stop))
+            }
+        } else {
+            OutlinedButton(onClick = onDiscoverTapped, modifier = Modifier.fillMaxWidth()) {
+                Icon(painterResource(R.drawable.ic_cell_tower), contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text(stringResource(R.string.regions_discover_nearby))
+            }
         }
         TextButton(onClick = onAddManuallyTapped, modifier = Modifier.fillMaxWidth()) {
             Icon(painterResource(R.drawable.ic_add), contentDescription = null, modifier = Modifier.padding(end = 8.dp))

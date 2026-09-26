@@ -19,7 +19,6 @@
     <string name="common_continue">Continuer</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Portage non officiel · sans lien avec l’application iOS MeshCore One</string>
     <string name="onboarding_welcome_tagline">Messagerie hors réseau via radio maillée LoRa — sans réseau mobile ni internet.</string>
     <string name="onboarding_get_started">Commencer</string>
 
@@ -37,6 +36,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Pays</string>
+    <string name="region_set">Choisir la région</string>
     <string name="region_state_province">État/Province</string>
     <string name="region_finding">Recherche de votre région…</string>
     <string name="region_choose_title">Choisissez votre région</string>
@@ -287,6 +287,7 @@
     <string name="chat_multi_regions_body">Plus d’une région de votre liste correspond au code de transport de ce paquet. L’application ne peut pas déterminer laquelle a été utilisée.\n\n%1$s</string>
     <string name="chat_reconnecting">Reconnexion…</string>
     <string name="chat_send">Envoyer</string>
+    <string name="chat_scroll_to_bottom">Aller au dernier message</string>
     <string name="chat_heard_by_repeater">Entendu par un répéteur</string>
     <string name="chat_path_map">Carte du chemin</string>
     <string name="chat_repeat_details">Détails des répétitions</string>
@@ -767,6 +768,12 @@
     <string name="danger_delete_data">Supprimer les données</string>
     <string name="danger_keep_data">Conserver les données</string>
     <string name="devices_none">Aucun appareil enregistré</string>
+    <string name="devices_remove_title">Supprimer %1$s ?</string>
+    <string name="devices_remove_body_ble">La radio sera retirée des appareils enregistrés et dissociée du Bluetooth de ce téléphone. Ses messages et contacts restent dans l\'app.</string>
+    <string name="devices_remove_body_wifi">La radio sera retirée des appareils enregistrés. Ses messages et contacts restent dans l\'app.</string>
+    <string name="devices_unpair_failed_title">Impossible de dissocier</string>
+    <string name="devices_unpair_failed_body">Android n\'a pas autorisé l\'app à supprimer l\'association Bluetooth. Ouvrez les réglages Bluetooth et choisissez « Oublier » pour %1$s.</string>
+    <string name="devices_open_bt_settings">Ouvrir les réglages Bluetooth</string>
     <string name="devices_none_desc">Recherchez une radio à proximité ou connectez-vous par WiFi.</string>
     <string name="devices_scan">Rechercher des appareils</string>
     <string name="devices_connected_elsewhere">Connecté dans une autre application</string>
@@ -791,6 +798,10 @@
     <string name="regions_none">Aucune région ajoutée</string>
     <string name="regions_none_desc">Découvrez des régions auprès des répéteurs à proximité ou ajoutez-les manuellement.</string>
     <string name="regions_discovering">Découverte…</string>
+    <string name="regions_progress_listening">Recherche de répéteurs… %1$d ont répondu</string>
+    <string name="regions_progress_querying">Interrogation des répéteurs : %1$d sur %2$d · nouvelles régions : %3$d</string>
+    <string name="regions_stop">Arrêter</string>
+    <string name="regions_msg_stopped">Recherche arrêtée</string>
     <string name="regions_discover_nearby">Découvrir les régions à proximité</string>
     <string name="regions_add_manually">Ajouter manuellement</string>
     <string name="regions_msg_no_repeaters">Aucun répéteur n’a répondu</string>

@@ -83,7 +83,6 @@ import com.meshcoretwo.android.ui.components.SectionCard
 import com.meshcoretwo.android.ui.components.SettingsGroupLabel
 import com.meshcoretwo.android.ui.components.SettingsListRow
 import com.meshcoretwo.android.ui.theme.ThemeService
-import com.meshcoretwo.protocol.PacketBuilder
 import com.meshcoretwo.protocol.decodeHex
 import com.meshcoretwo.protocol.hexString
 import com.meshcoretwo.services.connection.ConnectionManager
@@ -91,7 +90,6 @@ import com.meshcoretwo.services.location.LocationProvider
 import com.meshcoretwo.services.notifications.NotificationPreferences
 import com.meshcoretwo.services.notifications.NotificationPreferencesStore
 import com.meshcoretwo.services.persistence.DeviceDto
-import com.meshcoretwo.services.region.RadioOptions
 import com.meshcoretwo.services.region.RadioPresets
 import com.meshcoretwo.services.region.RadioPresets.RadioPreset
 import com.meshcoretwo.services.region.RegionResolver
@@ -106,7 +104,6 @@ import com.meshcoretwo.services.settings.KeyGenerationService
 import com.meshcoretwo.services.settings.StaleNodeCleanupPreferencesStore
 import java.time.Instant
 import java.util.Locale
-import kotlin.math.roundToLong
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -572,11 +569,11 @@ private fun DeviceSection(
     )
 
     if (showAdvancedRadio) {
-        AdvancedRadioDialog(
+        ManualRadioSettingsDialog(
             device = device,
             onDismiss = { showAdvancedRadio = false },
-            onApply = { frequencyKHz, bandwidthHz, spreadingFactor, codingRate, txPower, clientRepeat ->
-                viewModel.setAdvancedRadioSettings(frequencyKHz, bandwidthHz, spreadingFactor, codingRate, txPower, clientRepeat)
+            onApply = { settings ->
+                viewModel.setAdvancedRadioSettings(settings)
                 showAdvancedRadio = false
             },
         )
@@ -848,143 +845,6 @@ private fun RadioPresetPickerDialog(
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_close)) } },
     )
-}
-
-/**
- * Manual radio parameter entry, ported from `AdvancedRadioSection.swift`. Unlike
- * [RadioPresetPickerDialog], this port folds Swift's separate `RadioSettingsView`/
- * `AdvancedSettingsView` screens' repeat-mode handling into one dialog reachable from
- * [DeviceSection]'s Radio subsection — see that section's "Manual settings" button — rather than
- * adding another top-level [SectionCard]/subpage, matching this screen's existing flat structure
- * (see its class doc).
- *
- * Frequency/TX power are free-text, validated against [PacketBuilder.FREQUENCY_RANGE_KHZ]/
- * [PacketBuilder.TX_POWER_FLOOR] before enabling Apply — the same non-trapping-conversion checks
- * `AdvancedRadioSection.applySettings()` does. Toggling repeat mode snaps/restores the frequency
- * field the same way Swift's `snapFrequencyForRepeat`/`restoreFrequencyAfterRepeat` do.
- */
-@Composable
-private fun AdvancedRadioDialog(
-    device: DeviceDto,
-    onDismiss: () -> Unit,
-    onApply: (frequencyKHz: UInt, bandwidthHz: UInt, spreadingFactor: UByte, codingRate: UByte, txPower: Byte, clientRepeat: Boolean) -> Unit,
-) {
-    var frequencyInput by remember { mutableStateOf(String.format(Locale.US, "%.3f", device.frequency.toDouble() / 1000.0)) }
-    var bandwidth by remember { mutableStateOf(RadioOptions.nearestBandwidth(device.bandwidth)) }
-    var spreadingFactor by remember { mutableStateOf(device.spreadingFactor.toInt()) }
-    var codingRate by remember { mutableStateOf(device.codingRate.toInt()) }
-    var txPowerInput by remember { mutableStateOf(device.txPower.toString()) }
-    var clientRepeat by remember { mutableStateOf(device.clientRepeat) }
-
-    val scaledFreqKHz = frequencyInput.toDoubleOrNull()?.let { (it * 1000).roundToLong() }
-    val freqValid = scaledFreqKHz != null && scaledFreqKHz in 0..UInt.MAX_VALUE.toLong() &&
-        PacketBuilder.FREQUENCY_RANGE_KHZ.contains(scaledFreqKHz.toUInt())
-    val txPower = txPowerInput.toIntOrNull()
-    val txPowerValid = txPower != null && txPower >= PacketBuilder.TX_POWER_FLOOR && txPower <= device.maxTxPower
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_radio_config)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                OutlinedTextField(
-                    value = frequencyInput,
-                    onValueChange = { frequencyInput = it },
-                    label = { Text(stringResource(R.string.rf_frequency_mhz)) },
-                    singleLine = true,
-                    isError = !freqValid,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                RadioParamPicker(
-                    label = "Bandwidth (kHz)",
-                    valueText = RadioOptions.formatBandwidth(bandwidth),
-                    options = RadioOptions.bandwidthsHz.map { it to RadioOptions.formatBandwidth(it) },
-                    onSelect = { bandwidth = it },
-                )
-                RadioParamPicker(
-                    label = "Spreading Factor",
-                    valueText = spreadingFactor.toString(),
-                    options = RadioOptions.spreadingFactors.map { it to it.toString() },
-                    onSelect = { spreadingFactor = it },
-                )
-                RadioParamPicker(
-                    label = "Coding Rate",
-                    valueText = codingRate.toString(),
-                    options = RadioOptions.codingRates.map { it to it.toString() },
-                    onSelect = { codingRate = it },
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                OutlinedTextField(
-                    value = txPowerInput,
-                    onValueChange = { input -> txPowerInput = input.filterIndexed { i, c -> c.isDigit() || (c == '-' && i == 0) } },
-                    label = { Text("TX Power (dBm)") },
-                    singleLine = true,
-                    isError = !txPowerValid,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                if (device.supportsClientRepeat) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    SwitchRowWithDescription(
-                        label = stringResource(R.string.settings_repeat_mode_label),
-                        description = stringResource(R.string.settings_repeat_mode_desc),
-                        checked = clientRepeat,
-                        enabled = true,
-                        onCheckedChange = { enabling ->
-                            clientRepeat = enabling
-                            if (enabling) {
-                                val currentKHz = scaledFreqKHz?.toUInt()
-                                val nearest = currentKHz?.let {
-                                    if (RadioPresets.matchingRepeatPreset(it) != null) null else RadioPresets.nearestRepeatPreset(it)
-                                }
-                                if (nearest != null) frequencyInput = String.format(Locale.US, "%.3f", nearest.frequencyMHz)
-                            } else {
-                                val restoredKHz = device.preRepeatFrequency ?: device.frequency
-                                frequencyInput = String.format(Locale.US, "%.3f", restoredKHz.toDouble() / 1000.0)
-                            }
-                        },
-                    )
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    stringResource(R.string.settings_radio_warning),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = freqValid && txPowerValid,
-                onClick = {
-                    onApply(scaledFreqKHz!!.toUInt(), bandwidth, spreadingFactor.toUByte(), codingRate.toUByte(), txPower!!.toByte(), clientRepeat)
-                },
-            ) { Text(stringResource(R.string.common_apply)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
-    )
-}
-
-@Composable
-private fun <T> RadioParamPicker(label: String, valueText: String, options: List<Pair<T, String>>, onSelect: (T) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable { expanded = true },
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(label, style = MaterialTheme.typography.bodyMedium)
-            Text(valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (value, text) ->
-                DropdownMenuItem(text = { Text(text) }, onClick = { expanded = false; onSelect(value) })
-            }
-        }
-    }
 }
 
 @Composable
@@ -1336,7 +1196,7 @@ private fun MessageInfoSection(prefs: SharedPreferences) {
  * Ported from `DeviceIdentitySection.swift`: two entry points that replace the device's
  * cryptographic identity. Both `ImportKeySheet`/`RegenerateIdentitySheet` full-screen sheets fold
  * into [AlertDialog]s here, matching this screen's existing flat-dialog convention
- * ([AdvancedRadioDialog]/[WifiEditDialog]) instead of adding subpage navigation. See
+ * ([ManualRadioSettingsDialog]/[WifiEditDialog]) instead of adding subpage navigation. See
  * [SettingsViewModel.importPrivateKey]'s doc for why both dialogs end in a forced
  * [SettingsViewModel.forgetDevice] rather than Swift's in-place `refreshDeviceInfo()`.
  */
@@ -1447,7 +1307,7 @@ private fun ImportKeyDialog(onDismiss: () -> Unit, onConfirm: (ByteArray) -> Uni
  * pure local computation — no device I/O — so it runs as a cancellable [Job] owned by this
  * composable (mirroring `generateTask`/`cancelGeneration`) rather than going through
  * [SettingsViewModel]; only the final "Replace" confirm calls back into the view model, the same
- * split [AdvancedRadioDialog] already uses for its own local-then-apply staging.
+ * split [ManualRadioSettingsDialog] already uses for its own local-then-apply staging.
  */
 @Composable
 private fun RegenerateIdentityDialog(onDismiss: () -> Unit, onConfirm: (ByteArray) -> Unit) {
@@ -1611,7 +1471,7 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
 @Composable
 private fun PathHashModeRow(pathHashMode: UByte, isBusy: Boolean, onSelect: (UByte) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val labels = listOf("1 byte", "2 bytes", "3 bytes")
+    val labels = PATH_HASH_LABELS
     Box {
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable(enabled = !isBusy) { expanded = true },

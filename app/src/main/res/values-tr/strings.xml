@@ -18,7 +18,6 @@
     <string name="common_continue">Devam</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Resmî olmayan port · MeshCore One iOS uygulamasıyla bağlantısı yoktur</string>
     <string name="onboarding_welcome_tagline">LoRa mesh radyo üzerinden şebekesiz mesajlaşma — hücresel sinyal ve internet gerekmez.</string>
     <string name="onboarding_get_started">Başla</string>
 
@@ -36,6 +35,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Ülke</string>
+    <string name="region_set">Bölge seç</string>
     <string name="region_state_province">Eyalet/İl</string>
     <string name="region_finding">Bölgeniz bulunuyor…</string>
     <string name="region_choose_title">Bölgenizi seçin</string>
@@ -286,6 +286,7 @@
     <string name="chat_multi_regions_body">Listenizdeki birden fazla bölge bu paketin taşıma koduyla eşleşiyor. Uygulama hangisinin kullanıldığını belirleyemez.\n\n%1$s</string>
     <string name="chat_reconnecting">Yeniden bağlanılıyor…</string>
     <string name="chat_send">Gönder</string>
+    <string name="chat_scroll_to_bottom">Son mesaja git</string>
     <string name="chat_heard_by_repeater">Bir tekrarlayıcı tarafından duyuldu</string>
     <string name="chat_path_map">Yol haritası</string>
     <string name="chat_repeat_details">Tekrar ayrıntıları</string>
@@ -765,6 +766,12 @@
     <string name="danger_delete_data">Verileri sil</string>
     <string name="danger_keep_data">Verileri sakla</string>
     <string name="devices_none">Kayıtlı cihaz yok</string>
+    <string name="devices_remove_title">%1$s kaldırılsın mı?</string>
+    <string name="devices_remove_body_ble">Telsiz kayıtlı cihazlardan kaldırılacak ve bu telefonun Bluetooth eşleşmesi silinecek. Mesajları ve kişileri uygulamada kalır.</string>
+    <string name="devices_remove_body_wifi">Telsiz kayıtlı cihazlardan kaldırılacak. Mesajları ve kişileri uygulamada kalır.</string>
+    <string name="devices_unpair_failed_title">Eşleşme kaldırılamadı</string>
+    <string name="devices_unpair_failed_body">Android, uygulamanın Bluetooth eşleşmesini kaldırmasına izin vermedi. Bluetooth ayarlarını açıp %1$s için “Unut”u seçin.</string>
+    <string name="devices_open_bt_settings">Bluetooth ayarlarını aç</string>
     <string name="devices_none_desc">Yakındaki bir radyoyu tarayın veya WiFi ile bağlanın.</string>
     <string name="devices_scan">Cihazları tara</string>
     <string name="devices_connected_elsewhere">Başka bir uygulamada bağlı</string>
@@ -789,6 +796,10 @@
     <string name="regions_none">Bölge eklenmedi</string>
     <string name="regions_none_desc">Yakındaki tekrarlayıcılardan bölgeleri keşfedin veya elle ekleyin.</string>
     <string name="regions_discovering">Keşfediliyor…</string>
+    <string name="regions_progress_listening">Tekrarlayıcılar aranıyor… %1$d yanıt verdi</string>
+    <string name="regions_progress_querying">Tekrarlayıcılar sorgulanıyor: %1$d / %2$d · yeni bölge: %3$d</string>
+    <string name="regions_stop">Durdur</string>
+    <string name="regions_msg_stopped">Arama durduruldu</string>
     <string name="regions_discover_nearby">Yakındaki bölgeleri keşfet</string>
     <string name="regions_add_manually">Elle ekle</string>
     <string name="regions_msg_no_repeaters">Hiçbir tekrarlayıcı yanıt vermedi</string>

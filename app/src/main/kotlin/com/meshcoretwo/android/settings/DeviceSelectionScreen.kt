@@ -2,6 +2,11 @@
 
 package com.meshcoretwo.android.settings
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.AlertDialog
+import android.provider.Settings
+import android.content.Intent
+import android.content.ActivityNotFoundException
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 import com.meshcoretwo.android.ui.i18n.toUiText
@@ -88,7 +93,9 @@ fun DeviceSelectionScreen(connectionManager: ConnectionManager, onBack: () -> Un
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    var showWifiDialog by remember { mutableStateOf(false) }
+    var showWifiDialog by rememberSaveable { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<DeviceDto?>(null) }
+    val unpairFailedDeviceName by viewModel.unpairFailedDeviceName.collectAsStateWithLifecycle()
     var isPairing by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -156,7 +163,7 @@ fun DeviceSelectionScreen(connectionManager: ConnectionManager, onBack: () -> Un
                                     isConnectedElsewhere = state.connectedElsewhere.contains(device.id),
                                     isConnecting = connectingDeviceId == device.id,
                                     onConnect = { viewModel.connect(device, onConnected = onBack) },
-                                    onDelete = { viewModel.delete(device) },
+                                    onDelete = { pendingDelete = device },
                                 )
                                 HorizontalDivider()
                             }
@@ -191,6 +198,42 @@ fun DeviceSelectionScreen(connectionManager: ConnectionManager, onBack: () -> Un
                 showWifiDialog = false
                 onBack()
             },
+        )
+    }
+
+    pendingDelete?.let { device ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(stringResource(R.string.devices_remove_title, device.nodeName)) },
+            text = {
+                Text(stringResource(if (device.wifiHost != null) R.string.devices_remove_body_wifi else R.string.devices_remove_body_ble))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    viewModel.delete(device)
+                }) { Text(stringResource(R.string.common_remove), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+
+    unpairFailedDeviceName?.let { name ->
+        AlertDialog(
+            onDismissRequest = viewModel::dismissUnpairFailed,
+            title = { Text(stringResource(R.string.devices_unpair_failed_title)) },
+            text = { Text(stringResource(R.string.devices_unpair_failed_body, name)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.dismissUnpairFailed()
+                    try {
+                        context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                    } catch (error: ActivityNotFoundException) {
+                        // No Bluetooth settings screen on this build; nothing else to offer.
+                    }
+                }) { Text(stringResource(R.string.devices_open_bt_settings)) }
+            },
+            dismissButton = { TextButton(onClick = viewModel::dismissUnpairFailed) { Text(stringResource(R.string.common_close)) } },
         )
     }
 

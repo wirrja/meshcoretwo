@@ -47,14 +47,14 @@ internal fun RegionPickerRows(selection: RegionSelection?, onSelectionChange: (R
     Column(modifier = Modifier.fillMaxWidth()) {
         RegionPickerRow(
             label = stringResource(R.string.region_country),
-            value = selection?.countryCode?.let(::countryDisplayName) ?: "—",
+            value = selection?.countryCode?.let(::countryDisplayName),
             onClick = { showCountryPicker = true },
         )
         if (availableSubdivisions.size > 1) {
             HorizontalDivider()
             RegionPickerRow(
                 label = stringResource(R.string.region_state_province),
-                value = selection?.administrativeAreaCode?.let { RegionalAreas.subdivisionDisplayName(it) } ?: "—",
+                value = selection?.administrativeAreaCode?.let { RegionalAreas.subdivisionDisplayName(it) },
                 onClick = { showSubdivisionPicker = true },
             )
         }
@@ -92,22 +92,23 @@ internal fun isLocationGranted(context: Context): Boolean =
 private fun countryDisplayName(code: String): String =
     RegionalAreas.countries.firstOrNull { it.id == code }?.localizedName() ?: code
 
+/** A picker row whose trailing button shows the current value, or "Set region" while nothing is chosen. */
 @Composable
-private fun RegionPickerRow(label: String, value: String, onClick: () -> Unit) {
+private fun RegionPickerRow(label: String, value: String?, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 16.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            value,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.End,
-            modifier = Modifier.weight(1f),
-        )
+        TextButton(onClick = onClick) {
+            Text(
+                value ?: stringResource(R.string.region_set),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }
 

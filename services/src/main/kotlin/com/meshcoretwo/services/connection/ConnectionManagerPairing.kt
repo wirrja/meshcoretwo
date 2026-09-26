@@ -2,6 +2,8 @@
 
 package com.meshcoretwo.services.connection
 
+import com.meshcoretwo.services.pairing.BondRemovalResult
+import com.meshcoretwo.services.pairing.removeBluetoothBond
 import com.meshcoretwo.services.contacts.ContactServiceError
 import com.meshcoretwo.services.pairing.DevicePairingError
 import com.meshcoretwo.services.pairing.PairingError
@@ -310,15 +312,23 @@ suspend fun ConnectionManager.fetchSavedDevices(): List<DeviceDto> =
  * Removes a previously paired device from the saved-devices list, demoting it to a ghost (see
  * [com.meshcoretwo.services.persistence.DeviceStore.demoteDeviceToGhost]) rather than hard-deleting
  * it — unconditionally, unlike [forgetDevice]'s explicit choice, matching Swift's own unconditional
- * `deleteDevice`. No Android UI calls this yet (there's no saved-devices management screen in this
- * port — see this file's class doc); it's only exercised by tests today. Ported from `deleteDevice`.
+ * `deleteDevice`. Called by Settings' Saved Devices list. Ported from `deleteDevice`, plus two
+ * Android-only steps: the device is disconnected first if it's the current one, and its system
+ * Bluetooth bond is dropped (see [removeBluetoothBond]) so re-adding it pairs from scratch.
  */
-suspend fun ConnectionManager.deleteDevice(id: UUID) {
+suspend fun ConnectionManager.deleteDevice(id: UUID): BondRemovalResult =
     withContext(confinedDispatcher) {
+        val device = deviceStore.fetchDeviceById(id)
+        if (connectedDevice?.id == id) disconnectImpl(DisconnectReason.FORGET_DEVICE)
         deviceStore.demoteDeviceToGhost(id)
         clearPersistedConnection(id)
+        val bleAddress = device?.bleAddress
+        if (device == null || device.wifiHost != null || bleAddress == null) {
+            BondRemovalResult.NOT_BONDED
+        } else {
+            removeBluetoothBond(context, bleAddress)
+        }
     }
-}
 
 /** Devices registered with the pairing seam. Always empty — see this file's class doc. Ported from `pairedAccessoryInfos`. */
 fun ConnectionManager.pairedAccessoryInfos(): List<Pair<String, String>> = pairingService.registeredDeviceInfos()

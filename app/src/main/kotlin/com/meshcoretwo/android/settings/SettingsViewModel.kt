@@ -270,67 +270,15 @@ class SettingsViewModel(
     }
 
     /**
-     * Applies manual radio parameters and the repeat-mode toggle, ported from
-     * `AdvancedRadioSection.applySettings`. Every value here is caller-validated free-form input —
-     * see `SettingsScreen.kt`'s `AdvancedRadioSection` composable for the same frequency/TX-power
-     * range checks `AdvancedRadioSection.swift` does before calling this. When repeat mode is
-     * toggled on, the *previous* radio settings (still on the cached [device] snapshot) are saved
-     * as pre-repeat settings so they can be restored on toggle-off, and cleared when toggled back
-     * off — folded into the single [patchDevice] call below rather than Swift's separate
-     * `savePreRepeatSettings()`/`clearPreRepeatSettings()` `ConnectionManager` methods, since
-     * [patchDevice] already owns persistence for every setter on this screen.
+     * Applies manual radio parameters (plus path hash mode and the repeat-mode toggle), ported from
+     * `AdvancedRadioSection.applySettings`. Values are validated by [ManualRadioSettingsDialog];
+     * pre-repeat bookkeeping lives in [withManualRadioSettings], shared with onboarding.
      */
-    fun setAdvancedRadioSettings(
-        frequencyKHz: UInt,
-        bandwidthHz: UInt,
-        spreadingFactor: UByte,
-        codingRate: UByte,
-        txPower: Byte,
-        clientRepeat: Boolean,
-    ) = runAction {
+    internal fun setAdvancedRadioSettings(settings: ManualRadioSettings) = runAction {
         val device = connectionManager.connectedDeviceRecord ?: throw NotConnectedException
         val settingsService = connectionManager.settingsService ?: throw NotConnectedException
-
-        val wasRepeat = device.clientRepeat
-        settingsService.setRadioParamsVerified(
-            frequencyKHz = frequencyKHz,
-            bandwidthKHz = bandwidthHz,
-            spreadingFactor = spreadingFactor,
-            codingRate = codingRate,
-            clientRepeat = clientRepeat,
-        )
-        settingsService.setTxPowerVerified(txPower)
-
-        patchDevice {
-            it.copy(
-                frequency = frequencyKHz,
-                bandwidth = bandwidthHz,
-                spreadingFactor = spreadingFactor,
-                codingRate = codingRate,
-                txPower = txPower,
-                clientRepeat = clientRepeat,
-                preRepeatFrequency = when {
-                    !wasRepeat && clientRepeat -> device.frequency
-                    wasRepeat && !clientRepeat -> null
-                    else -> device.preRepeatFrequency
-                },
-                preRepeatBandwidth = when {
-                    !wasRepeat && clientRepeat -> device.bandwidth
-                    wasRepeat && !clientRepeat -> null
-                    else -> device.preRepeatBandwidth
-                },
-                preRepeatSpreadingFactor = when {
-                    !wasRepeat && clientRepeat -> device.spreadingFactor
-                    wasRepeat && !clientRepeat -> null
-                    else -> device.preRepeatSpreadingFactor
-                },
-                preRepeatCodingRate = when {
-                    !wasRepeat && clientRepeat -> device.codingRate
-                    wasRepeat && !clientRepeat -> null
-                    else -> device.preRepeatCodingRate
-                },
-            )
-        }
+        settingsService.writeManualRadioSettings(settings, device)
+        patchDevice { it.withManualRadioSettings(settings) }
         _statusMessage.value = UiText.of(R.string.settings_msg_radio)
     }
 

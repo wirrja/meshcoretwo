@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.settings
 
+import com.meshcoretwo.services.pairing.BondRemovalResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -106,11 +107,28 @@ class DeviceSelectionViewModel(private val connectionManager: ConnectionManager)
         }
     }
 
+    /** Name of a device whose Bluetooth bond couldn't be dropped on delete; the screen offers system settings. */
+    private val _unpairFailedDeviceName = MutableStateFlow<String?>(null)
+    val unpairFailedDeviceName: StateFlow<String?> = _unpairFailedDeviceName.asStateFlow()
+
+    /** Removes [device] from the list, disconnecting it first if current, and unpairs it (see [deleteDevice]). */
     fun delete(device: DeviceDto) {
         viewModelScope.launch {
-            connectionManager.deleteDevice(device.id)
+            try {
+                if (connectionManager.deleteDevice(device.id) == BondRemovalResult.FAILED) {
+                    _unpairFailedDeviceName.value = device.nodeName
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                _errorMessage.value = error.toUiText(UiText.of(R.string.settings_err_generic))
+            }
             refresh()
         }
+    }
+
+    fun dismissUnpairFailed() {
+        _unpairFailedDeviceName.value = null
     }
 
     fun clearError() {

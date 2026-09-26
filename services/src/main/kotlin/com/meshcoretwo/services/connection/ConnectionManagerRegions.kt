@@ -30,7 +30,9 @@ import kotlinx.coroutines.CancellationException
  * @return [RegionDiscoveryService.Outcome.SendFailed] if no device is connected, matching
  *   Swift's silent `guard let ... else { return }` (no user-facing message for that case either).
  */
-suspend fun ConnectionManager.discoverRegions(): RegionDiscoveryService.Outcome {
+suspend fun ConnectionManager.discoverRegions(
+    onProgress: suspend (RegionDiscoveryService.Progress) -> Unit = {},
+): RegionDiscoveryService.Outcome {
     val device = connectedDevice ?: return RegionDiscoveryService.Outcome.SendFailed
     val activeSession = session ?: return RegionDiscoveryService.Outcome.SendFailed
     val activeContactService = contactService ?: return RegionDiscoveryService.Outcome.SendFailed
@@ -41,6 +43,7 @@ suspend fun ConnectionManager.discoverRegions(): RegionDiscoveryService.Outcome 
         radioID = device.radioID,
         knownRegions = device.knownRegions,
         supportsAdHocRequest = device.supportsAdHocRepeaterRequest,
+        onProgress = onProgress,
     )
 }
 

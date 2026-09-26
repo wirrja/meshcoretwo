@@ -18,7 +18,6 @@
     <string name="common_continue">Jatka</string>
 
     <!-- Onboarding — Welcome -->
-    <string name="onboarding_welcome_disclaimer">Epävirallinen portti · ei ole yhteydessä MeshCore One iOS -sovellukseen</string>
     <string name="onboarding_welcome_tagline">Verkosta riippumaton viestintä LoRa mesh -radiolla — ei matkapuhelinverkkoa eikä internetiä.</string>
     <string name="onboarding_get_started">Aloita</string>
 
@@ -36,6 +35,7 @@
 
     <!-- Onboarding — Region -->
     <string name="region_country">Maa</string>
+    <string name="region_set">Valitse alue</string>
     <string name="region_state_province">Osavaltio/maakunta</string>
     <string name="region_finding">Etsitään aluettasi…</string>
     <string name="region_choose_title">Valitse alueesi</string>
@@ -286,6 +286,7 @@
     <string name="chat_multi_regions_body">Useampi luettelosi alue vastaa tämän paketin siirtokoodia. Sovellus ei voi tietää, mitä niistä käytettiin.\n\n%1$s</string>
     <string name="chat_reconnecting">Yhdistetään uudelleen…</string>
     <string name="chat_send">Lähetä</string>
+    <string name="chat_scroll_to_bottom">Siirry uusimpaan viestiin</string>
     <string name="chat_heard_by_repeater">Toistin kuuli</string>
     <string name="chat_path_map">Reittikartta</string>
     <string name="chat_repeat_details">Toiston tiedot</string>
@@ -765,6 +766,12 @@
     <string name="danger_delete_data">Poista tiedot</string>
     <string name="danger_keep_data">Säilytä tiedot</string>
     <string name="devices_none">Ei tallennettuja laitteita</string>
+    <string name="devices_remove_title">Poistetaanko %1$s?</string>
+    <string name="devices_remove_body_ble">Radio poistetaan tallennetuista laitteista ja sen Bluetooth-pariliitos tähän puhelimeen puretaan. Viestit ja yhteystiedot säilyvät sovelluksessa.</string>
+    <string name="devices_remove_body_wifi">Radio poistetaan tallennetuista laitteista. Viestit ja yhteystiedot säilyvät sovelluksessa.</string>
+    <string name="devices_unpair_failed_title">Pariliitosta ei voitu purkaa</string>
+    <string name="devices_unpair_failed_body">Android ei sallinut sovelluksen poistaa Bluetooth-pariliitosta. Avaa Bluetooth-asetukset ja valitse ”Unohda” laitteelle %1$s.</string>
+    <string name="devices_open_bt_settings">Avaa Bluetooth-asetukset</string>
     <string name="devices_none_desc">Etsi lähellä oleva radio tai yhdistä WiFillä.</string>
     <string name="devices_scan">Etsi laitteita</string>
     <string name="devices_connected_elsewhere">Yhdistetty toisessa sovelluksessa</string>
@@ -789,6 +796,10 @@
     <string name="regions_none">Alueita ei ole lisätty</string>
     <string name="regions_none_desc">Löydä alueita lähellä olevilta toistimilta tai lisää ne käsin.</string>
     <string name="regions_discovering">Etsitään…</string>
+    <string name="regions_progress_listening">Etsitään toistimia… %1$d vastasi</string>
+    <string name="regions_progress_querying">Kysytään toistimilta: %1$d / %2$d · uusia alueita: %3$d</string>
+    <string name="regions_stop">Pysäytä</string>
+    <string name="regions_msg_stopped">Haku pysäytetty</string>
     <string name="regions_discover_nearby">Löydä lähialueet</string>
     <string name="regions_add_manually">Lisää käsin</string>
     <string name="regions_msg_no_repeaters">Yksikään toistin ei vastannut</string>

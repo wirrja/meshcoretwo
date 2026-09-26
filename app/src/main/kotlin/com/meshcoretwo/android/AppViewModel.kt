@@ -2,6 +2,12 @@
 
 package com.meshcoretwo.android
 
+import com.meshcoretwo.services.pairing.DevicePairingError
+import com.meshcoretwo.services.connection.pairNewDevice
+import com.meshcoretwo.android.onboarding.PairingStatus
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -82,6 +88,39 @@ class AppViewModel(container: AppContainer) : ViewModel() {
 
     fun consumePendingNotificationRoute() {
         _pendingNotificationRoute.value = null
+    }
+
+    private val _pairing = MutableStateFlow<PairingStatus>(PairingStatus.Idle)
+    val pairing: StateFlow<PairingStatus> = _pairing.asStateFlow()
+
+    /**
+     * Onboarding's "Add device". Runs in [viewModelScope], not the Pair screen's composition scope:
+     * pairing waits for a full sync, and an Activity recreation in that window used to cancel it
+     * after the radio had already connected, leaving onboarding stuck on the Pair screen.
+     */
+    fun startPairing() {
+        if (_pairing.value is PairingStatus.Pairing) return
+        _pairing.value = PairingStatus.Pairing
+        viewModelScope.launch {
+            _pairing.value = try {
+                connectionManager.pairNewDevice()
+                PairingStatus.Paired
+            } catch (error: CancellationException) {
+                _pairing.value = PairingStatus.Idle
+                throw error
+            } catch (error: DevicePairingError.Cancelled) {
+                PairingStatus.Idle
+            } catch (error: DevicePairingError.AlreadyInProgress) {
+                PairingStatus.Idle
+            } catch (error: Exception) {
+                PairingStatus.Failed(error)
+            }
+        }
+    }
+
+    /** Called by the Pair screen once it has navigated on a [PairingStatus.Paired] result. */
+    fun consumePairingResult() {
+        _pairing.value = PairingStatus.Idle
     }
 
     init {
