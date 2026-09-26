@@ -49,6 +49,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberLocationPermissionAction
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.services.connection.ConnectionManager
@@ -64,7 +65,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -237,8 +237,6 @@ private fun NoLocationListSheet(unplottable: List<UnplottableNeighbor>, onDismis
 
 // MARK: - Map
 
-/** OpenFreeMap liberty, shared by the node maps in this package (see PLAN.md Л3 for its attribution). */
-internal const val NODE_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val LINES_SOURCE_ID = "neighbor-snr-lines"
 private const val LINE_LAYER_ID = "neighbor-snr-line-layer"
 private const val POINTS_SOURCE_ID = "neighbor-snr-points"
@@ -246,8 +244,6 @@ private const val POINTS_CIRCLE_LAYER_ID = "neighbor-snr-points-circle"
 private const val POINTS_LABEL_LAYER_ID = "neighbor-snr-points-label"
 private const val BADGES_SOURCE_ID = "neighbor-snr-badges"
 private const val BADGES_LABEL_LAYER_ID = "neighbor-snr-badges-label"
-/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
-private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_LABEL = "label"
 private const val PROP_COLOR = "color"
 private const val PROP_STROKE_COLOR = "strokeColor"
@@ -309,7 +305,7 @@ private class NeighborSnrMapController {
         if (attached) return
         attached = true
 
-        map.setStyle(Style.Builder().fromUri(NODE_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, labelFont ->
             val lines = GeoJsonSource(LINES_SOURCE_ID, lastLines.toLineFeatureCollection())
             style.addSource(lines)
             style.addLayer(
@@ -325,7 +321,7 @@ private class NeighborSnrMapController {
             style.addLayer(
                 SymbolLayer(BADGES_LABEL_LAYER_ID, BADGES_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_TEXT)),
-                    PropertyFactory.textFont(LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(10f),
                     PropertyFactory.textColor("#374151"),
                     PropertyFactory.textHaloColor("#FFFFFF"),
@@ -348,7 +344,7 @@ private class NeighborSnrMapController {
             style.addLayer(
                 SymbolLayer(POINTS_LABEL_LAYER_ID, POINTS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
-                    PropertyFactory.textFont(LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),

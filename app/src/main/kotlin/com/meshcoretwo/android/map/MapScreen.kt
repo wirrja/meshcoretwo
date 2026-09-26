@@ -96,9 +96,9 @@ import org.maplibre.geojson.Point as GeoPoint
  * marker opens a small bottom sheet with a Message/Details shortcut, mirroring `ContactDetailSheet`
  * from the iOS map; tapping a discovered-node marker opens a read-only variant with a shortcut to
  * the "Discover" list screen instead — adopting a discovered node into a contact only happens
- * there (`DiscoveryScreen`), not duplicated onto this sheet. Style is the hosted, keyless
- * `tiles.openfreemap.org/styles/liberty` (same source iOS's `MapTileURLs.openFreeMapLiberty`
- * points at) — offline map packs (`OfflineMapService`), style switching, north-lock/label toggles,
+ * there (`DiscoveryScreen`), not duplicated onto this sheet. The basemap is whatever
+ * [MapTiles] resolves (iOS always uses `MapTileURLs.openFreeMapLiberty`; see [MapTileProviderId]
+ * for why this port has a choice) — offline map packs (`OfflineMapService`), north-lock/label toggles,
  * SNR/hop trails, and camera persistence across launches are all out of scope for this slice; see
  * [MapViewModel]'s class doc for the full list.
  *
@@ -407,7 +407,6 @@ private fun MapLibreMapView(modifier: Modifier, controller: MapMarkerController)
     )
 }
 
-private const val MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val SOURCE_ID = "mc1-contacts"
 private const val LABELS_SOURCE_ID = "mc1-contacts-labels"
 private const val CLUSTERED_SOURCE_ID = "mc1-contacts-clustered"
@@ -417,11 +416,6 @@ private const val CLUSTER_CIRCLE_LAYER_ID = "mc1-cluster-circle"
 private const val CLUSTER_COUNT_LAYER_ID = "mc1-cluster-count"
 private const val CLUSTERED_POINT_LAYER_ID = "mc1-clustered-point-circle"
 private const val CLUSTERED_LABEL_LAYER_ID = "mc1-clustered-point-label"
-/**
- * A font stack the style's glyph server hosts — MapLibre's default (`Open Sans Regular`) 404s on
- * OpenFreeMap, and unloaded glyphs stall every layer of the same source (markers never draw).
- */
-private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_ID = "id"
 private const val PROP_NAME = "name"
 private const val PROP_COLOR = "color"
@@ -464,7 +458,7 @@ private class MapMarkerController {
 
         map.addOnMapClickListener { latLng -> handleTap(map, latLng) }
 
-        map.setStyle(Style.Builder().fromUri(MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, labelFont ->
             val source = GeoJsonSource(SOURCE_ID, lastPoints.toFeatureCollection())
             style.addSource(source)
             style.addLayer(
@@ -483,7 +477,7 @@ private class MapMarkerController {
             style.addLayer(
                 SymbolLayer(LABEL_LAYER_ID, LABELS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_NAME)),
-                    PropertyFactory.textFont(LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),
@@ -494,7 +488,7 @@ private class MapMarkerController {
                 ),
             )
             pointsSource = source
-            addClusteredLayers(style)
+            addClusteredLayers(style, labelFont)
             applyLayerVisibility(style)
         }
     }
@@ -509,7 +503,7 @@ private class MapMarkerController {
      * the clustering source — only it knows which points are still loose — so the glyph-stall
      * guard noted above can't apply to them; they use the same known-good font stack.
      */
-    private fun addClusteredLayers(style: Style) {
+    private fun addClusteredLayers(style: Style, labelFont: Array<String>) {
         val clustered = GeoJsonSource(
             CLUSTERED_SOURCE_ID,
             lastPoints.toFeatureCollection(),
@@ -540,7 +534,7 @@ private class MapMarkerController {
         style.addLayer(
             SymbolLayer(CLUSTER_COUNT_LAYER_ID, CLUSTERED_SOURCE_ID).withProperties(
                 PropertyFactory.textField(Expression.toString(Expression.get(PROP_POINT_COUNT))),
-                PropertyFactory.textFont(LABEL_FONT),
+                PropertyFactory.textFont(labelFont),
                 PropertyFactory.textSize(13f),
                 PropertyFactory.textColor("#FFFFFF"),
                 PropertyFactory.textAllowOverlap(true),
@@ -558,7 +552,7 @@ private class MapMarkerController {
         style.addLayer(
             SymbolLayer(CLUSTERED_LABEL_LAYER_ID, CLUSTERED_SOURCE_ID).withProperties(
                 PropertyFactory.textField(Expression.get(PROP_NAME)),
-                PropertyFactory.textFont(LABEL_FONT),
+                PropertyFactory.textFont(labelFont),
                 PropertyFactory.textSize(11f),
                 PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                 PropertyFactory.textAnchor("top"),

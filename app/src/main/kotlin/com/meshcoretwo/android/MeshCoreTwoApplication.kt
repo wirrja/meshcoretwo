@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.meshcoretwo.android.di.AppContainer
+import com.meshcoretwo.android.map.MapTiles
 import com.meshcoretwo.android.ui.i18n.AppLanguageManager
 import com.meshcoretwo.services.connection.DeviceConnectionState
 import com.meshcoretwo.services.connection.activate
@@ -39,8 +40,9 @@ class MeshCoreTwoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // Must run before any MapView is inflated (Map tab, Phase 5 item 5). No API key needed —
-        // the app only ever loads unauthenticated styles (OpenFreeMap), never Mapbox-hosted tiles.
+        // the app only ever loads keyless styles (see MapTileProviderId), never Mapbox-hosted tiles.
         MapLibre.getInstance(this)
+        MapTiles.init(this)
         NotificationService.defaultStringProvider = AppNotificationStrings(this)
         NotificationService.registerChannels(this)
         container = AppContainer(this)

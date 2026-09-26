@@ -1210,4 +1210,24 @@
     <string name="keepalive_channel_name">电台连接</string>
     <string name="keepalive_notification_title">MeshCore Two 已连接</string>
     <string name="keepalive_notification_text">正在保持电台连接</string>
+    <string name="map_source_title">地图来源</string>
+    <string name="map_source_hint">地图瓦片从互联网下载。如果地图一直空白，可能是你的网络屏蔽了瓦片服务器；请选择其他来源或点击“检查可用性”。</string>
+    <string name="map_source_auto">自动</string>
+    <string name="map_source_auto_desc">使用在当前网络中第一个能加载的来源</string>
+    <string name="map_source_auto_current">当前：%1$s</string>
+    <string name="map_source_openfreemap_desc">经 Cloudflare 提供的矢量地图，允许离线下载</string>
+    <string name="map_source_versatiles_desc">来自德国服务器的矢量地图</string>
+    <string name="map_source_osm_desc">栅格地图，不支持离线下载</string>
+    <string name="map_source_custom">自定义</string>
+    <string name="map_source_custom_desc">你自己的样式或瓦片服务器 URL</string>
+    <string name="map_source_custom_url">样式或瓦片 URL</string>
+    <string name="map_source_custom_help">MapLibre style.json URL，或带 {z}/{x}/{y} 的栅格模板</string>
+    <string name="map_source_custom_invalid">请输入 http(s) 地址</string>
+    <string name="map_source_check">检查可用性</string>
+    <string name="map_source_checking">正在检查…</string>
+    <string name="map_source_reachable">%1$d 毫秒</string>
+    <string name="map_source_unreachable">不可用</string>
+    <string name="map_source_offline_note">离线地图只能配合下载时使用的地图来源。</string>
+    <string name="offmap_base_not_allowed">%1$s 不允许离线下载，因此只能保存地形图层。请在 设置 → 地图 中选择其他地图来源。</string>
+    <string name="offmap_base_not_allowed_short">所选地图来源不允许离线下载。</string>
 </resources>

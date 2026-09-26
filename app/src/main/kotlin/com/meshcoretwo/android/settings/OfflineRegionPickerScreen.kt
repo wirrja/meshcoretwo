@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -49,9 +50,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.MapBaseStyle
+import com.meshcoretwo.android.map.MapTiles
 import com.meshcoretwo.android.map.OfflineMapError
 import com.meshcoretwo.android.map.OfflineMapLayer
 import com.meshcoretwo.android.map.OfflineMapService
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.connectedDeviceRecord
@@ -62,9 +66,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
 
-private const val REGION_PICKER_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val REGION_PICKER_MIN_ZOOM = 10
 private const val REGION_PICKER_INITIAL_ZOOM = 11.0
 private const val REGION_PICKER_WORLD_ZOOM = 1.5
@@ -91,6 +93,7 @@ fun OfflineRegionPickerScreen(
     var isDownloading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val diskSpaceError = stringResource(R.string.offline_err_disk_space)
+    val offlineNotAllowedError = stringResource(R.string.offmap_base_not_allowed_short)
     var selectionBounds by remember { mutableStateOf<LatLngBounds?>(null) }
     var mapSizePx by remember { mutableStateOf(IntSize.Zero) }
     val isNetworkAvailable by offlineMapService.isNetworkAvailable.collectAsStateWithLifecycle()
@@ -99,8 +102,14 @@ fun OfflineRegionPickerScreen(
     val density = LocalDensity.current
     val insetPx = with(density) { SELECTION_PADDING.toPx() }
 
-    val selectedLayers = remember(includeTopo) {
-        if (includeTopo) setOf(OfflineMapLayer.BASE, OfflineMapLayer.TOPO) else setOf(OfflineMapLayer.BASE)
+    // The base layer comes from the selected map source, and some sources forbid bulk download.
+    val baseStyle by produceState<MapBaseStyle?>(null) { value = MapTiles.resolve() }
+    val baseAllowed = baseStyle?.offlineStyleUrl != null
+    val selectedLayers = remember(includeTopo, baseAllowed) {
+        buildSet {
+            if (baseAllowed) add(OfflineMapLayer.BASE)
+            if (includeTopo) add(OfflineMapLayer.TOPO)
+        }
     }
     val estimatedBytes = remember(selectionBounds, selectedLayers) {
         selectionBounds?.let { bounds ->
@@ -147,7 +156,7 @@ fun OfflineRegionPickerScreen(
                 actions = {
                     TextButton(
                         enabled = regionName.isNotBlank() && !isDownloading && !exceedsAvailableSpace &&
-                            isNetworkAvailable && selectionBounds != null,
+                            isNetworkAvailable && selectionBounds != null && selectedLayers.isNotEmpty(),
                         onClick = {
                             val bounds = selectionBounds ?: return@TextButton
                             isDownloading = true
@@ -158,7 +167,11 @@ fun OfflineRegionPickerScreen(
                                 } catch (e: CancellationException) {
                                     throw e
                                 } catch (e: OfflineMapError) {
-                                    errorMessage = if (e is OfflineMapError.InsufficientDiskSpace) diskSpaceError else e.message
+                                    errorMessage = when (e) {
+                                        is OfflineMapError.InsufficientDiskSpace -> diskSpaceError
+                                        is OfflineMapError.OfflineNotAllowed -> offlineNotAllowedError
+                                        else -> e.message
+                                    }
                                 } finally {
                                     isDownloading = false
                                 }
@@ -197,6 +210,7 @@ fun OfflineRegionPickerScreen(
                 estimatedDownloadBytes = estimatedBytes,
                 exceedsAvailableSpace = exceedsAvailableSpace,
                 isNetworkAvailable = isNetworkAvailable,
+                baseNotAllowedSource = baseStyle?.takeIf { !baseAllowed }?.provider?.let { stringResource(it.labelRes) },
             )
         }
     }
@@ -211,6 +225,7 @@ private fun RegionPickerBottomCard(
     estimatedDownloadBytes: Long?,
     exceedsAvailableSpace: Boolean,
     isNetworkAvailable: Boolean,
+    baseNotAllowedSource: String?,
 ) {
     val context = LocalContext.current
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -228,6 +243,14 @@ private fun RegionPickerBottomCard(
         ) {
             Text(stringResource(R.string.offmap_include_topo))
             Switch(checked = includeTopo, onCheckedChange = onIncludeTopoChange)
+        }
+        if (baseNotAllowedSource != null) {
+            Text(
+                stringResource(R.string.offmap_base_not_allowed, baseNotAllowedSource),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
         when {
@@ -291,7 +314,7 @@ private class OfflineRegionPickerMapController(
             .target(initialCamera ?: LatLng(0.0, 0.0))
             .zoom(if (initialCamera != null) REGION_PICKER_INITIAL_ZOOM else REGION_PICKER_WORLD_ZOOM)
             .build()
-        map.setStyle(Style.Builder().fromUri(REGION_PICKER_STYLE_URL))
+        map.setBaseStyle()
         map.addOnCameraIdleListener { recomputeBounds() }
         recomputeBounds()
     }

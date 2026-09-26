@@ -1220,4 +1220,27 @@
     <string name="keepalive_channel_name">Radio connection</string>
     <string name="keepalive_notification_title">MeshCore Two is connected</string>
     <string name="keepalive_notification_text">Keeping the radio link alive</string>
+    <string name="map_source_openfreemap" translatable="false">OpenFreeMap</string>
+    <string name="map_source_versatiles" translatable="false">VersaTiles</string>
+    <string name="map_source_osm" translatable="false">OpenStreetMap</string>
+    <string name="map_source_title">Map source</string>
+    <string name="map_source_hint">Map tiles are downloaded from the internet. If the map stays blank, your network may be blocking the tile server; pick another source or tap “Check availability”.</string>
+    <string name="map_source_auto">Automatic</string>
+    <string name="map_source_auto_desc">Uses the first source that loads on your current network</string>
+    <string name="map_source_auto_current">Now using: %1$s</string>
+    <string name="map_source_openfreemap_desc">Vector map via Cloudflare, offline download allowed</string>
+    <string name="map_source_versatiles_desc">Vector map from a server in Germany</string>
+    <string name="map_source_osm_desc">Raster map, no offline download</string>
+    <string name="map_source_custom">Custom</string>
+    <string name="map_source_custom_desc">Your own style or tile server URL</string>
+    <string name="map_source_custom_url">Style or tile URL</string>
+    <string name="map_source_custom_help">A MapLibre style.json URL, or a raster template with {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Enter an http(s) URL</string>
+    <string name="map_source_check">Check availability</string>
+    <string name="map_source_checking">Checking…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Unavailable</string>
+    <string name="map_source_offline_note">Offline maps only work with the map source they were downloaded from.</string>
+    <string name="offmap_base_not_allowed">%1$s doesn’t allow offline download, so only the topographic layer can be saved. Choose another map source in Settings → Maps.</string>
+    <string name="offmap_base_not_allowed_short">The selected map source doesn’t allow offline download.</string>
 </resources>

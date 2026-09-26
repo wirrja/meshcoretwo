@@ -112,6 +112,17 @@ characters themselves aren't copyrightable; only the English labels/shortcodes a
 |---|---|---|---|
 | Emoji labels/shortcodes | [emojibase-data](https://github.com/milesj/emojibase) | Copyright (c) 2017-2019 Miles Johnson | [LICENSES/emojibase-data-MIT.txt](LICENSES/emojibase-data-MIT.txt) |
 
+## Bundled map label glyphs
+
+Not a Maven dependency: `app/src/main/assets/glyphs/noto_sans_regular/*.pbf` are signed-distance-field
+glyphs of Noto Sans (Latin, Greek, Cyrillic, Armenian, Hebrew and punctuation ranges; the other ranges
+are empty placeholders), as published by the [VersaTiles Fonts](https://github.com/versatiles-org/versatiles-fonts)
+project. They let marker labels render on raster basemaps, which have no glyph server of their own.
+
+| Font | Copyright | License |
+|---|---|---|
+| Noto Sans, Noto Sans Armenian, Noto Sans Hebrew | Copyright 2022 The Noto Project Authors | SIL Open Font License 1.1: [LICENSES/Noto-Sans-OFL-1.1.txt](LICENSES/Noto-Sans-OFL-1.1.txt) |
+
 ## Data sources
 
 Data the app displays or fetches, listed for transparency. These are terms of use of the data, not
@@ -119,7 +130,8 @@ licenses of this program's code.
 
 | Data | Source | Terms |
 |---|---|---|
-| Map tiles (map, neighbor map, line of sight) | [OpenFreeMap](https://openfreemap.org) "liberty" style © [OpenMapTiles](https://openmaptiles.org), data from [OpenStreetMap](https://www.openstreetmap.org/copyright) | OpenStreetMap data: Open Database License (ODbL) 1.0 |
+| Map tiles, selectable in Settings → Maps → Map source | [OpenFreeMap](https://openfreemap.org) "liberty" style © [OpenMapTiles](https://openmaptiles.org); [VersaTiles](https://versatiles.org) "colorful" style (MIT) with landcover from [ESA WorldCover 2021](https://esa-worldcover.org/en/data-access); [OpenStreetMap](https://www.openstreetmap.org) standard tiles under the [OSMF tile usage policy](https://operations.osmfoundation.org/policies/tiles/) (no offline download); all with data from [OpenStreetMap](https://www.openstreetmap.org/copyright) | OpenStreetMap data: Open Database License (ODbL) 1.0; ESA WorldCover: CC BY 4.0 |
+| Topographic offline layer | [OpenTopoMap](https://opentopomap.org) | CC BY-SA 3.0; data from OpenStreetMap (ODbL 1.0) and SRTM |
 | Elevation profile (line of sight) | Copernicus DEM GLO-90 via the [Open-Meteo](https://open-meteo.com) Elevation API | Open-Meteo data: CC BY 4.0; the free API is for non-commercial use only. Copernicus DEM notice below (required by the [DEM licence](https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf), Article 6) |
 | Battery discharge (OCV) curve presets | Values from the [Meshtastic firmware](https://github.com/meshtastic/firmware) (GPL-3.0), via MeshCore One | Numeric reference data |
 | Chile radio preset | Community settings of the [MeshChile](https://meshchile.cl) network, via MeshCore One | Numeric reference data |

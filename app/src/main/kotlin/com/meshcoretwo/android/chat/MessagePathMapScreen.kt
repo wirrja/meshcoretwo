@@ -37,7 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
-import com.meshcoretwo.android.contacts.NODE_MAP_STYLE_URL
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.tools.LOSFormatters
 import com.meshcoretwo.android.ui.components.FilterChipRow
 import com.meshcoretwo.android.ui.components.LoadingScreen
@@ -65,7 +65,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -334,8 +333,6 @@ private const val LINE_LAYER_ID = "message-path-line-layer"
 private const val POINTS_SOURCE_ID = "message-path-points"
 private const val POINTS_CIRCLE_LAYER_ID = "message-path-points-circle"
 private const val POINTS_LABEL_LAYER_ID = "message-path-points-label"
-/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
-private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_LABEL = "label"
 private const val PROP_COLOR = "color"
 private const val PROP_STROKE_COLOR = "strokeColor"
@@ -385,7 +382,7 @@ private class MessagePathMapController {
         if (attached) return
         attached = true
 
-        map.setStyle(Style.Builder().fromUri(NODE_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, labelFont ->
             val lines = GeoJsonSource(LINE_SOURCE_ID, lastPlotted.lineCoordinates.toLineFeatureCollection())
             style.addSource(lines)
             style.addLayer(
@@ -416,7 +413,7 @@ private class MessagePathMapController {
             style.addLayer(
                 SymbolLayer(POINTS_LABEL_LAYER_ID, POINTS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
-                    PropertyFactory.textFont(LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),

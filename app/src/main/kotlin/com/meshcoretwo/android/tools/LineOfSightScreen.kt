@@ -46,6 +46,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberLocationPermissionAction
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.services.connection.ConnectionManager
@@ -61,7 +62,6 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -294,7 +294,6 @@ private fun AnalyzeButtonRow(state: LineOfSightUiState, viewModel: LineOfSightVi
 
 // MARK: - Map
 
-private const val LOS_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val LOS_LINES_SOURCE_ID = "los-lines"
 private const val LOS_LINE_LAYER_ID = "los-line-layer"
 private const val LOS_REPEATERS_SOURCE_ID = "los-repeaters"
@@ -305,11 +304,6 @@ private const val LOS_MARKERS_LABEL_LAYER_ID = "los-markers-label"
 private const val LOS_REPEATERS_LABELS_SOURCE_ID = "los-repeaters-labels"
 private const val LOS_MARKERS_LABELS_SOURCE_ID = "los-markers-labels"
 private const val LOS_REPEATERS_LABEL_LAYER_ID = "los-repeaters-label"
-/**
- * A font stack the map style's glyph server actually hosts — MapLibre's default (`Open Sans
- * Regular`) 404s on OpenFreeMap, and unloaded glyphs stall every layer of the same source.
- */
-private val LOS_LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val PROP_ID = "id"
 private const val PROP_LABEL = "label"
 private const val PROP_COLOR = "color"
@@ -386,7 +380,7 @@ private class LosMapController {
             true
         }
 
-        map.setStyle(Style.Builder().fromUri(LOS_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, labelFont ->
             val lines = GeoJsonSource(LOS_LINES_SOURCE_ID, lastLines.toLineFeatureCollection())
             style.addSource(lines)
             style.addLayer(
@@ -415,7 +409,7 @@ private class LosMapController {
             style.addLayer(
                 SymbolLayer(LOS_REPEATERS_LABEL_LAYER_ID, LOS_REPEATERS_LABELS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
-                    PropertyFactory.textFont(LOS_LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(11f),
                     PropertyFactory.textColor("#1F2937"),
                     PropertyFactory.textHaloColor("#FFFFFF"),
@@ -443,7 +437,7 @@ private class LosMapController {
             style.addLayer(
                 SymbolLayer(LOS_MARKERS_LABEL_LAYER_ID, LOS_MARKERS_LABELS_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(PROP_LABEL)),
-                    PropertyFactory.textFont(LOS_LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(12f),
                     PropertyFactory.textColor("#FFFFFF"),
                     PropertyFactory.textAllowOverlap(true),

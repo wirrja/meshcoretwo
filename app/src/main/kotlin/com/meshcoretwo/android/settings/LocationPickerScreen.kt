@@ -46,6 +46,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.android.ui.i18n.UiText
 import com.meshcoretwo.android.ui.i18n.toUiText
@@ -70,7 +71,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
@@ -294,7 +294,6 @@ class LocationPickerViewModel(
 
 // MARK: - Map
 
-private const val LOCATION_PICKER_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val PICKER_SOURCE_ID = "location-picker-pin"
 private const val PICKER_CIRCLE_LAYER_ID = "location-picker-pin-circle"
 private const val PICKER_PIN_COLOR = "#2463EB"
@@ -321,7 +320,7 @@ private class LocationPickerMapController(
             .target(initial ?: LatLng(0.0, 0.0))
             .zoom(if (initial != null) PICKER_FIX_ZOOM else PICKER_WORLD_ZOOM)
             .build()
-        map.setStyle(Style.Builder().fromUri(LOCATION_PICKER_STYLE_URL)) { style ->
+        map.setBaseStyle { style, _ ->
             val source = GeoJsonSource(PICKER_SOURCE_ID, initial?.let(::pinFeatureCollection) ?: emptyFeatureCollection())
             this.source = source
             style.addSource(source)

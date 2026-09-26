@@ -75,6 +75,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
 import com.meshcoretwo.android.about.AppLinks
 import com.meshcoretwo.android.chat.ChatDisplayPreferences
+import com.meshcoretwo.android.map.MapTiles
 import com.meshcoretwo.android.onboarding.WiFiAddressValidation
 import com.meshcoretwo.android.ui.components.CompactSearchTopBar
 import com.meshcoretwo.android.ui.components.ConfirmDialog
@@ -141,6 +142,7 @@ fun SettingsScreen(
     onOpenRegionManagement: () -> Unit,
     onOpenLocationPicker: () -> Unit,
     onOpenOfflineMaps: () -> Unit,
+    onOpenMapSource: () -> Unit,
     onOpenAppearance: () -> Unit,
     onOpenDangerZone: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -190,7 +192,7 @@ fun SettingsScreen(
                 ConnectionSection(onOpenDeviceSelection = onOpenDeviceSelection)
                 AppearanceSection(themeService = themeService, onOpenAppearance = onOpenAppearance)
                 LanguageRow()
-                MapsSection(onOpenOfflineMaps = onOpenOfflineMaps)
+                MapsSection(onOpenMapSource = onOpenMapSource, onOpenOfflineMaps = onOpenOfflineMaps)
                 BackupRestoreSection(onOpenBackupRestore = onOpenBackupRestore)
                 AboutSection(onOpenAbout = onOpenAbout, onOpenLicenses = onOpenLicenses)
             }
@@ -219,6 +221,7 @@ fun SettingsScreen(
                 onOpenRegionManagement = onOpenRegionManagement,
                 onOpenLocationPicker = onOpenLocationPicker,
                 onOpenOfflineMaps = onOpenOfflineMaps,
+                onOpenMapSource = onOpenMapSource,
                 onOpenAppearance = onOpenAppearance,
                 onOpenDangerZone = onOpenDangerZone,
                 onOpenAbout = onOpenAbout,
@@ -254,6 +257,7 @@ private fun SettingsContent(
     onOpenRegionManagement: () -> Unit,
     onOpenLocationPicker: () -> Unit,
     onOpenOfflineMaps: () -> Unit,
+    onOpenMapSource: () -> Unit,
     onOpenAppearance: () -> Unit,
     onOpenDangerZone: () -> Unit,
     onOpenAbout: () -> Unit,
@@ -273,7 +277,7 @@ private fun SettingsContent(
             LanguageRow()
         }
         SettingsCard {
-            MapsSection(onOpenOfflineMaps = onOpenOfflineMaps)
+            MapsSection(onOpenMapSource = onOpenMapSource, onOpenOfflineMaps = onOpenOfflineMaps)
         }
         SettingsCard {
             DeviceSection(device = device, isBusy = isBusy, viewModel = viewModel, regionSelectionStore = regionSelectionStore, regionResolver = regionResolver)
@@ -381,16 +385,22 @@ private fun AppearanceSection(themeService: ThemeService, onOpenAppearance: () -
 
 /**
  * Settings → Maps. Ported from `MapsSettingsView.swift`, minus its basemap light/dark appearance
- * picker: that needs a map-wide light/dark style switch, which `MapScreen.kt` consciously never
- * got (one fixed `openfreemap/liberty` style — see its class doc), so this section is just the
- * single row that hub's `NavigationLink` led to, `OfflineMapSettingsView`'s screen, linked
- * directly rather than through a single-item hub.
+ * picker, which needs a map-wide light/dark style switch this port never got. The "Map source"
+ * row is new (see [MapSourceScreen]); "Offline Maps" is `OfflineMapSettingsView`'s screen.
  */
 @Composable
-private fun MapsSection(onOpenOfflineMaps: () -> Unit) {
+private fun MapsSection(onOpenMapSource: () -> Unit, onOpenOfflineMaps: () -> Unit) {
+    val selected by MapTiles.selected.collectAsStateWithLifecycle()
     Column {
         SettingsGroupLabel(stringResource(R.string.settings_maps))
-        SettingsListRow(title = stringResource(R.string.settings_offline_maps), icon = R.drawable.ic_map, onClick = onOpenOfflineMaps)
+        SettingsListRow(
+            title = stringResource(R.string.map_source_title),
+            value = stringResource(selected.labelRes),
+            icon = R.drawable.ic_map,
+            onClick = onOpenMapSource,
+        )
+        HorizontalDivider()
+        SettingsListRow(title = stringResource(R.string.settings_offline_maps), onClick = onOpenOfflineMaps)
     }
 }
 

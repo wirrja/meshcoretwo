@@ -129,7 +129,11 @@ fun AboutScreen(
             }
 
             SettingsGroupLabel(stringResource(R.string.about_data_sources))
-            Text("Map data: OpenFreeMap © OpenMapTiles Data from OpenStreetMap", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Map data © OpenStreetMap contributors (ODbL). Basemaps: OpenFreeMap © OpenMapTiles, " +
+                    "VersaTiles (incl. ESA WorldCover 2021, CC BY 4.0), OpenStreetMap tiles, OpenTopoMap (CC BY-SA)",
+                style = MaterialTheme.typography.bodySmall,
+            )
             ExternalLinkRow(stringResource(R.string.about_osm_copyright), AppLinks.OPENSTREETMAP_COPYRIGHT)
             Text(
                 "Elevation data: Copernicus DEM GLO-90 via Open-Meteo (CC BY 4.0)",

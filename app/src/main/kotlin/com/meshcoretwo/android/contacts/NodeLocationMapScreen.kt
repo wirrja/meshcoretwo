@@ -21,12 +21,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.PropertyFactory
@@ -74,8 +74,6 @@ fun NodeLocationMapScreen(latitude: Double, longitude: Double, name: String?, on
 private const val LOCATION_SOURCE_ID = "node-location-point"
 private const val LOCATION_CIRCLE_LAYER_ID = "node-location-point-circle"
 private const val LOCATION_LABEL_LAYER_ID = "node-location-point-label"
-/** A font stack the style's glyph server hosts — the default (`Open Sans Regular`) 404s on OpenFreeMap and unloaded glyphs stall every layer of the same source (pins never draw). */
-private val LABEL_FONT = arrayOf("Noto Sans Regular")
 private const val LOCATION_PROP_LABEL = "label"
 
 /** Swift frames a single fix with a 0.05° span, roughly zoom 12 at mid latitudes. */
@@ -99,7 +97,7 @@ private class NodeLocationMapController(
 
         // Set before the style loads, so the first rendered frame is already on the fix.
         map.cameraPosition = CameraPosition.Builder().target(LatLng(latitude, longitude)).zoom(SINGLE_FIX_ZOOM).build()
-        map.setStyle(Style.Builder().fromUri(NODE_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, labelFont ->
             val pin = Feature.fromGeometry(GeoPoint.fromLngLat(longitude, latitude)).apply {
                 label?.let { addStringProperty(LOCATION_PROP_LABEL, it) }
             }
@@ -115,7 +113,7 @@ private class NodeLocationMapController(
             style.addLayer(
                 SymbolLayer(LOCATION_LABEL_LAYER_ID, LOCATION_SOURCE_ID).withProperties(
                     PropertyFactory.textField(Expression.get(LOCATION_PROP_LABEL)),
-                    PropertyFactory.textFont(LABEL_FONT),
+                    PropertyFactory.textFont(labelFont),
                     PropertyFactory.textSize(12f),
                     PropertyFactory.textOffset(arrayOf(0f, 1.4f)),
                     PropertyFactory.textAnchor("top"),

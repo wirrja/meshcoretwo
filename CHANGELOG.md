@@ -3,6 +3,37 @@
 Notable user-facing changes to MeshCore Two, release by release, in Russian and English
 (from 1.1.19). Dates are UTC+3 (Moscow).
 
+## 1.1.20 — 2026-09-26
+
+### Русский
+
+- **Карта снова грузится без VPN.** Прежний сервер карт (OpenFreeMap) работает через
+  Cloudflare, а соединения с ним российские провайдеры обрывают — карта оставалась пустой.
+  Теперь источник карты можно выбрать в «Настройки → Карты → Источник карты»: OpenFreeMap,
+  VersaTiles, OpenStreetMap или адрес своего сервера. По умолчанию стоит «Автоматически» —
+  приложение само проверяет, какой сервер отвечает в вашей сети, и берёт первый рабочий.
+- **Кнопка «Проверить доступность»** на том же экране показывает, какие источники доступны
+  прямо сейчас и с какой задержкой.
+- **Офлайн-карты** скачиваются с текущего источника, и в списке видно, с какого. Скачанная
+  область работает только с тем источником, из которого она загружена. OpenStreetMap
+  запрещает массовую загрузку, поэтому с ним сохраняется только топографический слой.
+- **Подписи узлов** на карте отображаются с любым источником, в том числе с растровым
+  OpenStreetMap.
+
+### English
+
+- **The map loads again without a VPN.** The previous map server (OpenFreeMap) is served
+  through Cloudflare, which Russian ISPs cut off, so the map stayed blank. You can now choose
+  the map source in Settings → Maps → Map source: OpenFreeMap, VersaTiles, OpenStreetMap, or
+  your own server's URL. The default, "Automatic", checks which server answers on your network
+  and uses the first one that works.
+- **"Check availability"** on the same screen shows which sources are reachable right now and
+  how fast.
+- **Offline maps** are downloaded from the current source, and the list shows which one. A
+  downloaded area only works with the source it came from. OpenStreetMap forbids bulk
+  download, so with it only the topographic layer can be saved.
+- **Node labels** on the map show up with every source, including raster OpenStreetMap.
+
 ## 1.1.19 — 2026-09-26
 
 ### Русский

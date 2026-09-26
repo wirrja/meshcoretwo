@@ -1212,4 +1212,24 @@
     <string name="keepalive_channel_name">Funkverbindung</string>
     <string name="keepalive_notification_title">MeshCore Two ist verbunden</string>
     <string name="keepalive_notification_text">Funkverbindung wird gehalten</string>
+    <string name="map_source_title">Kartenquelle</string>
+    <string name="map_source_hint">Kartenkacheln werden aus dem Internet geladen. Bleibt die Karte leer, blockiert dein Netz möglicherweise den Kachelserver – wähle eine andere Quelle oder tippe auf „Verfügbarkeit prüfen“.</string>
+    <string name="map_source_auto">Automatisch</string>
+    <string name="map_source_auto_desc">Nutzt die erste Quelle, die in deinem aktuellen Netz lädt</string>
+    <string name="map_source_auto_current">Aktuell: %1$s</string>
+    <string name="map_source_openfreemap_desc">Vektorkarte über Cloudflare, Offline-Download erlaubt</string>
+    <string name="map_source_versatiles_desc">Vektorkarte von einem Server in Deutschland</string>
+    <string name="map_source_osm_desc">Rasterkarte, kein Offline-Download</string>
+    <string name="map_source_custom">Eigene</string>
+    <string name="map_source_custom_desc">URL deines eigenen Stils oder Kachelservers</string>
+    <string name="map_source_custom_url">Stil- oder Kachel-URL</string>
+    <string name="map_source_custom_help">Eine MapLibre-style.json-URL oder eine Raster-Vorlage mit {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Gib eine http(s)-URL ein</string>
+    <string name="map_source_check">Verfügbarkeit prüfen</string>
+    <string name="map_source_checking">Wird geprüft…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Nicht erreichbar</string>
+    <string name="map_source_offline_note">Offline-Karten funktionieren nur mit der Kartenquelle, aus der sie geladen wurden.</string>
+    <string name="offmap_base_not_allowed">%1$s erlaubt keinen Offline-Download, daher kann nur die topografische Ebene gespeichert werden. Wähle eine andere Kartenquelle unter Einstellungen → Karten.</string>
+    <string name="offmap_base_not_allowed_short">Die gewählte Kartenquelle erlaubt keinen Offline-Download.</string>
 </resources>

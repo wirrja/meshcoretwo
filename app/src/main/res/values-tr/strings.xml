@@ -1212,4 +1212,24 @@
     <string name="keepalive_channel_name">Telsiz bağlantısı</string>
     <string name="keepalive_notification_title">MeshCore Two bağlı</string>
     <string name="keepalive_notification_text">Telsiz bağlantısı korunuyor</string>
+    <string name="map_source_title">Harita kaynağı</string>
+    <string name="map_source_hint">Harita karoları internetten indirilir. Harita boş kalıyorsa ağınız karo sunucusunu engelliyor olabilir; başka bir kaynak seçin veya “Erişilebilirliği denetle”ye dokunun.</string>
+    <string name="map_source_auto">Otomatik</string>
+    <string name="map_source_auto_desc">Mevcut ağınızda yüklenen ilk kaynağı kullanır</string>
+    <string name="map_source_auto_current">Şu an: %1$s</string>
+    <string name="map_source_openfreemap_desc">Cloudflare üzerinden vektör harita, çevrimdışı indirme serbest</string>
+    <string name="map_source_versatiles_desc">Almanya’daki bir sunucudan vektör harita</string>
+    <string name="map_source_osm_desc">Raster harita, çevrimdışı indirme yok</string>
+    <string name="map_source_custom">Özel</string>
+    <string name="map_source_custom_desc">Kendi stil veya karo sunucunuzun URL’si</string>
+    <string name="map_source_custom_url">Stil veya karo URL’si</string>
+    <string name="map_source_custom_help">Bir MapLibre style.json URL’si veya {z}/{x}/{y} içeren raster şablon</string>
+    <string name="map_source_custom_invalid">Bir http(s) URL’si girin</string>
+    <string name="map_source_check">Erişilebilirliği denetle</string>
+    <string name="map_source_checking">Denetleniyor…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Erişilemiyor</string>
+    <string name="map_source_offline_note">Çevrimdışı haritalar yalnızca indirildikleri harita kaynağıyla çalışır.</string>
+    <string name="offmap_base_not_allowed">%1$s çevrimdışı indirmeye izin vermiyor, bu yüzden yalnızca topografik katman kaydedilebilir. Ayarlar → Haritalar’dan başka bir harita kaynağı seçin.</string>
+    <string name="offmap_base_not_allowed_short">Seçili harita kaynağı çevrimdışı indirmeye izin vermiyor.</string>
 </resources>

@@ -31,27 +31,33 @@ import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.tan
 
-private const val OFFLINE_BASE_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 private const val OFFLINE_TOPO_STYLE_URL = "asset://topo-offline.json"
 
-/** Which downloadable tile layer an [OfflinePack] belongs to. Ported from `OfflineMapLayer.swift`. */
+/**
+ * Which downloadable tile layer an [OfflinePack] belongs to. Ported from `OfflineMapLayer.swift`.
+ * [BASE] has no fixed URL here: it is the current basemap ([MapTiles.offlineStyle]), and a pack
+ * only serves the map while that same basemap is selected.
+ */
 enum class OfflineMapLayer(@StringRes val labelRes: Int, val maxDownloadZoom: Int) {
     BASE(R.string.offline_layer_base, 14),
     TOPO(R.string.offline_layer_topo, 17);
-
-    val styleUrl: String
-        get() = when (this) {
-            BASE -> OFFLINE_BASE_STYLE_URL
-            TOPO -> OFFLINE_TOPO_STYLE_URL
-        }
 }
 
-/** Ported from `OfflinePackMetadata`; stored as the pack's opaque `context`/`metadata` bytes. */
-data class OfflinePackMetadata(val name: String, val createdAtEpochMillis: Long, val layer: OfflineMapLayer) {
+/**
+ * Ported from `OfflinePackMetadata`; stored as the pack's opaque `context`/`metadata` bytes.
+ * [provider] is not in the Swift struct. Packs saved before it existed were all OpenFreeMap.
+ */
+data class OfflinePackMetadata(
+    val name: String,
+    val createdAtEpochMillis: Long,
+    val layer: OfflineMapLayer,
+    val provider: MapTileProviderId? = null,
+) {
     fun toBytes(): ByteArray = JSONObject().apply {
         put("name", name)
         put("createdAt", createdAtEpochMillis)
         put("layer", layer.name)
+        provider?.let { put("provider", it.name) }
     }.toString().toByteArray(Charsets.UTF_8)
 
     companion object {
@@ -63,15 +69,21 @@ data class OfflinePackMetadata(val name: String, val createdAtEpochMillis: Long,
                     name = json.getString("name"),
                     createdAtEpochMillis = json.getLong("createdAt"),
                     layer = OfflineMapLayer.entries.firstOrNull { it.name == json.optString("layer") } ?: OfflineMapLayer.BASE,
+                    provider = MapTileProviderId.fromName(json.optString("provider"))
+                        ?: MapTileProviderId.OPENFREEMAP.takeIf { json.optString("layer") != OfflineMapLayer.TOPO.name },
                 )
             }.getOrNull()
         }
     }
 }
 
-/** Ported from `OfflineMapError`; `missingStyleResource` has no Android equivalent — every [OfflineMapLayer.styleUrl] always resolves. */
+/**
+ * Ported from `OfflineMapError`; `missingStyleResource` has no Android equivalent, every layer's
+ * style always resolves. [OfflineNotAllowed] is new: the selected basemap forbids bulk download.
+ */
 sealed class OfflineMapError(message: String) : Exception(message) {
     object InsufficientDiskSpace : OfflineMapError("Not enough free storage to download this region.")
+    object OfflineNotAllowed : OfflineMapError("The selected map source does not allow offline download.")
     class DownloadFailed(reason: String) : OfflineMapError(reason)
 }
 
@@ -81,6 +93,8 @@ data class OfflinePack(
     val name: String,
     val createdAtEpochMillis: Long?,
     val layer: OfflineMapLayer,
+    /** The basemap a [OfflineMapLayer.BASE] pack was downloaded from; `null` for topo packs. */
+    val provider: MapTileProviderId?,
     val completedFraction: Double,
     val completedBytes: Long,
     val downloadSpeedBytesPerSecond: Long?,
@@ -249,6 +263,7 @@ class OfflineMapService(context: Context) {
                 name = metadata?.name ?: localized(R.string.offline_unknown_region),
                 createdAtEpochMillis = metadata?.createdAtEpochMillis,
                 layer = metadata?.layer ?: OfflineMapLayer.BASE,
+                provider = metadata?.provider,
                 completedFraction = fraction,
                 completedBytes = status?.completedResourceSize ?: 0L,
                 downloadSpeedBytesPerSecond = if (isActive) downloadSpeeds[region.id] else null,
@@ -264,10 +279,15 @@ class OfflineMapService(context: Context) {
         if (availableDiskSpaceBytes() < MINIMUM_DISK_SPACE_BYTES) throw OfflineMapError.InsufficientDiskSpace
         val now = System.currentTimeMillis()
         val pixelRatio = appContext.resources.displayMetrics.density
+        val base = if (OfflineMapLayer.BASE in layers) MapTiles.offlineStyle() ?: throw OfflineMapError.OfflineNotAllowed else null
         for (layer in layers) {
-            val metadata = OfflinePackMetadata(name, now, layer)
+            val styleUrl = when (layer) {
+                OfflineMapLayer.BASE -> checkNotNull(base?.offlineStyleUrl)
+                OfflineMapLayer.TOPO -> OFFLINE_TOPO_STYLE_URL
+            }
+            val metadata = OfflinePackMetadata(name, now, layer, base?.provider?.takeIf { layer == OfflineMapLayer.BASE })
             val definition = OfflineTilePyramidRegionDefinition(
-                layer.styleUrl,
+                styleUrl,
                 bounds,
                 minZoom.toDouble(),
                 layer.maxDownloadZoom.toDouble(),

@@ -47,9 +47,8 @@ import kotlinx.coroutines.launch
  * "Offline Maps" — download/manage MapLibre tile packs for use without a network connection.
  * Ported from `OfflineMapSettingsView.swift`, reached from Settings' `MapsSection`. Swift's
  * `MapsSettingsView` hub (basemap light/dark appearance picker + a link into this screen) is
- * skipped: the appearance half needs a map-wide light/dark style switch, which `MapScreen.kt`
- * consciously never got (see its class doc — one fixed style), so a hub with a single working
- * item would be dead weight. This screen is linked directly from `SettingsScreen`'s `MapsSection`.
+ * skipped: the appearance half needs a map-wide light/dark style switch, which this port never
+ * got. Each base pack shows the map source it came from, since it only serves that source.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +145,8 @@ private fun OfflinePackRow(pack: OfflinePack, onPauseResume: () -> Unit, onDelet
         Column(modifier = Modifier.weight(1f)) {
             Row {
                 Text(pack.name)
-                Text(" — ${stringResource(pack.layer.labelRes)}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val source = pack.provider?.let { " · ${stringResource(it.labelRes)}" }.orEmpty()
+                Text(" — ${stringResource(pack.layer.labelRes)}$source", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp),

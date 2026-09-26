@@ -1212,4 +1212,24 @@
     <string name="keepalive_channel_name">Radioanslutning</string>
     <string name="keepalive_notification_title">MeshCore Two är ansluten</string>
     <string name="keepalive_notification_text">Radioanslutningen hålls uppe</string>
+    <string name="map_source_title">Kartkälla</string>
+    <string name="map_source_hint">Kartplattor hämtas från internet. Om kartan förblir tom kan ditt nät blockera plattservern – välj en annan källa eller tryck på ”Kontrollera tillgänglighet”.</string>
+    <string name="map_source_auto">Automatisk</string>
+    <string name="map_source_auto_desc">Använder den första källan som laddas i ditt nuvarande nät</string>
+    <string name="map_source_auto_current">Används nu: %1$s</string>
+    <string name="map_source_openfreemap_desc">Vektorkarta via Cloudflare, offlinenedladdning tillåten</string>
+    <string name="map_source_versatiles_desc">Vektorkarta från en server i Tyskland</string>
+    <string name="map_source_osm_desc">Rasterkarta, ingen offlinenedladdning</string>
+    <string name="map_source_custom">Egen</string>
+    <string name="map_source_custom_desc">URL till din egen stil eller plattserver</string>
+    <string name="map_source_custom_url">Stil- eller platt-URL</string>
+    <string name="map_source_custom_help">En MapLibre style.json-URL eller en rastermall med {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Ange en http(s)-URL</string>
+    <string name="map_source_check">Kontrollera tillgänglighet</string>
+    <string name="map_source_checking">Kontrollerar…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Otillgänglig</string>
+    <string name="map_source_offline_note">Offlinekartor fungerar bara med den kartkälla de laddades ned från.</string>
+    <string name="offmap_base_not_allowed">%1$s tillåter inte offlinenedladdning, så bara det topografiska lagret kan sparas. Välj en annan kartkälla under Inställningar → Kartor.</string>
+    <string name="offmap_base_not_allowed_short">Den valda kartkällan tillåter inte offlinenedladdning.</string>
 </resources>

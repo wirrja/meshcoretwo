@@ -1212,4 +1212,24 @@
     <string name="keepalive_channel_name">Radioyhteys</string>
     <string name="keepalive_notification_title">MeshCore Two on yhdistetty</string>
     <string name="keepalive_notification_text">Radioyhteyttä ylläpidetään</string>
+    <string name="map_source_title">Karttalähde</string>
+    <string name="map_source_hint">Karttatiilet ladataan internetistä. Jos kartta pysyy tyhjänä, verkkosi saattaa estää tiilipalvelimen – valitse toinen lähde tai napauta ”Tarkista saatavuus”.</string>
+    <string name="map_source_auto">Automaattinen</string>
+    <string name="map_source_auto_desc">Käyttää ensimmäistä lähdettä, joka latautuu nykyisessä verkossa</string>
+    <string name="map_source_auto_current">Nyt käytössä: %1$s</string>
+    <string name="map_source_openfreemap_desc">Vektorikartta Cloudflaren kautta, offline-lataus sallittu</string>
+    <string name="map_source_versatiles_desc">Vektorikartta saksalaiselta palvelimelta</string>
+    <string name="map_source_osm_desc">Rasterikartta, ei offline-latausta</string>
+    <string name="map_source_custom">Oma</string>
+    <string name="map_source_custom_desc">Oman tyylisi tai tiilipalvelimesi URL</string>
+    <string name="map_source_custom_url">Tyylin tai tiilien URL</string>
+    <string name="map_source_custom_help">MapLibre style.json -URL tai rasterimalli, jossa on {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Anna http(s)-osoite</string>
+    <string name="map_source_check">Tarkista saatavuus</string>
+    <string name="map_source_checking">Tarkistetaan…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Ei saatavilla</string>
+    <string name="map_source_offline_note">Offline-kartat toimivat vain sen karttalähteen kanssa, josta ne ladattiin.</string>
+    <string name="offmap_base_not_allowed">%1$s ei salli offline-latausta, joten vain topografinen taso voidaan tallentaa. Valitse toinen karttalähde kohdassa Asetukset → Kartat.</string>
+    <string name="offmap_base_not_allowed_short">Valittu karttalähde ei salli offline-latausta.</string>
 </resources>

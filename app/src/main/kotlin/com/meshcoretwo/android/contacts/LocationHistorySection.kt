@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.services.persistence.NodeStatusSnapshotDto
 import com.meshcoretwo.services.remotenode.validCoordinate
@@ -40,7 +41,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -205,7 +205,7 @@ private class LocationPreviewMapController {
         attached = true
         map.uiSettings.setAllGesturesEnabled(false)
 
-        map.setStyle(Style.Builder().fromUri(NODE_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, _ ->
             val lines = GeoJsonSource(PREVIEW_SOURCE_LINES, FeatureCollection.fromFeatures(emptyArray()))
             style.addSource(lines)
             style.addLayer(

@@ -32,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.persistence.NodeStatusSnapshotDto
@@ -41,7 +42,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
@@ -201,7 +201,7 @@ private class LocationHistoryMapController {
             }
         }
 
-        map.setStyle(Style.Builder().fromUri(NODE_MAP_STYLE_URL)) { style ->
+        map.setBaseStyle { style, _ ->
             val lines = GeoJsonSource(SOURCE_LINES, emptyList<LocationMapLine>().linesToFeatureCollection())
             style.addSource(lines)
             style.addLayer(

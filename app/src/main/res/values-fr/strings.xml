@@ -1214,4 +1214,24 @@
     <string name="keepalive_channel_name">Connexion radio</string>
     <string name="keepalive_notification_title">MeshCore Two est connecté</string>
     <string name="keepalive_notification_text">Liaison radio maintenue</string>
+    <string name="map_source_title">Source de la carte</string>
+    <string name="map_source_hint">Les tuiles de la carte sont téléchargées depuis Internet. Si la carte reste vide, votre réseau bloque peut-être le serveur de tuiles : choisissez une autre source ou touchez « Vérifier la disponibilité ».</string>
+    <string name="map_source_auto">Automatique</string>
+    <string name="map_source_auto_desc">Utilise la première source qui se charge sur votre réseau actuel</string>
+    <string name="map_source_auto_current">Actuellement : %1$s</string>
+    <string name="map_source_openfreemap_desc">Carte vectorielle via Cloudflare, téléchargement hors ligne autorisé</string>
+    <string name="map_source_versatiles_desc">Carte vectorielle depuis un serveur en Allemagne</string>
+    <string name="map_source_osm_desc">Carte raster, sans téléchargement hors ligne</string>
+    <string name="map_source_custom">Personnalisée</string>
+    <string name="map_source_custom_desc">URL de votre propre style ou serveur de tuiles</string>
+    <string name="map_source_custom_url">URL du style ou des tuiles</string>
+    <string name="map_source_custom_help">Une URL MapLibre style.json, ou un modèle raster avec {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Saisissez une URL http(s)</string>
+    <string name="map_source_check">Vérifier la disponibilité</string>
+    <string name="map_source_checking">Vérification…</string>
+    <string name="map_source_reachable">%1$d ms</string>
+    <string name="map_source_unreachable">Indisponible</string>
+    <string name="map_source_offline_note">Les cartes hors ligne ne fonctionnent qu’avec la source depuis laquelle elles ont été téléchargées.</string>
+    <string name="offmap_base_not_allowed">%1$s n’autorise pas le téléchargement hors ligne : seule la couche topographique peut être enregistrée. Choisissez une autre source dans Réglages → Cartes.</string>
+    <string name="offmap_base_not_allowed_short">La source de carte sélectionnée n’autorise pas le téléchargement hors ligne.</string>
 </resources>

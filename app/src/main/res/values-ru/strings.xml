@@ -1216,4 +1216,24 @@
     <string name="keepalive_channel_name">Связь с радио</string>
     <string name="keepalive_notification_title">MeshCore Two на связи</string>
     <string name="keepalive_notification_text">Связь с радио поддерживается</string>
+    <string name="map_source_title">Источник карты</string>
+    <string name="map_source_hint">Тайлы карты загружаются из интернета. Если карта остаётся пустой, ваша сеть может блокировать сервер тайлов — выберите другой источник или нажмите «Проверить доступность».</string>
+    <string name="map_source_auto">Автоматически</string>
+    <string name="map_source_auto_desc">Первый источник, который загружается в текущей сети</string>
+    <string name="map_source_auto_current">Сейчас: %1$s</string>
+    <string name="map_source_openfreemap_desc">Векторная карта через Cloudflare, офлайн-загрузка разрешена</string>
+    <string name="map_source_versatiles_desc">Векторная карта с сервера в Германии</string>
+    <string name="map_source_osm_desc">Растровая карта, без офлайн-загрузки</string>
+    <string name="map_source_custom">Свой</string>
+    <string name="map_source_custom_desc">URL вашего стиля или сервера тайлов</string>
+    <string name="map_source_custom_url">URL стиля или тайлов</string>
+    <string name="map_source_custom_help">URL MapLibre style.json или растровый шаблон с {z}/{x}/{y}</string>
+    <string name="map_source_custom_invalid">Введите адрес http(s)</string>
+    <string name="map_source_check">Проверить доступность</string>
+    <string name="map_source_checking">Проверка…</string>
+    <string name="map_source_reachable">%1$d мс</string>
+    <string name="map_source_unreachable">Недоступен</string>
+    <string name="map_source_offline_note">Офлайн-карты работают только с тем источником, из которого они были загружены.</string>
+    <string name="offmap_base_not_allowed">%1$s не разрешает офлайн-загрузку, поэтому сохранить можно только топографический слой. Выберите другой источник в Настройки → Карты.</string>
+    <string name="offmap_base_not_allowed_short">Выбранный источник карты не разрешает офлайн-загрузку.</string>
 </resources>

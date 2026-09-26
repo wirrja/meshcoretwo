@@ -107,6 +107,7 @@ import com.meshcoretwo.android.settings.DeviceSelectionScreen
 import com.meshcoretwo.android.settings.DeviceLocationPickerScreen
 import com.meshcoretwo.android.settings.NodeConfigExportScreen
 import com.meshcoretwo.android.settings.NodeConfigImportScreen
+import com.meshcoretwo.android.settings.MapSourceScreen
 import com.meshcoretwo.android.settings.OfflineMapSettingsScreen
 import com.meshcoretwo.android.settings.OfflineRegionPickerScreen
 import com.meshcoretwo.android.settings.RegionManagementScreen
@@ -201,6 +202,7 @@ internal object MainRoute {
     const val REGION_MANAGEMENT = "settings/regions"
     const val LOCATION_PICKER = "settings/location-picker"
     const val OFFLINE_MAPS = "settings/offline-maps"
+    const val MAP_SOURCE = "settings/map-source"
     const val OFFLINE_MAPS_PICK_REGION = "settings/offline-maps/pick-region"
     const val ABOUT = "settings/about"
     const val APPEARANCE = "settings/appearance"
@@ -347,7 +349,7 @@ private fun FloatingNavBar(
  * [MainRoute.ROOM_SETTINGS], [MainRoute.RX_LOG],
  * [MainRoute.LINE_OF_SIGHT], [MainRoute.TRACE_PATH], [MainRoute.NODE_DISCOVERY],
  * [MainRoute.DISCOVERY], [MainRoute.BLOCKED_CONTACTS], [MainRoute.CONFIG_EXPORT], [MainRoute.CONFIG_IMPORT],
- * [MainRoute.REGION_MANAGEMENT], [MainRoute.LOCATION_PICKER], [MainRoute.OFFLINE_MAPS],
+ * [MainRoute.REGION_MANAGEMENT], [MainRoute.LOCATION_PICKER], [MainRoute.MAP_SOURCE], [MainRoute.OFFLINE_MAPS],
  * [MainRoute.OFFLINE_MAPS_PICK_REGION], [MainRoute.ABOUT],
  * [MainRoute.LICENSES], and [MainRoute.LICENSE_TEXT] — the same way a
  * typical bottom-tab + stack-per-section app works,
@@ -558,6 +560,7 @@ fun MainScreen(
                     onOpenRegionManagement = { navController.navigate(MainRoute.REGION_MANAGEMENT) },
                     onOpenLocationPicker = { navController.navigate(MainRoute.LOCATION_PICKER) },
                     onOpenOfflineMaps = { navController.navigate(MainRoute.OFFLINE_MAPS) },
+                    onOpenMapSource = { navController.navigate(MainRoute.MAP_SOURCE) },
                     onOpenAppearance = { navController.navigate(MainRoute.APPEARANCE) },
                     onOpenDangerZone = { navController.navigate(MainRoute.DANGER_ZONE) },
                     onOpenAbout = { navController.navigate(MainRoute.ABOUT) },
@@ -571,6 +574,9 @@ fun MainScreen(
                     devicePreferenceStore = devicePreferenceStore,
                     onBack = { navController.popBackStack() },
                 )
+            }
+            composable(MainRoute.MAP_SOURCE) {
+                MapSourceScreen(onBack = { navController.popBackStack() })
             }
             composable(MainRoute.OFFLINE_MAPS) {
                 OfflineMapSettingsScreen(
