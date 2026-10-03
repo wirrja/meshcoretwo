@@ -1003,6 +1003,17 @@
     <string name="trace_avg_snr">Medel-SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Spara väg</string>
     <string name="trace_path_name">Vägnamn</string>
+    <string name="trace_mode_list">Lista</string>
+    <string name="trace_mode_map">Karta</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d hop</item>
+        <item quantity="other">%1$d hops</item>
+    </plurals>
+    <string name="trace_map_results">Resultat</string>
+    <string name="trace_map_run">Kör</string>
+    <string name="trace_map_center_on_path">Centrera på vägen</string>
+    <string name="trace_map_hint">Tryck på repeatrar på kartan för att lägga till dem i vägen.</string>
+    <string name="trace_map_middle_hop">På kartan kan bara det sista hoppet tas bort. Redigera resten i listan.</string>
     <string name="saved_delete_title">Ta bort väg</string>
     <string name="saved_delete_body">Ta bort ”%1$s”? Detta tar bort vägen och hela körhistoriken.</string>
     <string name="saved_rename_title">Byt namn på väg</string>
@@ -1197,6 +1208,9 @@
     <string name="nav_map">Karta</string>
     <string name="rf_frequency">Frekvens</string>
     <string name="los_err_analysis">Analysen misslyckades</string>
+    <string name="err_elevation_network">Det gick inte att läsa in höjddata. Kontrollera internetanslutningen.</string>
+    <string name="err_elevation_data">Höjdtjänsten returnerade oanvändbara data.</string>
+    <string name="err_elevation_busy">Höjdtjänsten är upptagen. Försök igen om en minut.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Batteri</string>

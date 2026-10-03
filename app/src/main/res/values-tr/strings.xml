@@ -1003,6 +1003,17 @@
     <string name="trace_avg_snr">Ort. SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Yolu kaydet</string>
     <string name="trace_path_name">Yol adı</string>
+    <string name="trace_mode_list">Liste</string>
+    <string name="trace_mode_map">Harita</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d hop</item>
+        <item quantity="other">%1$d hop</item>
+    </plurals>
+    <string name="trace_map_results">Sonuçlar</string>
+    <string name="trace_map_run">Başlat</string>
+    <string name="trace_map_center_on_path">Yolu ortala</string>
+    <string name="trace_map_hint">Yola eklemek için haritadaki tekrarlayıcılara dokunun.</string>
+    <string name="trace_map_middle_hop">Haritada yalnızca son hop kaldırılabilir. Diğerlerini listede düzenleyin.</string>
     <string name="saved_delete_title">Yolu sil</string>
     <string name="saved_delete_body">“%1$s” silinsin mi? Bu işlem yolu ve tüm çalıştırma geçmişini kaldırır.</string>
     <string name="saved_rename_title">Yolu yeniden adlandır</string>
@@ -1197,6 +1208,9 @@
     <string name="nav_map">Harita</string>
     <string name="rf_frequency">Frekans</string>
     <string name="los_err_analysis">Analiz başarısız oldu</string>
+    <string name="err_elevation_network">Yükseklik verisi yüklenemedi. İnternet bağlantısını kontrol edin.</string>
+    <string name="err_elevation_data">Yükseklik servisi kullanılamaz veri döndürdü.</string>
+    <string name="err_elevation_busy">Yükseklik servisi meşgul. Bir dakika sonra tekrar deneyin.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Pil</string>

@@ -3,6 +3,36 @@
 Notable user-facing changes to MeshCore Two, release by release, in Russian and English
 (from 1.1.19). Dates are UTC+3 (Moscow).
 
+## 1.1.23 — 2026-10-03
+
+### Русский
+
+- **Трассировка пути на карте.** В «Инструменты → Трассировка пути» вверху появился переключатель
+  «Список / Карта». На карте путь собирается нажатиями на репитеры — и из контактов, и найденные
+  поиском узлов; повторное нажатие на последний hop убирает его. Трассировку можно запустить прямо
+  с карты: после ответа каждый участок пути раскрашивается по SNR, который сообщил его hop.
+  Кнопки очистки пути, запуска и результатов плавают над картой.
+- **Высоты для «Прямой видимости» без VPN.** Профиль рельефа раньше загружался только с
+  Open-Meteo, а этот сервис из России работает с перебоями — поэтому анализ получался, только
+  когда был включён VPN. Теперь высоты берутся из тайлов рельефа Mapterhorn с того же сервера
+  VersaTiles, что и карта VersaTiles, и хранятся в кэше на телефоне; Open-Meteo остался
+  запасным вариантом. Под профилем указан источник данных, а ошибки загрузки высот переведены.
+- **Компас на карте** при повороте больше не прячется под строкой поиска узлов.
+
+### English
+
+- **Trace Path on a map.** Tools → Trace Path now has a List / Map switch at the top. On the map
+  you build the path by tapping repeaters, both contacts and ones found by node discovery; tapping
+  the last hop again takes it back. The trace runs straight from the map: once it answers, each
+  segment of the path is colored by the SNR its hop reported. Clearing the path, running the trace
+  and opening the results are floating buttons over the map.
+- **Line of Sight elevations without a VPN.** The terrain profile used to come only from
+  Open-Meteo, which is unreliable from Russia, so the analysis only worked with a VPN on.
+  Elevations now come from Mapterhorn terrain tiles on the same VersaTiles server as the
+  VersaTiles basemap and are cached on the phone; Open-Meteo stays as the fallback. The profile
+  credits the data source it used, and elevation loading errors are translated.
+- **The map's compass** no longer hides under the node search bar when the map is rotated.
+
 ## 1.1.22 — 2026-10-03
 
 ### Русский

@@ -14,6 +14,7 @@ import com.meshcoretwo.services.location.LocationProviderError
 import com.meshcoretwo.services.messages.MessageServiceError
 import com.meshcoretwo.services.pairing.DevicePairingError
 import com.meshcoretwo.services.remotenode.RemoteNodeError
+import com.meshcoretwo.services.rf.ElevationServiceError
 import com.meshcoretwo.services.sendqueue.ChatSendQueueServiceError
 import com.meshcoretwo.services.settings.KeyGenerationService
 import com.meshcoretwo.services.settings.SettingsServiceError
@@ -123,6 +124,11 @@ private fun Throwable.localizedOrNull(): UiText? = when (this) {
         LocationProviderError.NoProviderAvailable -> UiText.of(R.string.err_location_no_provider)
         LocationProviderError.Timeout -> UiText.of(R.string.err_location_timeout)
         else -> null
+    }
+    is ElevationServiceError -> when (this) {
+        is ElevationServiceError.NetworkError -> UiText.of(R.string.err_elevation_network)
+        ElevationServiceError.RateLimited -> UiText.of(R.string.err_elevation_busy)
+        else -> UiText.of(R.string.err_elevation_data)
     }
     is MeshCoreError -> when (this) {
         MeshCoreError.Timeout -> UiText.of(R.string.err_operation_timeout)

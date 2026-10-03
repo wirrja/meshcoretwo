@@ -1001,6 +1001,16 @@
     <string name="trace_avg_snr">平均 SNR：%1$s dB（%2$s – %3$s）</string>
     <string name="trace_save_path">保存路径</string>
     <string name="trace_path_name">路径名称</string>
+    <string name="trace_mode_list">列表</string>
+    <string name="trace_mode_map">地图</string>
+    <plurals name="trace_map_hops">
+        <item quantity="other">%1$d 个 hop</item>
+    </plurals>
+    <string name="trace_map_results">结果</string>
+    <string name="trace_map_run">运行</string>
+    <string name="trace_map_center_on_path">以路径为中心</string>
+    <string name="trace_map_hint">点按地图上的中继器，将其添加到路径。</string>
+    <string name="trace_map_middle_hop">在地图上只能移除最后一个 hop。其余的请在列表中编辑。</string>
     <string name="saved_delete_title">删除路径</string>
     <string name="saved_delete_body">删除“%1$s”？这将移除该路径及其所有运行历史。</string>
     <string name="saved_rename_title">重命名路径</string>
@@ -1195,6 +1205,9 @@
     <string name="nav_map">地图</string>
     <string name="rf_frequency">频率</string>
     <string name="los_err_analysis">分析失败</string>
+    <string name="err_elevation_network">无法加载海拔数据。请检查网络连接。</string>
+    <string name="err_elevation_data">海拔服务返回的数据无法使用。</string>
+    <string name="err_elevation_busy">海拔服务繁忙，请一分钟后重试。</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">电池</string>

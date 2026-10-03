@@ -42,6 +42,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextMeasurer
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.meshcoretwo.android.R
 import com.meshcoretwo.android.about.AppLinks
 import com.meshcoretwo.services.rf.ElevationSample
+import com.meshcoretwo.services.rf.ElevationSource
 import com.meshcoretwo.services.rf.ProfileSample
 import java.util.Locale
 import kotlin.math.ceil
@@ -117,19 +119,43 @@ fun TerrainProfileCanvas(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
-                buildAnnotatedString {
-                    append("Elevation data: Copernicus DEM GLO-90 via ")
-                    val linkStart = length
-                    append("Open-Meteo")
-                    addStyle(SpanStyle(textDecoration = TextDecoration.Underline), linkStart, length)
-                    addLink(LinkAnnotation.Url(AppLinks.OPEN_METEO), linkStart, length)
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            )
+            ElevationAttribution(elevationProfile)
         }
     }
+}
+
+/** Credits whichever dataset(s) the shown profile came from, see [ElevationSource]. */
+@Composable
+private fun ElevationAttribution(elevationProfile: List<ElevationSample>) {
+    val sources = remember(elevationProfile) { elevationProfile.mapNotNull { it.source }.distinct() }
+    if (sources.isEmpty()) return
+    Text(
+        buildAnnotatedString {
+            append("Elevation data: ")
+            sources.forEachIndexed { index, source ->
+                if (index > 0) append("; ")
+                when (source) {
+                    ElevationSource.MAPTERHORN -> {
+                        appendLink("© Mapterhorn", AppLinks.MAPTERHORN_ATTRIBUTION)
+                        append(" via VersaTiles")
+                    }
+                    ElevationSource.OPEN_METEO -> {
+                        append("Copernicus DEM GLO-90 via ")
+                        appendLink("Open-Meteo", AppLinks.OPEN_METEO)
+                    }
+                }
+            }
+        },
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+    )
+}
+
+private fun AnnotatedString.Builder.appendLink(text: String, url: String) {
+    val linkStart = length
+    append(text)
+    addStyle(SpanStyle(textDecoration = TextDecoration.Underline), linkStart, length)
+    addLink(LinkAnnotation.Url(url), linkStart, length)
 }
 
 @Composable

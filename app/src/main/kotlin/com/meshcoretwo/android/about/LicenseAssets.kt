@@ -31,4 +31,5 @@ object AppLinks {
     const val MESHCORE_ONLINE_MAP = "https://map.meshcore.io/"
     const val OPENSTREETMAP_COPYRIGHT = "https://www.openstreetmap.org/copyright"
     const val OPEN_METEO = "https://open-meteo.com/"
+    const val MAPTERHORN_ATTRIBUTION = "https://mapterhorn.com/attribution"
 }

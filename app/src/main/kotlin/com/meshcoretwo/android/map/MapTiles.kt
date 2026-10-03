@@ -8,6 +8,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.SystemClock
 import androidx.core.content.edit
+import com.meshcoretwo.services.utilities.HTTP_USER_AGENT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -47,7 +48,7 @@ object MapTileProbe {
                 connectTimeout = CONNECT_TIMEOUT_MS
                 readTimeout = READ_TIMEOUT_MS
                 instanceFollowRedirects = true
-                setRequestProperty("User-Agent", USER_AGENT)
+                setRequestProperty("User-Agent", HTTP_USER_AGENT)
             }
             val code = connection.responseCode
             if (code !in 200..299) return@withContext MapProbeResult.Unreachable("HTTP $code")
@@ -69,9 +70,6 @@ object MapTileProbe {
             connection?.disconnect()
         }
     }
-
-    /** Names the app, as the OSM tile usage policy asks of every client. */
-    private const val USER_AGENT = "MeshCoreTwo (Android; +https://github.com/wirrja/meshcoretwo)"
 }
 
 /**

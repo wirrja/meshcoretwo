@@ -1011,6 +1011,17 @@
     <string name="trace_avg_snr">Avg SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Save Path</string>
     <string name="trace_path_name">Path name</string>
+    <string name="trace_mode_list">List</string>
+    <string name="trace_mode_map">Map</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d hop</item>
+        <item quantity="other">%1$d hops</item>
+    </plurals>
+    <string name="trace_map_results">Results</string>
+    <string name="trace_map_run">Run Trace</string>
+    <string name="trace_map_center_on_path">Center on path</string>
+    <string name="trace_map_hint">Tap repeaters on the map to add them to the path.</string>
+    <string name="trace_map_middle_hop">On the map only the last hop can be removed. Edit the rest in the list.</string>
     <string name="saved_delete_title">Delete Path</string>
     <string name="saved_delete_body">Delete “%1$s”? This will remove the path and all run history.</string>
     <string name="saved_rename_title">Rename Path</string>
@@ -1205,6 +1216,9 @@
     <string name="nav_map">Map</string>
     <string name="rf_frequency">Frequency</string>
     <string name="los_err_analysis">Analysis failed</string>
+    <string name="err_elevation_network">Couldn’t load elevation data. Check the internet connection.</string>
+    <string name="err_elevation_data">The elevation service returned unusable data.</string>
+    <string name="err_elevation_busy">The elevation service is busy. Try again in a minute.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Battery</string>

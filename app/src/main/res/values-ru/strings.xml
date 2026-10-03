@@ -1007,6 +1007,19 @@
     <string name="trace_avg_snr">Средний SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Сохранить путь</string>
     <string name="trace_path_name">Название пути</string>
+    <string name="trace_mode_list">Список</string>
+    <string name="trace_mode_map">Карта</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">Hops: %1$d</item>
+        <item quantity="few">Hops: %1$d</item>
+        <item quantity="many">Hops: %1$d</item>
+        <item quantity="other">Hops: %1$d</item>
+    </plurals>
+    <string name="trace_map_results">Результаты</string>
+    <string name="trace_map_run">Запустить</string>
+    <string name="trace_map_center_on_path">Показать весь путь</string>
+    <string name="trace_map_hint">Нажимайте на репитеры на карте, чтобы добавить их в путь.</string>
+    <string name="trace_map_middle_hop">На карте можно убрать только последний hop. Остальные правятся в списке.</string>
     <string name="saved_delete_title">Удалить путь</string>
     <string name="saved_delete_body">Удалить «%1$s»? Путь и вся история запусков будут удалены.</string>
     <string name="saved_rename_title">Переименовать путь</string>
@@ -1201,6 +1214,9 @@
     <string name="nav_map">Карта</string>
     <string name="rf_frequency">Частота</string>
     <string name="los_err_analysis">Не удалось выполнить анализ</string>
+    <string name="err_elevation_network">Не удалось загрузить данные о высоте. Проверьте подключение к интернету.</string>
+    <string name="err_elevation_data">Сервис высот вернул непригодные данные.</string>
+    <string name="err_elevation_busy">Сервис высот перегружен. Повторите через минуту.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Батарея</string>

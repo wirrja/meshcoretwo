@@ -1005,6 +1005,18 @@
     <string name="trace_avg_snr">SNR moyen : %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Enregistrer le chemin</string>
     <string name="trace_path_name">Nom du chemin</string>
+    <string name="trace_mode_list">Liste</string>
+    <string name="trace_mode_map">Carte</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d hop</item>
+        <item quantity="many">%1$d hops</item>
+        <item quantity="other">%1$d hops</item>
+    </plurals>
+    <string name="trace_map_results">Résultats</string>
+    <string name="trace_map_run">Lancer</string>
+    <string name="trace_map_center_on_path">Centrer sur le chemin</string>
+    <string name="trace_map_hint">Touchez des répéteurs sur la carte pour les ajouter au chemin.</string>
+    <string name="trace_map_middle_hop">Sur la carte, seul le dernier hop peut être retiré. Modifiez les autres dans la liste.</string>
     <string name="saved_delete_title">Supprimer le chemin</string>
     <string name="saved_delete_body">Supprimer « %1$s » ? Cela supprimera le chemin et tout l’historique des exécutions.</string>
     <string name="saved_rename_title">Renommer le chemin</string>
@@ -1199,6 +1211,9 @@
     <string name="nav_map">Carte</string>
     <string name="rf_frequency">Fréquence</string>
     <string name="los_err_analysis">Échec de l\'analyse</string>
+    <string name="err_elevation_network">Impossible de charger les données d’altitude. Vérifiez la connexion Internet.</string>
+    <string name="err_elevation_data">Le service d’altitude a renvoyé des données inutilisables.</string>
+    <string name="err_elevation_busy">Le service d’altitude est surchargé. Réessayez dans une minute.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Batterie</string>

@@ -50,7 +50,7 @@ import com.meshcoretwo.services.connection.ConnectionManager
  * [result] is the trace snapshot that triggered showing this screen (fixed for its lifetime,
  * matching Swift's `.sheet(item:)`); batch-mode aggregates (per-hop stats, RTT, progress) instead
  * read live off [viewModel]'s state, since they keep updating while a batch trace is still running
- * underneath this screen. [TracePathListScreen] owns calling [TracePathViewModel.cancelBatchTrace]
+ * underneath this screen. [TracePathScreen] owns calling [TracePathViewModel.cancelBatchTrace]
  * on dismiss if a batch is still in progress, mirroring `TracePathView.swift`'s `.sheet(onDismiss:)`.
  */
 @OptIn(ExperimentalMaterial3Api::class)

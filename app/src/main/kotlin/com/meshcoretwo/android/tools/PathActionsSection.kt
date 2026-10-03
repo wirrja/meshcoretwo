@@ -22,7 +22,7 @@ import com.meshcoretwo.android.R
 
 /**
  * Path configuration toggles, hash-size override, and the copy/clear actions. Ported from
- * `PathActionsSectionView.swift`, only shown by [TracePathListScreen] while the path is non-empty
+ * `PathActionsSectionView.swift`, only shown by [TracePathListContent] while the path is non-empty
  * (same as Swift's `if !viewModel.outboundPath.isEmpty` guard around the whole section body). The
  * hash-size `Picker` becomes a [FilterChip] row (same convention as `AddHopSegmentPicker`) instead
  * of a dropdown menu — this port doesn't use `DropdownMenu` for single-choice pickers elsewhere.

@@ -118,7 +118,7 @@ import com.meshcoretwo.android.tools.LineOfSightScreen
 import com.meshcoretwo.android.tools.RxLogScreen
 import com.meshcoretwo.android.tools.ToolsScreen
 import com.meshcoretwo.android.tools.NodeDiscoveryScreen
-import com.meshcoretwo.android.tools.TracePathListScreen
+import com.meshcoretwo.android.tools.TracePathScreen
 import com.meshcoretwo.android.ui.components.LocalOpenDeviceSelection
 import com.meshcoretwo.android.ui.theme.ThemeService
 import com.meshcoretwo.services.backup.AppBackupService
@@ -535,8 +535,9 @@ fun MainScreen(
                 NodeDiscoveryScreen(connectionManager = connectionManager, onBack = { navController.popBackStack() })
             }
             composable(MainRoute.TRACE_PATH) {
-                TracePathListScreen(
+                TracePathScreen(
                     connectionManager = connectionManager,
+                    locationProvider = locationProvider,
                     prefs = prefs,
                     onBack = { navController.popBackStack() },
                 )

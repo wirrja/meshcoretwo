@@ -1003,6 +1003,17 @@
     <string name="trace_avg_snr">Keskim. SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Tallenna reitti</string>
     <string name="trace_path_name">Reitin nimi</string>
+    <string name="trace_mode_list">Lista</string>
+    <string name="trace_mode_map">Kartta</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d hop</item>
+        <item quantity="other">%1$d hopia</item>
+    </plurals>
+    <string name="trace_map_results">Tulokset</string>
+    <string name="trace_map_run">Suorita</string>
+    <string name="trace_map_center_on_path">Keskitä reittiin</string>
+    <string name="trace_map_hint">Lisää toistimia reitille napauttamalla niitä kartalla.</string>
+    <string name="trace_map_middle_hop">Kartalla voi poistaa vain viimeisen hopin. Muokkaa muita listassa.</string>
     <string name="saved_delete_title">Poista reitti</string>
     <string name="saved_delete_body">Poistetaanko ”%1$s”? Tämä poistaa reitin ja koko ajohistorian.</string>
     <string name="saved_rename_title">Nimeä reitti uudelleen</string>
@@ -1197,6 +1208,9 @@
     <string name="nav_map">Kartta</string>
     <string name="rf_frequency">Taajuus</string>
     <string name="los_err_analysis">Analyysi epäonnistui</string>
+    <string name="err_elevation_network">Korkeustietoja ei voitu ladata. Tarkista internetyhteys.</string>
+    <string name="err_elevation_data">Korkeuspalvelu palautti käyttökelvottomia tietoja.</string>
+    <string name="err_elevation_busy">Korkeuspalvelu on ruuhkautunut. Yritä uudelleen minuutin kuluttua.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Akku</string>

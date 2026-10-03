@@ -3,8 +3,8 @@
 package com.meshcoretwo.android.contacts
 
 import com.meshcoretwo.android.map.MapFilterState
+import com.meshcoretwo.android.map.SnrLink
 import com.meshcoretwo.android.pathediting.NeighborNameResolver
-import com.meshcoretwo.android.tools.LOSFormatters
 import com.meshcoretwo.protocol.Neighbour
 import com.meshcoretwo.protocol.hexString
 import com.meshcoretwo.services.location.LocationFix
@@ -15,8 +15,6 @@ import com.meshcoretwo.services.rendering.NodeNameMatchKind
 import com.meshcoretwo.services.rendering.SNRQuality
 import com.meshcoretwo.services.rf.GeoCoordinate
 import com.meshcoretwo.services.rf.RFCalculator
-import java.util.Locale
-import kotlin.math.abs
 
 /** A repeater or a located neighbor, plotted on the SNR map. */
 enum class SnrMapPointRole { CENTER, NEIGHBOR }
@@ -129,21 +127,17 @@ object NeighborSnrMapBuilder {
             )
 
             val distance = RFCalculator.distance(GeoCoordinate(centerLatitude, centerLongitude), GeoCoordinate(latitude, longitude))
-            val midpoint = midpoint(centerLatitude, centerLongitude, latitude, longitude)
+            val midpoint = SnrLink.midpoint(centerLatitude, centerLongitude, latitude, longitude)
             badges += SnrMapBadge(
                 id = "badge-$prefixHex",
                 latitude = midpoint.first,
                 longitude = midpoint.second,
-                text = snrBadgeText(distance, neighbor.snr),
+                text = SnrLink.badgeText(distance, neighbor.snr),
             )
         }
 
         return PlottedNeighbors(points, lines, badges, disambiguatingUnresolved(unplottable))
     }
-
-    /** "120 m · -3.2 dB". */
-    private fun snrBadgeText(distanceMeters: Double, snr: Double): String =
-        "${LOSFormatters.formatDistance(distanceMeters)} · ${"%.1f".format(Locale.US, snr)} dB"
 
     /**
      * Distinct unresolved neighbors can share the clamped key prefix and look identical; colliding
@@ -165,20 +159,4 @@ object NeighborSnrMapBuilder {
     }
 
     private fun isPlottable(latitude: Double, longitude: Double): Boolean = latitude in -90.0..90.0 && longitude in -180.0..180.0
-
-    /**
-     * Geographic midpoint of two coordinates, shifting one longitude by 360° before averaging when
-     * the pair straddles the antimeridian so the badge lands between them rather than on the
-     * opposite hemisphere.
-     */
-    private fun midpoint(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Pair<Double, Double> {
-        var a = lon1
-        var b = lon2
-        if (abs(a - b) > 180) {
-            if (a < b) a += 360 else b += 360
-        }
-        var midLongitude = (a + b) / 2
-        if (midLongitude > 180) midLongitude -= 360
-        return (lat1 + lat2) / 2 to midLongitude
-    }
 }

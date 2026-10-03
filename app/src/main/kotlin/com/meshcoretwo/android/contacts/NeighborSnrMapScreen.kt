@@ -49,6 +49,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.map.SnrLink
 import com.meshcoretwo.android.map.setBaseStyle
 import com.meshcoretwo.android.ui.components.rememberLocationPermissionAction
 import com.meshcoretwo.android.ui.components.rememberMapViewWithLifecycle
@@ -56,7 +57,6 @@ import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.location.LocationProvider
 import com.meshcoretwo.services.location.LocationProviderError
 import com.meshcoretwo.services.rendering.NodeNameMatchKind
-import com.meshcoretwo.services.rendering.SNRQuality
 import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -254,20 +254,6 @@ private const val CENTER_STROKE_COLOR = "#6A1B9A"
 private const val NEIGHBOR_COLOR = "#F59E0B"
 private const val NEIGHBOR_STROKE_COLOR = "#FFFFFF"
 
-/**
- * Hex line/casing color per [SNRQuality] — the light-theme values of `ui.theme`'s success/caution
- * /danger tokens (same ones `TraceResultHopRow.kt`'s `signalColor` uses), fixed rather than read
- * from [LocalMeshExtendedColors][com.meshcoretwo.android.ui.theme.LocalMeshExtendedColors]: this
- * builds a MapLibre style JSON once per `attach()`, not a `@Composable`, and the map isn't
- * re-styled on theme change (same reasoning as this file's other fixed map colors below).
- */
-private fun SNRQuality.lineColorHex(): String = when (this) {
-    SNRQuality.EXCELLENT, SNRQuality.GOOD -> "#1B6D24"
-    SNRQuality.FAIR -> "#835400"
-    SNRQuality.POOR -> "#B91D20"
-    SNRQuality.UNKNOWN -> "#9E9E9E"
-}
-
 @Composable
 private fun NeighborSnrMapLibreView(modifier: Modifier, controller: NeighborSnrMapController) {
     val mapView = rememberMapViewWithLifecycle()
@@ -415,7 +401,7 @@ private fun List<SnrMapLine>.toLineFeatureCollection(): FeatureCollection = Feat
         Feature.fromGeometry(
             LineString.fromLngLats(listOf(GeoPoint.fromLngLat(line.fromLongitude, line.fromLatitude), GeoPoint.fromLngLat(line.toLongitude, line.toLatitude))),
         ).apply {
-            addStringProperty(PROP_COLOR, line.quality.lineColorHex())
+            addStringProperty(PROP_COLOR, SnrLink.lineColorHex(line.quality))
         }
     },
 )

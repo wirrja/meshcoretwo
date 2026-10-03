@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -125,6 +126,8 @@ fun MapScreen(
     val points = (uiState as? MapUiState.Ready)?.points.orEmpty()
 
     val controller = remember { MapMarkerController() }
+    // The search bar covers the top of the map: 12 dp padding plus a 56 dp text field.
+    controller.compassMarginsPx = with(LocalDensity.current) { intArrayOf(0, 80.dp.roundToPx(), 12.dp.roundToPx(), 0) }
     var hasAutoCentered by rememberSaveable { mutableStateOf(false) }
     var selectedPoint by remember { mutableStateOf<MapPoint?>(null) }
     var showFilterMenu by remember { mutableStateOf(false) }
@@ -439,6 +442,9 @@ private const val CLUSTER_COLOR = "#2563EB"
 private class MapMarkerController {
     var onMarkerTap: ((MapPoint) -> Unit)? = null
 
+    /** Compass margins left, top, right, bottom; the top one keeps it below the search bar. */
+    var compassMarginsPx: IntArray = intArrayOf(0, 0, 0, 0)
+
     private var map: MapLibreMap? = null
     private var attached = false
     private var pointsSource: GeoJsonSource? = null
@@ -456,6 +462,8 @@ private class MapMarkerController {
         if (attached) return
         attached = true
 
+        val (left, top, right, bottom) = compassMarginsPx
+        map.uiSettings.setCompassMargins(left, top, right, bottom)
         map.addOnMapClickListener { latLng -> handleTap(map, latLng) }
 
         map.setBaseStyle { style, labelFont ->

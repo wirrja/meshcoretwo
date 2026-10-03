@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,7 @@ import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.location.LocationProvider
 import com.meshcoretwo.services.location.LocationProviderError
 import com.meshcoretwo.services.persistence.ContactDto
+import com.meshcoretwo.services.rf.FallbackElevationService
 import com.meshcoretwo.services.rf.GeoCoordinate
 import java.util.UUID
 import kotlinx.coroutines.delay
@@ -104,7 +106,10 @@ fun LineOfSightScreen(
     prefs: SharedPreferences,
     onBack: () -> Unit,
 ) {
-    val viewModel: LineOfSightViewModel = viewModel(factory = LineOfSightViewModel.Factory(connectionManager))
+    val context = LocalContext.current
+    val viewModel: LineOfSightViewModel = viewModel(
+        factory = LineOfSightViewModel.Factory(connectionManager, FallbackElevationService.shared(context)),
+    )
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val controller = remember { LosMapController() }

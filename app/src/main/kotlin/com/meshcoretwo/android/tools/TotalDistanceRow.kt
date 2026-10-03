@@ -20,7 +20,7 @@ import com.meshcoretwo.android.R
  * Total path distance (repeater-to-repeater, or full path when device location is available) with
  * an info-button entry point into [DistanceInfoScreen]. Ported from `TotalDistanceRow.swift`, minus
  * the row's own `.sheet` — [TracePathResultsScreen] owns showing/hiding the info screen, same as
- * [TracePathListScreen] owns the Add-Hop picker's visibility.
+ * [TracePathScreen] owns the Add-Hop picker's visibility.
  */
 @Composable
 fun TotalDistanceRow(distanceMeters: Double?, isDistanceUsingFallback: Boolean, onShowDistanceInfo: () -> Unit) {

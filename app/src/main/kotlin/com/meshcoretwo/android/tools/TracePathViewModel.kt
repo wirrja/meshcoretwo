@@ -17,13 +17,16 @@ import com.meshcoretwo.android.pathediting.RepeaterResolver
 import com.meshcoretwo.protocol.ContactType
 import com.meshcoretwo.protocol.TraceInfo
 import com.meshcoretwo.protocol.prefixBytes
+import com.meshcoretwo.services.RepeaterResolvable
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.DeviceConnectionState
 import com.meshcoretwo.services.connection.connectedDeviceRecord
 import com.meshcoretwo.services.connection.contactService
+import com.meshcoretwo.services.connection.discoveredNodeStore
 import com.meshcoretwo.services.connection.tracePathService
 import com.meshcoretwo.services.location.LocationFix
 import com.meshcoretwo.services.persistence.ContactDto
+import com.meshcoretwo.services.persistence.DiscoveredNodeDto
 import com.meshcoretwo.services.persistence.TracePathDto
 import com.meshcoretwo.services.persistence.TracePathRunDto
 import com.meshcoretwo.services.rf.GeoCoordinate
@@ -44,10 +47,8 @@ import kotlin.random.Random
 
 /**
  * UI state for the Trace Path builder/executor. Ported from the `@Observable` property set of
- * `TracePathViewModel.swift`, minus Swift's `discoveredRepeaters` (the "Discover" list has no
- * Android equivalent yet — see [com.meshcoretwo.android.pathediting.HopPickerSource]'s doc) and
- * the map/list-UI-only bits (view mode, per-row expansion) that belong to the not-yet-built
- * screen (PLAN.md's Trace Path subslices 4/5).
+ * `TracePathViewModel.swift`, minus the list/map-UI-only bits (view mode, per-row expansion) that
+ * live on [TracePathScreen].
  *
  * [devicePathHashMode] mirrors Swift's `deps.connectedDevice()?.pathHashMode` live read — this
  * port snapshots it into state at construction and on every [TracePathViewModel.loadContacts]
@@ -60,6 +61,8 @@ data class TracePathUiState(
     val outboundPath: List<PathHop> = emptyList(),
     val availableRepeaters: List<ContactDto> = emptyList(),
     val availableRooms: List<ContactDto> = emptyList(),
+    /** Repeaters heard in adverts but not added as contacts; hop resolution falls back to them, and the map plots them. */
+    val discoveredRepeaters: List<DiscoveredNodeDto> = emptyList(),
     val autoReturnPath: Boolean = true,
     /** Recently added hop public keys, newest first. Source for the shared picker's "Recent" section. */
     val recentPublicKeys: List<ByteArray> = emptyList(),
@@ -91,6 +94,7 @@ data class TracePathUiState(
         return outboundPath == other.outboundPath &&
             availableRepeaters == other.availableRepeaters &&
             availableRooms == other.availableRooms &&
+            discoveredRepeaters == other.discoveredRepeaters &&
             autoReturnPath == other.autoReturnPath &&
             recentPublicKeys.size == other.recentPublicKeys.size &&
             recentPublicKeys.zip(other.recentPublicKeys).all { (a, b) -> a.contentEquals(b) } &&
@@ -112,6 +116,7 @@ data class TracePathUiState(
         var result = outboundPath.hashCode()
         result = 31 * result + availableRepeaters.hashCode()
         result = 31 * result + availableRooms.hashCode()
+        result = 31 * result + discoveredRepeaters.hashCode()
         result = 31 * result + autoReturnPath.hashCode()
         result = 31 * result + recentPublicKeys.fold(1) { acc, key -> 31 * acc + key.contentHashCode() }
         result = 31 * result + isRunning.hashCode()
@@ -243,16 +248,15 @@ val TracePathUiState.isDistanceUsingFallback: Boolean
     }
 
 /**
- * Backs the Trace Path tool (diagnostic item 7 in PLAN.md's Phase 5 value list; screen not yet
- * built — subslices 4/5 remain). Ported from `TracePathViewModel.swift`
+ * Backs the Trace Path tool ([TracePathScreen]). Ported from `TracePathViewModel.swift`
  * (`MC1/Views/Tools/TracePath`), minus the map/list-UI state noted on [TracePathUiState]'s doc.
  *
  * Takes [ConnectionManager] directly rather than Swift's closure-based `Dependencies` struct —
  * same convention as [LineOfSightViewModel]/[RxLogViewModel] (`contactService`/`tracePathService`
  * read live off it on demand). [currentLocation] stands in for Swift's `AppState.bestAvailableLocation`
  * — a continuously-updated app-wide location cache Android's port doesn't have yet (see
- * [LineOfSightViewModel]'s own gap); the future screen calls [setCurrentLocation] the same way
- * [LineOfSightScreen] drives its own location fetch.
+ * [LineOfSightViewModel]'s own gap); the map mode fetches a fix once and passes it to
+ * [setCurrentLocation], the list mode leaves it unset.
  *
  * [startListening]/[stopListening] additionally start/stop [ConnectionManager.tracePathService]'s
  * event monitoring (`BinaryProtocolService.startEventMonitoring`), which is *not* part of
@@ -406,14 +410,20 @@ class TracePathViewModel(
 
     // MARK: - Hash Resolution
 
-    /** Resolve hash bytes to the best matching contact name. Ported from `resolveHashToName`. */
+    /** Resolve hash bytes to the best matching node name (contacts first, then discovered). Ported from `resolveHashToName`. */
     fun resolveHashToName(hashBytes: ByteArray): String? = resolveNode(hashBytes)?.resolvableName
 
-    private fun resolveNode(hashBytes: ByteArray): ContactDto? =
-        RepeaterResolver.bestMatch(hashBytes, _uiState.value.availableNodes, currentLocation)
+    private fun resolveNode(hashBytes: ByteArray): RepeaterResolvable? {
+        val state = _uiState.value
+        return RepeaterResolver.bestMatch(hashBytes, state.availableNodes, currentLocation)
+            ?: RepeaterResolver.bestMatch(hashBytes, state.discoveredRepeaters, currentLocation)
+    }
 
-    private fun resolveNode(hop: PathHop): ContactDto? =
-        RepeaterResolver.bestMatch(hop, _uiState.value.availableNodes, currentLocation)
+    private fun resolveNode(hop: PathHop): RepeaterResolvable? {
+        val state = _uiState.value
+        return RepeaterResolver.bestMatch(hop, state.availableNodes, currentLocation)
+            ?: RepeaterResolver.bestMatch(hop, state.discoveredRepeaters, currentLocation)
+    }
 
     // MARK: - Data Loading
 
@@ -434,23 +444,25 @@ class TracePathViewModel(
         val contactService = connectionManager.contactService
         if (contactService == null) {
             allContacts = emptyList()
-            _uiState.update { it.copy(availableRepeaters = emptyList(), availableRooms = emptyList()) }
+            _uiState.update { it.copy(availableRepeaters = emptyList(), availableRooms = emptyList(), discoveredRepeaters = emptyList()) }
             return
         }
         val contacts = contactService.getContacts(radioID)
         allContacts = contacts
+        val discovered = connectionManager.discoveredNodeStore?.fetchDiscoveredNodes(radioID).orEmpty()
         _uiState.update {
             it.copy(
                 availableRepeaters = contacts.filter { c -> c.type == ContactType.REPEATER },
                 availableRooms = contacts.filter { c -> c.type == ContactType.ROOM },
+                discoveredRepeaters = discovered.filter { node -> node.nodeType == ContactType.REPEATER },
             )
         }
     }
 
     // MARK: - Path Manipulation
 
-    /** Adds a node to the outbound path. Ported from `addNode`. */
-    fun addNode(node: ContactDto) {
+    /** Adds a contact or discovered node to the outbound path. Ported from `addNode`. */
+    fun addNode(node: RepeaterResolvable) {
         clearError()
         val hashBytes = node.publicKey.prefixBytes(_uiState.value.hashSize)
         val hop = PathHop(hashBytes = hashBytes, publicKey = node.publicKey, resolvedName = node.resolvableName)

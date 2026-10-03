@@ -211,10 +211,14 @@ fun coordinateAt(profile: List<ElevationSample>, pathFraction: Double): GeoCoord
  * the shared [ConnectionManager] and reading `contactService`/`lastConnectedRadioID` off it
  * on demand. Likewise, the connected device's frequency (kHz) is seeded once at construction
  * from [ConnectionManager.connectedDeviceRecord] instead of a separate `configure(...)` call.
+ *
+ * [elevationService] has no default: the screen passes the shared
+ * [com.meshcoretwo.services.rf.FallbackElevationService] (terrain tiles, then Open-Meteo) rather
+ * than Swift's fixed Open-Meteo client, see that class's doc for why.
  */
 class LineOfSightViewModel(
     private val connectionManager: ConnectionManager,
-    private val elevationService: ElevationService = OpenMeteoElevationService(),
+    private val elevationService: ElevationService,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         LineOfSightUiState(
@@ -752,7 +756,7 @@ class LineOfSightViewModel(
 
     class Factory(
         private val connectionManager: ConnectionManager,
-        private val elevationService: ElevationService = OpenMeteoElevationService(),
+        private val elevationService: ElevationService,
         private val preselectedContact: ContactDto? = null,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

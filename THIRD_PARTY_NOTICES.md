@@ -132,9 +132,16 @@ licenses of this program's code.
 |---|---|---|
 | Map tiles, selectable in Settings → Maps → Map source | [OpenFreeMap](https://openfreemap.org) "liberty" style © [OpenMapTiles](https://openmaptiles.org); [VersaTiles](https://versatiles.org) "colorful" style (MIT) with landcover from [ESA WorldCover 2021](https://esa-worldcover.org/en/data-access); [OpenStreetMap](https://www.openstreetmap.org) standard tiles under the [OSMF tile usage policy](https://operations.osmfoundation.org/policies/tiles/) (no offline download); all with data from [OpenStreetMap](https://www.openstreetmap.org/copyright) | OpenStreetMap data: Open Database License (ODbL) 1.0; ESA WorldCover: CC BY 4.0 |
 | Topographic offline layer | [OpenTopoMap](https://opentopomap.org) | CC BY-SA 3.0; data from OpenStreetMap (ODbL 1.0) and SRTM |
-| Elevation profile (line of sight) | Copernicus DEM GLO-90 via the [Open-Meteo](https://open-meteo.com) Elevation API | Open-Meteo data: CC BY 4.0; the free API is for non-commercial use only. Copernicus DEM notice below (required by the [DEM licence](https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf), Article 6) |
+| Elevation profile (line of sight) | [Mapterhorn](https://mapterhorn.com) terrain tiles (Terrarium WebP, z0–12) served by [VersaTiles](https://versatiles.org) (`tiles.versatiles.org/tiles/elevation`), cached on the device | Mosaic of open elevation data — mainly Copernicus DEM GLO-30, plus national elevation models under CC BY 4.0, public-domain, Licence Ouverte 2.0, Datenlizenz Deutschland and similar open terms; full per-source list and attributions: [mapterhorn.com/attribution](https://mapterhorn.com/attribution). Copernicus DEM notices below |
+| Elevation profile, fallback when the tiles are unreachable | Copernicus DEM GLO-90 via the [Open-Meteo](https://open-meteo.com) Elevation API | Open-Meteo data: CC BY 4.0; the free API is for non-commercial use only. Copernicus DEM notices below (required by the [DEM licence](https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf), Article 6) |
 | Battery discharge (OCV) curve presets | Values from the [Meshtastic firmware](https://github.com/meshtastic/firmware) (GPL-3.0), via MeshCore One | Numeric reference data |
 | Chile radio preset | Community settings of the [MeshChile](https://meshchile.cl) network, via MeshCore One | Numeric reference data |
 
+"produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH
+2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+
 "produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH
 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+
+"The organisations in charge of the Copernicus programme by law or by delegation do not incur any
+liability for any use of the Copernicus WorldDEM-30" (and likewise of the Copernicus WorldDEM-90).

@@ -46,6 +46,7 @@ class OpenMeteoElevationService : ElevationService {
                 coordinate = coordinate,
                 elevation = elevations[index],
                 distanceFromAMeters = RFCalculator.distance(from = startCoordinate, to = coordinate),
+                source = ElevationSource.OPEN_METEO,
             )
         }
     }

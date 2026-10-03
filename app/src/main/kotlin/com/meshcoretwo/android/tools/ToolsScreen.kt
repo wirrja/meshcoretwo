@@ -24,10 +24,8 @@ import com.meshcoretwo.services.connection.ConnectionManager
  * The Tools tab root — a port of `ToolsView.swift`'s list, PLAN.md's Phase 5 item 7. All the
  * diagnostic tools are wired up: RX Log, Node Discovery (`NodeDiscoveryView.swift`, see [NodeDiscoveryScreen]), Line of Sight (`LineOfSightView.swift`, see
  * [LineOfSightScreen]'s class doc for its own 9/10/11/12/13 sub-slice breakdown), and Trace Path
- * (`TracePathListView.swift`, built across slices 14-21 but only reachable here as of slice 22 —
- * [TracePathListScreen] itself still only covers the list view mode, not `TracePathView.swift`'s
- * list/map switcher). The list shape (rather than routing the tab straight to one screen) matches
- * iOS's `ToolSelection.allCases`.
+ * (`TracePathView.swift`, see [TracePathScreen] — list and map modes). The list shape (rather than
+ * routing the tab straight to one screen) matches iOS's `ToolSelection.allCases`.
  *
  * Phase 11 slice 1 replaced the collapsing `LargeTopAppBar` + icon+description [SectionCard]s
  * (added PLAN.md's Phase 6 slice 5) with a plain `TopAppBar` + [SettingsListRow] per tool — the

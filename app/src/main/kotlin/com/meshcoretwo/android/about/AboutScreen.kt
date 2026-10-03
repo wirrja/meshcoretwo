@@ -44,12 +44,20 @@ private const val GPL_NOTICE =
         "even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU " +
         "General Public License for more details."
 
-// Verbatim notice required by the Copernicus DEM licence (PLAN.md Л3), Article 6(b) — the app shows
+// Verbatim notices required by the Copernicus DEM licence (PLAN.md Л3), Article 6(b) — the app shows
 // elevation values derived from the DEM, not the raw raster, so the "adapted or modified" wording
 // applies: https://docs.sentinel-hub.com/api/latest/static/files/data/dem/resources/license/License-COPDEM-30.pdf
+// GLO-30 is the main global source of the Mapterhorn tiles, GLO-90 is what Open-Meteo serves.
 private const val COPERNICUS_NOTICE =
-    "produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and " +
-        "Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved"
+    "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and " +
+        "Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. " +
+        "produced using Copernicus WorldDEM-90 © DLR e.V. 2010-2014 and © Airbus Defence and " +
+        "Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. " +
+        // Article 6(c), once per DEM.
+        "The organisations in charge of the Copernicus programme by law or by delegation do not incur any " +
+        "liability for any use of the Copernicus WorldDEM-30. " +
+        "The organisations in charge of the Copernicus programme by law or by delegation do not incur any " +
+        "liability for any use of the Copernicus WorldDEM-90."
 
 /**
  * About this app (PLAN.md Л1): name and version, the unofficial-port notice, copyright and the
@@ -136,10 +144,14 @@ fun AboutScreen(
             )
             ExternalLinkRow(stringResource(R.string.about_osm_copyright), AppLinks.OPENSTREETMAP_COPYRIGHT)
             Text(
-                "Elevation data: Copernicus DEM GLO-90 via Open-Meteo (CC BY 4.0)",
+                "Elevation data: © Mapterhorn terrain tiles (Copernicus DEM GLO-30 and other open elevation " +
+                    "data, see their attribution list) served by VersaTiles; if those are unreachable, " +
+                    "Copernicus DEM GLO-90 via Open-Meteo (CC BY 4.0)",
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(COPERNICUS_NOTICE, style = MaterialTheme.typography.labelSmall)
+            ExternalLinkRow("Mapterhorn", AppLinks.MAPTERHORN_ATTRIBUTION)
+            HorizontalDivider()
             ExternalLinkRow("Open-Meteo", AppLinks.OPEN_METEO)
         }
     }

@@ -24,7 +24,7 @@ import com.meshcoretwo.android.pathediting.PathEditMetrics
 import com.meshcoretwo.android.pathediting.PathHop
 
 /**
- * One row of [TracePathListScreen]'s outbound-path list. Ported from `TracePathHopRow.swift`,
+ * One row of [TracePathListContent]'s outbound-path list. Ported from `TracePathHopRow.swift`,
  * with move-up/move-down text buttons standing in for SwiftUI's drag-handle `.onMove` — this port
  * has no drag-reorder library or gesture wired up for `LazyColumn` yet, and a small path (the
  * common case) reorders just as easily one step at a time. Delete is a direct button rather than

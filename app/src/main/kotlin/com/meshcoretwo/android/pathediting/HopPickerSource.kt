@@ -9,9 +9,10 @@ import com.meshcoretwo.services.persistence.ContactDto
  * the contact path editor (hop-capped, once ported from `PathManagementViewModel`) and the trace
  * path builder (uncapped) without depending on either concretely. Ported from `HopPickerSource`.
  *
- * Swift's version also declares `discoveredRepeaters: [DiscoveredNodeDTO]` — the "Discover" list
- * (nodes heard but not yet added as contacts) has no Android equivalent yet (see
- * `AdvertisementService`'s class doc), so implementers resolve against contacts alone for now.
+ * Swift's version also declares `discoveredRepeaters: [DiscoveredNodeDTO]` for a picker section
+ * of repeaters heard but not added as contacts. That section isn't ported, so the picker lists
+ * contacts only; the trace builder still resolves pasted codes against discovered repeaters, and
+ * its map mode lets the user tap them (see `TracePathViewModel`).
  */
 interface HopPickerSource {
     val availableRepeaters: List<ContactDto>

@@ -12,4 +12,15 @@ data class ElevationSample(
     /** Meters above sea level. */
     val elevation: Double,
     val distanceFromAMeters: Double,
+    /** Where the value came from, for the attribution under the terrain profile; `null` for synthetic profiles. */
+    val source: ElevationSource? = null,
 )
+
+/** The dataset behind an [ElevationSample]. Not in Swift, which has Open-Meteo only. */
+enum class ElevationSource {
+    /** Mapterhorn terrain tiles, see [TerrainTileElevationService]. */
+    MAPTERHORN,
+
+    /** Copernicus DEM GLO-90 via the Open-Meteo API, see [OpenMeteoElevationService]. */
+    OPEN_METEO,
+}

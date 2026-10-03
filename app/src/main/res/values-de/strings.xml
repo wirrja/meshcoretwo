@@ -1003,6 +1003,17 @@
     <string name="trace_avg_snr">Mittleres SNR: %1$s dB (%2$s – %3$s)</string>
     <string name="trace_save_path">Pfad speichern</string>
     <string name="trace_path_name">Pfadname</string>
+    <string name="trace_mode_list">Liste</string>
+    <string name="trace_mode_map">Karte</string>
+    <plurals name="trace_map_hops">
+        <item quantity="one">%1$d Hop</item>
+        <item quantity="other">%1$d Hops</item>
+    </plurals>
+    <string name="trace_map_results">Ergebnisse</string>
+    <string name="trace_map_run">Starten</string>
+    <string name="trace_map_center_on_path">Auf Pfad zentrieren</string>
+    <string name="trace_map_hint">Tippe auf Repeater auf der Karte, um sie zum Pfad hinzuzufügen.</string>
+    <string name="trace_map_middle_hop">Auf der Karte lässt sich nur der letzte Hop entfernen. Den Rest bearbeitest du in der Liste.</string>
     <string name="saved_delete_title">Pfad löschen</string>
     <string name="saved_delete_body">„%1$s“ löschen? Dadurch werden der Pfad und der gesamte Laufverlauf entfernt.</string>
     <string name="saved_rename_title">Pfad umbenennen</string>
@@ -1197,6 +1208,9 @@
     <string name="nav_map">Karte</string>
     <string name="rf_frequency">Frequenz</string>
     <string name="los_err_analysis">Analyse fehlgeschlagen</string>
+    <string name="err_elevation_network">Höhendaten konnten nicht geladen werden. Prüfe die Internetverbindung.</string>
+    <string name="err_elevation_data">Der Höhendienst hat unbrauchbare Daten geliefert.</string>
+    <string name="err_elevation_busy">Der Höhendienst ist ausgelastet. Versuche es in einer Minute erneut.</string>
 
     <!-- Radio metric chart titles -->
     <string name="chart_battery">Batterie</string>
