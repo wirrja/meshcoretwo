@@ -23,7 +23,7 @@ private val TappableMinSide = 44.dp
 
 /**
  * Shared theme preview for [ThemeSelectionCard]. The diagonal split signals light+dark support;
- * an un-split swatch signals a dark-only theme ([Theme.Ember]).
+ * an un-split swatch signals a single-appearance theme (Night/Phosphor dark, Daylight light).
  *
  * Ported from `ThemePaletteSwatch.swift`. [thumbnail] drops the 44dp tappable-minimum enforced by
  * default, matching Swift's `.thumbnail`/`.tappable` `SizeStyle` split — unused until a row of many
@@ -42,7 +42,7 @@ fun ThemePaletteSwatch(theme: Theme, modifier: Modifier = Modifier, thumbnail: B
             SwatchPalette(theme, isDark = false, modifier = Modifier.fillMaxSize().clip(DiagonalHalf(top = true)))
             SwatchPalette(theme, isDark = true, modifier = Modifier.fillMaxSize().clip(DiagonalHalf(top = false)))
         } else {
-            SwatchPalette(theme, isDark = true, modifier = Modifier.fillMaxSize())
+            SwatchPalette(theme, isDark = theme.forcedDark ?: true, modifier = Modifier.fillMaxSize())
         }
     }
 }

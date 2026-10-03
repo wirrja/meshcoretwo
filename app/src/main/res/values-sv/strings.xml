@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">System</string>
     <string name="appearance_scheme_light">Ljust</string>
     <string name="appearance_scheme_dark">Mörkt</string>
+    <string name="appearance_experimental_title">Experimentella teman</string>
+    <string name="appearance_experimental_notice">Dessa teman är under utveckling: utseendet kan ändras från version till version.</string>
+    <string name="appearance_group_functional">Funktionella</string>
+    <string name="appearance_group_color">Färger</string>
+    <string name="appearance_group_character">Med karaktär</string>
+    <string name="appearance_scheme_forced">Det här temat väljer själv ljust eller mörkt läge.</string>
     <string name="language_system_default">Systemstandard</string>
 
     <plurals name="chat_heard_times">

@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.ui.theme.LocalAppTheme
 
 /**
  * Shared "grouped list" section container — the Compose analog of iOS's
@@ -46,7 +47,8 @@ fun SectionCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = cardSurfaceColor()),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (LocalAppTheme.current.style.shadow) 1.dp else 0.dp),
+        border = themeOutlineStroke(),
     ) {
         Column(modifier = Modifier.padding(16.dp), content = content)
     }

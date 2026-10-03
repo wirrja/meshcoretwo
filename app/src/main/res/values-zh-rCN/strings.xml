@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">跟随系统</string>
     <string name="appearance_scheme_light">浅色</string>
     <string name="appearance_scheme_dark">深色</string>
+    <string name="appearance_experimental_title">实验性主题</string>
+    <string name="appearance_experimental_notice">这些主题仍在开发中，外观可能随版本变化。</string>
+    <string name="appearance_group_functional">功能型</string>
+    <string name="appearance_group_color">配色</string>
+    <string name="appearance_group_character">个性风格</string>
+    <string name="appearance_scheme_forced">此主题自行决定浅色或深色模式。</string>
     <string name="language_system_default">跟随系统</string>
 
     <plurals name="chat_heard_times">

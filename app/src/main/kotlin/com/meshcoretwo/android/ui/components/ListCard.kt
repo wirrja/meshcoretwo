@@ -23,8 +23,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import com.meshcoretwo.android.ui.theme.LocalAppTheme
 import com.meshcoretwo.android.ui.theme.LocalIsDarkTheme
 
@@ -62,7 +66,7 @@ fun Modifier.listCard(onClick: () -> Unit, onLongClick: (() -> Unit)? = null, em
         .fillMaxWidth()
         .padding(horizontal = 12.dp, vertical = 4.dp)
         .graphicsLayer { scaleX = scale; scaleY = scale }
-        .shadow(1.dp, shape, clip = false)
+        .cardChrome(shape)
         .clip(shape)
         .background(fill)
         .combinedClickable(interactionSource = interaction, indication = LocalIndication.current, onClick = onClick, onLongClick = onLongClick)
@@ -70,7 +74,8 @@ fun Modifier.listCard(onClick: () -> Unit, onLongClick: (() -> Unit)? = null, em
 
 /** Soft accent wash fading into the canvas — painted behind the tab screens so the app has color at
  * the top instead of a flat sheet. Scaled by how colorful the accent is, so near-monochrome themes
- * (ink-on-paper Graphite) get a barely-there tint instead of a muddy grey wash. */
+ * (ink-on-paper Graphite) get a barely-there tint instead of a muddy grey wash. A theme may drop the
+ * wash (Daylight's pure white) and add a decorative [backdropPattern] over the canvas. */
 @Composable
 fun Modifier.accentBackdrop(): Modifier {
     val isDark = LocalIsDarkTheme.current
@@ -81,11 +86,57 @@ fun Modifier.accentBackdrop(): Modifier {
     val chroma = remember(accent) { maxOf(accent.red, accent.green, accent.blue) - minOf(accent.red, accent.green, accent.blue) }
     val strength = (chroma / 0.35f).coerceIn(0f, 1f).let { if (isDark) maxOf(it, 0.5f) else it }
     val alpha = (if (isDark) 0.22f else 0.16f) * strength
-    return this.background(
-        Brush.verticalGradient(
-            0f to accent.copy(alpha = alpha).compositeOver(canvas),
-            0.35f to canvas,
-            1f to canvas,
-        ),
-    )
+    val style = LocalAppTheme.current.style
+    val fill = if (style.accentWash) {
+        Modifier.background(
+            Brush.verticalGradient(
+                0f to accent.copy(alpha = alpha).compositeOver(canvas),
+                0.35f to canvas,
+                1f to canvas,
+            ),
+        )
+    } else {
+        Modifier.background(canvas)
+    }
+    val patternColor = style.patternColor?.resolve(isDark)
+    val patternAccent = style.patternAccent?.resolve(isDark)?.takeIf { it.alpha > 0f }
+    val pattern = if (patternColor != null) Modifier.backdropPattern(style.pattern, patternColor, patternAccent) else Modifier
+    return this.then(fill).then(pattern)
+}
+
+/**
+ * The floating-card treatment for a surface of [shape]: the classic soft drop shadow, or the theme's
+ * colored glow, plus its hairline outline when it has one ([com.meshcoretwo.android.ui.theme.ThemeStyle]).
+ * Apply before `clip`/`background` so the shadow sits outside the shape and the outline draws over
+ * the fill.
+ */
+@Composable
+fun Modifier.cardChrome(shape: Shape, elevation: Dp = 1.dp): Modifier {
+    val style = LocalAppTheme.current.style
+    val isDark = LocalIsDarkTheme.current
+    val glow = style.glow?.resolve(isDark)?.takeIf { it.alpha > 0f }
+    val outline = style.outline?.resolve(isDark)
+    val shadowed = when {
+        glow != null -> shadow(elevation * GLOW_ELEVATION_FACTOR, shape, clip = false, ambientColor = glow, spotColor = glow)
+        style.shadow -> shadow(elevation, shape, clip = false)
+        else -> this
+    }
+    return if (outline != null) shadowed.border(style.outlineWidth, outline, shape) else shadowed
+}
+
+/** A glow needs more blur than a drop shadow to read as light rather than as a dark rim. */
+private const val GLOW_ELEVATION_FACTOR = 6f
+
+/** The theme's card outline color, or transparent when it has none — for components that take a
+ * border color rather than a stroke (outlined text fields, chips). */
+@Composable
+fun themeOutlineColor(): Color = LocalAppTheme.current.style.outline?.resolve(LocalIsDarkTheme.current) ?: Color.Transparent
+
+/** The theme's card outline as a [BorderStroke] for Material components that take one (`Card`,
+ * `Surface`); `null` when the theme has none. */
+@Composable
+fun themeOutlineStroke(): BorderStroke? {
+    val style = LocalAppTheme.current.style
+    val outline = style.outline?.resolve(LocalIsDarkTheme.current) ?: return null
+    return BorderStroke(style.outlineWidth, outline)
 }

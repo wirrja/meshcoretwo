@@ -3,7 +3,6 @@
 package com.meshcoretwo.android.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -11,10 +10,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.meshcoretwo.android.R
+import com.meshcoretwo.android.ui.theme.LocalAppTheme
+import com.meshcoretwo.android.ui.theme.pill
 
 /**
  * Borderless pill-shaped search field — replaces the plain-rectangle `OutlinedTextField` search
@@ -36,10 +36,10 @@ fun SearchPillField(
         placeholder = { Text(placeholder) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
         singleLine = true,
-        shape = CircleShape,
+        shape = LocalAppTheme.current.style.corners.pill,
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = themeOutlineColor(),
+            focusedBorderColor = themeOutlineColor(),
             unfocusedContainerColor = cardSurfaceColor(),
             focusedContainerColor = cardSurfaceColor(),
         ),

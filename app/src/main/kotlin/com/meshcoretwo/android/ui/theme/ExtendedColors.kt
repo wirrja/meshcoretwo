@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.Color
  * Status colors outside Material3's baseline `ColorScheme` roles — success/caution/warning/danger/
  * info (theme-adaptive) and the fixed BLE/radio status hues (neither adaptive). Unlike the identity
  * gamut and category avatar colors (Phase 6 slice 3 moved those onto [Theme] — they vary per
- * *selected theme*, not per appearance), every field here is the same across all 10 built-in
- * themes, matching iOS where `ClearanceStatus`/`SNRQuality`/`RxLogView`'s status colors and
+ * *selected theme*, not per appearance), every field here is the same across the built-in themes —
+ * except Night, which swaps in red-only [NightExtendedColors] via `Theme.extendedColorsOverride` — matching iOS where `ClearanceStatus`/`SNRQuality`/`RxLogView`'s status colors and
  * `AppColors.Radio` are system-adaptive/fixed constants independent of `Theme`. See `Color.kt`'s
  * doc comment for how each value was derived and which iOS source each maps to.
  */

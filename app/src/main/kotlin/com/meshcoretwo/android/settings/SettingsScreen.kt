@@ -2,8 +2,8 @@
 
 package com.meshcoretwo.android.settings
 
+import com.meshcoretwo.android.ui.components.cardChrome
 import com.meshcoretwo.android.ui.components.cardSurfaceColor
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.background
@@ -356,7 +356,7 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(1.dp, shape, clip = false)
+            .cardChrome(shape)
             .clip(shape)
             .background(cardSurfaceColor())
             .padding(horizontal = 16.dp, vertical = 4.dp),

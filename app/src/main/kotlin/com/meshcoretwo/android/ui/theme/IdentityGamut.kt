@@ -27,6 +27,12 @@ data class IdentityGamut(
      * hue physically cannot reach the luminance a dark background demands at full saturation.
      */
     val saturation: ClosedFloatingPointRange<Double>,
+    /**
+     * Cap on how far (degrees) a name may drift from its anchor. Unbounded by default: the jitter
+     * spans half the gap to each neighbor. A single-hue theme (Night's reds, Phosphor's greens)
+     * sets it, because its one wide wrap-around gap would otherwise carry names into foreign hues.
+     */
+    val maxJitter: Double = Double.POSITIVE_INFINITY,
 ) {
     /** Hue, saturation, and brightness a name resolves to, before constructing the [Color]. */
     data class Resolved(val hue: Double, val saturation: Double, val brightness: Double)
@@ -137,7 +143,7 @@ data class IdentityGamut(
         val gapNext = circularGap(anchor, next)
         val gapPrev = circularGap(prev, anchor)
         val fraction = fraction(seed, shift = 16) * 2 - 1
-        val jitter = if (fraction >= 0) fraction * gapNext / 2 else fraction * gapPrev / 2
+        val jitter = (if (fraction >= 0) fraction * gapNext / 2 else fraction * gapPrev / 2).coerceIn(-maxJitter, maxJitter)
         val raw = (anchor + jitter) % DEGREES_PER_CIRCLE
         return if (raw < 0) raw + DEGREES_PER_CIRCLE else raw
     }

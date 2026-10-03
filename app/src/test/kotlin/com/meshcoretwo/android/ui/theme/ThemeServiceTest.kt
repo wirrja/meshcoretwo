@@ -42,6 +42,15 @@ class ThemeServiceTest {
     }
 
     @Test
+    fun `a persisted experimental theme ID is adopted without write-back`() {
+        val prefs = FakeSharedPreferences()
+        prefs.edit().putString("selectedThemeID", ExperimentalThemes.Topo.id).apply()
+        val service = ThemeService(prefs)
+        assertEquals(ExperimentalThemes.Topo.id, service.current.value.id)
+        assertEquals(ExperimentalThemes.Topo.id, prefs.getString("selectedThemeID", null))
+    }
+
+    @Test
     fun `a retired theme ID falls back to Default and is overwritten`() {
         for (retired in listOf("ember", "fern", "marine", "olive", "lavender", "sakura", "solarized", "nord", "catppuccin")) {
             val prefs = FakeSharedPreferences()

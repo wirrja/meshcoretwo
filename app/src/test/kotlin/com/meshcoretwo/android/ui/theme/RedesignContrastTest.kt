@@ -68,4 +68,14 @@ class RedesignContrastTest {
             }
         }
     }
+
+    @Test
+    fun `selected theme tile name clears WCAG AA against its secondaryContainer fill for every theme and appearance`() {
+        for (theme in ThemeRegistry.allThemes) {
+            for (isDark in appearancesFor(theme)) {
+                val scheme = theme.colorScheme(isDark)
+                assertAA("${theme.id} onSecondaryContainer vs secondaryContainer (dark=$isDark)", scheme.onSecondaryContainer, scheme.secondaryContainer)
+            }
+        }
+    }
 }

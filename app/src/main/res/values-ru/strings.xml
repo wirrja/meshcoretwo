@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">Системная</string>
     <string name="appearance_scheme_light">Светлая</string>
     <string name="appearance_scheme_dark">Тёмная</string>
+    <string name="appearance_experimental_title">Экспериментальные темы</string>
+    <string name="appearance_experimental_notice">Темы в разработке: их вид может меняться от версии к версии.</string>
+    <string name="appearance_group_functional">Функциональные</string>
+    <string name="appearance_group_color">Цветные</string>
+    <string name="appearance_group_character">С характером</string>
+    <string name="appearance_scheme_forced">Эта тема сама выбирает светлый или тёмный режим.</string>
     <string name="language_system_default">Как в системе</string>
 
     <plurals name="chat_heard_times">

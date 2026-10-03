@@ -3,6 +3,113 @@
 Notable user-facing changes to MeshCore Two, release by release, in Russian and English
 (from 1.1.19). Dates are UTC+3 (Moscow).
 
+## 1.2 — 2026-10-03
+
+### Русский
+
+**Новое оформление: экспериментальные темы.** В «Настройки → Оформление» рядом с пятью прежними
+темами (Default, Aurora, Sunrise, Graphite, Ultraviolet — они остались как были) появился шестой
+квадрат со стрелкой — «Экспериментальные темы». За ним 15 новых тем в трёх группах. Тема
+применяется сразу, как и раньше; вернуться к прежнему оформлению — выбрать любую из пяти. Пока
+включена экспериментальная тема, шестой квадрат отмечен галочкой и подписан её названием. Темы
+экспериментальные: их вид ещё может меняться от версии к версии.
+
+**Функциональные** — сами выбирают светлый или тёмный режим, переключатель «Системная / Светлая /
+Тёмная» при них выключен:
+
+- **Night** — только красный свет на чёрном, чтобы не сбивать ночное зрение в поле, на крыше у
+  ретранслятора или в машине. Красными становятся и статусы, и цвета имён, и карта: она рисуется
+  инвертированной в красный — светлая подложка становится почти чёрной, дороги, подписи и метки
+  узлов — красными.
+- **Daylight** — максимальный контраст для экрана под прямым солнцем: чисто белый фон, чёрный текст,
+  чёткие рамки вместо теней (на солнце тени не видны) и более плотный шрифт.
+
+**Цветные** — как прежние темы: меняются только цвета, есть светлый и тёмный вариант:
+
+- **Taiga** — мох и хвоя, спокойный зелёный.
+- **Amber** — тёплый медовый.
+- **Garnet** — глубокий малиновый.
+- **Orchid** — приглушённый розово-сиреневый.
+
+**С характером** — кроме цвета меняют фон, форму карточек и шрифт:
+
+- **Mesh** — электрический циан и узор из узлов сети за заголовком; в тёмной версии карточки
+  мягко светятся.
+- **Blueprint** — синька: миллиметровая сетка на фоне, острые углы, моноширинные заголовки.
+- **Topo** — бумажная карта: горизонтали рельефа и заголовки с засечками.
+- **Phosphor** — зелёный экран старого терминала: моноширинный шрифт, строки развёртки,
+  светящийся текст. Всегда тёмная.
+- **Neon** — синтвейв: перспективная сетка до горизонта под полосатым закатным солнцем,
+  малиновое свечение карточек и заголовков. Всегда тёмная.
+- **Hazard** — жёлто-чёрная сигнальная лента внизу экрана, толстые рамки, жирные заголовки,
+  исходящие сообщения — жёлтые «наклейки».
+- **Notebook** — в светлой версии тетрадный лист с линовкой, красным полем и синими «чернилами»,
+  в тёмной — школьная доска с мелом. Заголовки рукописным шрифтом, если он есть в системе
+  телефона.
+- **Newsprint** — газета: растровые точки, весь текст с засечками, прямые углы, тонкие чёрные
+  линии и красный акцент.
+- **Starmap** — в светлой версии звёздный атлас, в тёмной — ночное небо: звёзды и созвездия на
+  фоне, золото на тёмно-синем.
+
+Шрифты только системные — в приложение ничего не добавлено. Контраст текста во всех новых темах
+проверяется автоматически: обычный текст — не ниже стандарта WCAG AA, подписи на кнопках, чипах и
+плавающих кнопках — заметно контрастнее, чтобы не сливаться с заливкой.
+
+**Исправлено:** название выбранной темы в «Оформлении» на некоторых темах почти не читалось
+(например, в тёмной Aurora).
+
+### English
+
+**A new look: experimental themes.** Settings → Appearance now has a sixth tile with an arrow —
+"Experimental themes" — next to the five themes you know (Default, Aurora, Sunrise, Graphite,
+Ultraviolet, all unchanged). It opens 15 new themes in three groups. A theme applies as soon as
+you tap it; to go back to the classic look, pick any of the five. While an experimental theme is
+on, the sixth tile shows a check mark and the theme's name. These themes are experimental: their
+look may still change from version to version.
+
+**Functional** — they pick light or dark themselves, so the System / Light / Dark switch is off
+while one of them is active:
+
+- **Night** — nothing but red light on black, to keep your night vision in the field, on a roof by
+  the repeater or in the car. Statuses, name colors and the map turn red too: the map is drawn
+  inverted into red, so the light basemap goes almost black and roads, labels and node markers
+  are red.
+- **Daylight** — maximum contrast for a screen in direct sunlight: pure white, black text, crisp
+  outlines instead of shadows (shadows vanish in the sun) and a heavier font.
+
+**Colors** — like the classic themes, only the colors change, in light and dark:
+
+- **Taiga** — moss and pine, a calm green.
+- **Amber** — warm honey.
+- **Garnet** — deep raspberry.
+- **Orchid** — a muted pink-lilac.
+
+**With character** — besides color they change the background, the card shapes and the fonts:
+
+- **Mesh** — electric cyan and a mesh-network pattern behind the header; in dark, cards softly
+  glow.
+- **Blueprint** — a drafting grid in the background, sharp corners, monospace headings.
+- **Topo** — a paper map: relief contour lines and serif headings.
+- **Phosphor** — an old terminal's green screen: monospace type, scanlines, glowing text. Always
+  dark.
+- **Neon** — synthwave: a perspective grid running to the horizon under a striped sunset sun,
+  magenta glow on cards and headings. Always dark.
+- **Hazard** — a yellow-and-black hazard-tape band at the bottom of the screen, thick outlines,
+  heavy headings, outgoing messages as yellow "stickers".
+- **Notebook** — ruled notebook paper with a red margin and blue "ink" in light, a chalkboard in
+  dark. Headings in a handwritten font, if the phone's system has one.
+- **Newsprint** — a newspaper: halftone dots, serif type throughout, square corners, thin black
+  rules and a red accent.
+- **Starmap** — a star atlas in light, the night sky in dark: stars and constellations in the
+  background, gold on navy.
+
+Fonts are the phone's own — nothing was added to the app. Text contrast in every new theme is
+checked automatically: regular text meets at least WCAG AA, and labels on buttons, chips and
+floating buttons get noticeably more contrast so they don't blend into the fill.
+
+**Fixed:** in Appearance, the selected theme's name was barely readable on some themes (dark
+Aurora, for example).
+
 ## 1.1.23 — 2026-10-03
 
 ### Русский

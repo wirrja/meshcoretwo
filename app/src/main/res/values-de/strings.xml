@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">System</string>
     <string name="appearance_scheme_light">Hell</string>
     <string name="appearance_scheme_dark">Dunkel</string>
+    <string name="appearance_experimental_title">Experimentelle Designs</string>
+    <string name="appearance_experimental_notice">Diese Designs sind noch in Arbeit: Ihr Aussehen kann sich von Version zu Version ändern.</string>
+    <string name="appearance_group_functional">Funktional</string>
+    <string name="appearance_group_color">Farben</string>
+    <string name="appearance_group_character">Mit Charakter</string>
+    <string name="appearance_scheme_forced">Dieses Design legt Hell oder Dunkel selbst fest.</string>
     <string name="language_system_default">Systemstandard</string>
 
     <plurals name="chat_heard_times">

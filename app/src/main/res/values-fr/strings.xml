@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">Système</string>
     <string name="appearance_scheme_light">Clair</string>
     <string name="appearance_scheme_dark">Sombre</string>
+    <string name="appearance_experimental_title">Thèmes expérimentaux</string>
+    <string name="appearance_experimental_notice">Ces thèmes sont en cours de développement : leur apparence peut changer d’une version à l’autre.</string>
+    <string name="appearance_group_functional">Fonctionnels</string>
+    <string name="appearance_group_color">Couleurs</string>
+    <string name="appearance_group_character">Avec du caractère</string>
+    <string name="appearance_scheme_forced">Ce thème choisit lui-même le mode clair ou sombre.</string>
     <string name="language_system_default">Langue du système</string>
 
     <plurals name="chat_heard_times">

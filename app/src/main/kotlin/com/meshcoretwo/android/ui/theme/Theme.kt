@@ -10,6 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,7 +33,8 @@ data class Theme(
     val accentColor: ThemeColor,
     val outgoingTextColor: ThemeColor,
     val hashtagColor: ThemeColor,
-    /** Forces one appearance regardless of [AppColorSchemePreference]; no built-in theme sets it. */
+    /** Forces one appearance regardless of [AppColorSchemePreference]; only experimental themes set it
+     * (Night/Phosphor dark, Daylight light). */
     val forcedDark: Boolean?,
     val surfaces: Surfaces?,
     /** The theme's identity-color space for contact avatars, channel sender names, and mentions. */
@@ -43,6 +45,12 @@ data class Theme(
     val categoryHues: CategoryHues?,
     val lightScheme: ColorScheme,
     val darkScheme: ColorScheme,
+    /** Which section of the experimental-themes screen lists this theme; `null` = a classic theme. */
+    val group: ThemeGroup? = null,
+    /** What the theme changes beyond color (pattern, outlines, corners, fonts). */
+    val style: ThemeStyle = ThemeStyle.Classic,
+    /** Replaces the shared status colors ([LightExtendedColors]/[DarkExtendedColors]) — Night only. */
+    val extendedColorsOverride: MeshExtendedColors? = null,
 ) {
     fun colorScheme(isDark: Boolean): ColorScheme = if (isDark) darkScheme else lightScheme
 
@@ -189,13 +197,16 @@ fun resolveIsDark(theme: Theme, preference: AppColorSchemePreference, systemDark
  * deliberately not used — target devices are non-GMS Huawei/OEM hardware (see project constraints) where its
  * behavior is inconsistent, and a fixed palette keeps the look identical across devices. Also
  * provides [LocalMeshExtendedColors] (status/radio colors) and [LocalAppTheme] (the active theme).
+ * The theme's [ThemeStyle] picks the type scale's fonts and the [androidx.compose.material3.Shapes].
  */
 @Composable
 fun MeshCoreTwoTheme(themeService: ThemeService, content: @Composable () -> Unit) {
     val current by themeService.current.collectAsStateWithLifecycle()
     val preference by themeService.colorSchemePreference.collectAsStateWithLifecycle()
     val isDark = resolveIsDark(current, preference, systemDark = isSystemInDarkTheme())
-    val extendedColors = if (isDark) DarkExtendedColors else LightExtendedColors
+    val extendedColors = current.extendedColorsOverride ?: if (isDark) DarkExtendedColors else LightExtendedColors
+    val style = current.style
+    val typography = remember(style, isDark) { style.typography(MeshCoreTwoTypography, isDark) }
     CompositionLocalProvider(
         LocalMeshExtendedColors provides extendedColors,
         LocalAppTheme provides current,
@@ -203,8 +214,8 @@ fun MeshCoreTwoTheme(themeService: ThemeService, content: @Composable () -> Unit
     ) {
         MaterialTheme(
             colorScheme = current.colorScheme(isDark),
-            typography = MeshCoreTwoTypography,
-            shapes = MeshCoreTwoShapes,
+            typography = typography,
+            shapes = style.corners.shapes,
             content = content,
         )
     }

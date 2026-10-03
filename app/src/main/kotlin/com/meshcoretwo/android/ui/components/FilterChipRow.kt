@@ -2,6 +2,7 @@
 
 package com.meshcoretwo.android.ui.components
 
+import com.meshcoretwo.android.ui.theme.LocalAppTheme
 import com.meshcoretwo.android.ui.theme.LocalIsDarkTheme
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.meshcoretwo.android.ui.theme.pill
 
 /**
  * A scrollable row of [FilterChip]s over an enum-like list of segments — replaces `TabRow`/
@@ -46,7 +47,7 @@ fun <T> FilterChipRow(
                 selected = isSelected,
                 onClick = { onSelect(item) },
                 label = { Text(label(item)) },
-                shape = RoundedCornerShape(50),
+                shape = LocalAppTheme.current.style.corners.pill,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = if (LocalIsDarkTheme.current) MaterialTheme.colorScheme.surfaceContainerHigh else cardSurfaceColor(),
                     labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -56,7 +57,7 @@ fun <T> FilterChipRow(
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = isSelected,
-                    borderColor = Color.Transparent,
+                    borderColor = themeOutlineColor(),
                     selectedBorderColor = Color.Transparent,
                 ),
             )

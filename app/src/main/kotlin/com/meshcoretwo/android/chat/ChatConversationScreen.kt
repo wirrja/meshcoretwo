@@ -2,7 +2,9 @@
 
 package com.meshcoretwo.android.chat
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
@@ -75,10 +77,15 @@ import com.meshcoretwo.android.ui.components.FullScreenMessage
 import com.meshcoretwo.android.ui.components.InitialsAvatar
 import com.meshcoretwo.android.ui.components.LoadingScreen
 import com.meshcoretwo.android.ui.components.RouteChip
+import com.meshcoretwo.android.ui.components.themeOutlineColor
+import com.meshcoretwo.android.ui.components.themeOutlineStroke
 import com.meshcoretwo.android.ui.theme.LocalAppTheme
 import com.meshcoretwo.android.ui.theme.LocalIsDarkTheme
+import com.meshcoretwo.android.ui.theme.bubble
+import com.meshcoretwo.android.ui.theme.fieldRadius
 import com.meshcoretwo.android.ui.theme.identityColor
 import com.meshcoretwo.android.ui.theme.incomingBubbleColor
+import com.meshcoretwo.android.ui.theme.pill
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.DeviceConnectionState
 import com.meshcoretwo.services.persistence.ContactDto
@@ -458,12 +465,17 @@ private fun MessageBubble(
         else -> 2.dp
     }
 
+    val outgoingFill = outgoingBubbleFill()
     val bubbleColor = when {
         !isOutgoing -> incomingBubbleColor()
         message.hasFailed -> OutgoingBubbleFailedColor
-        else -> MaterialTheme.colorScheme.primary
+        else -> outgoingFill ?: MaterialTheme.colorScheme.primary
     }
-    val textColor = if (isOutgoing) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = when {
+        !isOutgoing -> MaterialTheme.colorScheme.onSurfaceVariant
+        message.hasFailed -> MaterialTheme.colorScheme.onPrimary
+        else -> outgoingBubbleTextColor()
+    }
     val timeColor = if (isOutgoing) textColor.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Row(
@@ -485,7 +497,7 @@ private fun MessageBubble(
                 linkified.tokens.filter { it.kind == LinkToken.Kind.MENTION }.map { it.value }.distinct()
             }
             val mentionColors = mentionNames.associateWith { identityColor(it) }
-            val gradientBubble = isOutgoing && !message.hasFailed
+            val gradientBubble = isOutgoing && !message.hasFailed && outgoingFill == null
             val primary = MaterialTheme.colorScheme.primary
             val bubbleBrush = remember(primary) {
                 Brush.linearGradient(listOf(lerp(primary, Color.White, 0.10f), lerp(primary, Color.Black, 0.12f)))
@@ -493,7 +505,8 @@ private fun MessageBubble(
             Surface(
                 color = if (gradientBubble) Color.Transparent else bubbleColor,
                 shape = bubbleShape(isOutgoing),
-                shadowElevation = if (isOutgoing) 0.dp else 1.dp,
+                shadowElevation = if (isOutgoing || !theme.style.shadow) 0.dp else 1.dp,
+                border = bubbleBorder(isOutgoing),
                 modifier = Modifier.combinedClickable(onClick = {}, onLongClick = onLongPress),
             ) {
                 Text(
@@ -688,11 +701,24 @@ private fun AmbiguousRegionDialog(candidates: List<String>, onDismiss: () -> Uni
  * 6dp corner on the side that points at its sender (bottom-end for outgoing, bottom-start for
  * incoming). Also reused by [RoomConversationScreen]'s `RoomMessageBubble`.
  */
-internal fun bubbleShape(isOutgoing: Boolean): RoundedCornerShape = if (isOutgoing) {
-    RoundedCornerShape(topStart = 19.dp, topEnd = 19.dp, bottomStart = 19.dp, bottomEnd = 6.dp)
-} else {
-    RoundedCornerShape(topStart = 19.dp, topEnd = 19.dp, bottomStart = 6.dp, bottomEnd = 19.dp)
-}
+@Composable
+internal fun bubbleShape(isOutgoing: Boolean): Shape = LocalAppTheme.current.style.corners.bubble(isOutgoing)
+
+/** The theme's flat outgoing bubble fill (Night keeps bubbles dark); `null` = the primary gradient.
+ * Also reused by [RoomConversationScreen]'s `RoomMessageBubble`. */
+@Composable
+internal fun outgoingBubbleFill(): Color? = LocalAppTheme.current.style.outgoingBubble?.resolve(LocalIsDarkTheme.current)
+
+/** Text on a sent (non-failed) outgoing bubble: the theme's override, else `onPrimary`. */
+@Composable
+internal fun outgoingBubbleTextColor(): Color =
+    LocalAppTheme.current.style.outgoingBubbleText?.resolve(LocalIsDarkTheme.current) ?: MaterialTheme.colorScheme.onPrimary
+
+/** The theme's outline around incoming bubbles, and around outgoing ones only when they're a flat
+ * fill (a gradient bubble needs no edge). */
+@Composable
+internal fun bubbleBorder(isOutgoing: Boolean): BorderStroke? =
+    if (!isOutgoing || outgoingBubbleFill() != null) themeOutlineStroke() else null
 
 /** Also reused by [RoomConversationScreen]'s `RoomMessageBubble` — same status vocabulary. */
 @DrawableRes
@@ -709,7 +735,6 @@ internal fun formatMessageTime(date: Instant): String =
     DatePatterns.timeShort().format(date)
 
 /** Corner radius of the pill-shaped compose field. Ported from `ChatInputMetrics.fieldCornerRadius`. */
-private val ChatInputFieldCornerRadius = 24.dp
 
 /**
  * Ported from `Components/ChatInputBar.swift`, minus its leading-accessory slot (no attachments
@@ -787,19 +812,20 @@ internal fun ChatInputBar(
                     placeholder = { Text(stringResource(if (canSendConnection) R.string.common_message else R.string.chat_reconnecting)) },
                     enabled = canSendConnection,
                     maxLines = 4,
-                    shape = RoundedCornerShape(ChatInputFieldCornerRadius),
+                    shape = RoundedCornerShape(LocalAppTheme.current.style.corners.fieldRadius),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
+                        focusedBorderColor = themeOutlineColor(),
+                        unfocusedBorderColor = themeOutlineColor(),
                         disabledBorderColor = Color.Transparent,
                     ),
                 )
                 FilledIconButton(
                     enabled = canSend,
                     modifier = Modifier.padding(bottom = 4.dp).size(48.dp),
+                    shape = LocalAppTheme.current.style.corners.pill,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,

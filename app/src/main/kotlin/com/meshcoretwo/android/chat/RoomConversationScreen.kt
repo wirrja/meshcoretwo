@@ -288,9 +288,13 @@ private fun RoomMessageBubble(
     val bubbleColor = when {
         !isOutgoing -> incomingBubbleColor()
         message.status == MessageStatus.FAILED -> OutgoingBubbleFailedColor
-        else -> MaterialTheme.colorScheme.primary
+        else -> outgoingBubbleFill() ?: MaterialTheme.colorScheme.primary
     }
-    val textColor = if (isOutgoing) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = when {
+        !isOutgoing -> MaterialTheme.colorScheme.onSurfaceVariant
+        message.status == MessageStatus.FAILED -> MaterialTheme.colorScheme.onPrimary
+        else -> outgoingBubbleTextColor()
+    }
     // The footer sits outside the bubble, so the bubble-relative color (near-white for outgoing)
     // is unreadable on the chat background; see [USE_QUIET_META_LINE].
     val timeColor = when {
@@ -320,6 +324,7 @@ private fun RoomMessageBubble(
             Surface(
                 color = bubbleColor,
                 shape = bubbleShape(isOutgoing),
+                border = bubbleBorder(isOutgoing),
                 modifier = Modifier.combinedClickable(onClick = {}, onLongClick = onLongPress),
             ) {
                 Text(

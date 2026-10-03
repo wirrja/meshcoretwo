@@ -55,15 +55,17 @@ import com.meshcoretwo.android.ui.theme.AppColorSchemePreference
 import com.meshcoretwo.android.ui.theme.ThemeRegistry
 import com.meshcoretwo.android.ui.theme.ThemeService
 
-private val GridItemMinimum = 160.dp
-private val GridSpacing = 12.dp
+internal val ThemeGridItemMinimum = 160.dp
+internal val ThemeGridSpacing = 12.dp
 
 /**
  * Settings → Appearance: the global light/dark/system picker plus the theme grid. Every built-in
  * theme is available and selectable — this port has no monetization (project constraints), which is exactly
  * iOS's sideload branch (`ThemeService.isAccessible`), so the "Purchase more themes" link
  * (`AppearanceView.shouldShowBrowseMore`, only shown when some registry theme is inaccessible)
- * never applies and isn't ported.
+ * never applies and isn't ported. The grid holds the five classic themes plus a sixth tile into
+ * [ExperimentalThemesScreen] (no iOS counterpart); while the active theme fixes its own appearance
+ * (Night, Daylight, Phosphor) the light/dark picker is disabled and says so.
  *
  * Ported from `AppearanceView.swift`, as one `LazyVerticalGrid` instead of a `List` with a nested
  * `LazyVGrid` section — the scheme picker is a full-span grid item ahead of the theme cards, since
@@ -71,7 +73,7 @@ private val GridSpacing = 12.dp
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppearanceScreen(themeService: ThemeService, onBack: () -> Unit) {
+fun AppearanceScreen(themeService: ThemeService, onOpenExperimentalThemes: () -> Unit, onBack: () -> Unit) {
     val current by themeService.current.collectAsStateWithLifecycle()
     val preference by themeService.colorSchemePreference.collectAsStateWithLifecycle()
 
@@ -90,26 +92,43 @@ fun AppearanceScreen(themeService: ThemeService, onBack: () -> Unit) {
         },
     ) { padding ->
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = GridItemMinimum),
+            columns = GridCells.Adaptive(minSize = ThemeGridItemMinimum),
             modifier = Modifier.padding(padding).padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(GridSpacing),
-            verticalArrangement = Arrangement.spacedBy(GridSpacing),
+            horizontalArrangement = Arrangement.spacedBy(ThemeGridSpacing),
+            verticalArrangement = Arrangement.spacedBy(ThemeGridSpacing),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                SchemePicker(
-                    preference = preference,
-                    onSelect = themeService::setColorSchemePreference,
-                    modifier = Modifier.padding(vertical = 16.dp),
-                )
+                Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                    SchemePicker(
+                        preference = preference,
+                        onSelect = themeService::setColorSchemePreference,
+                        enabled = current.forcedDark == null,
+                    )
+                    if (current.forcedDark != null) {
+                        Text(
+                            stringResource(R.string.appearance_scheme_forced),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(stringResource(R.string.appearance_themes), style = MaterialTheme.typography.titleMedium)
             }
-            items(ThemeRegistry.allThemes, key = { it.id }) { theme ->
+            items(ThemeRegistry.classicThemes, key = { it.id }) { theme ->
                 ThemeSelectionCard(
                     theme = theme,
                     isSelected = theme.id == current.id,
                     onSelect = { themeService.setCurrent(theme) },
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+            }
+            item(key = "experimental") {
+                ExperimentalThemesCard(
+                    selected = current.takeIf { it.group != null },
+                    onClick = onOpenExperimentalThemes,
                     modifier = Modifier.padding(vertical = 4.dp),
                 )
             }
@@ -125,6 +144,7 @@ fun AppearanceScreen(themeService: ThemeService, onBack: () -> Unit) {
 private fun SchemePicker(
     preference: AppColorSchemePreference,
     onSelect: (AppColorSchemePreference) -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val options = listOf(
@@ -137,6 +157,7 @@ private fun SchemePicker(
             SegmentedButton(
                 selected = preference == value,
                 onClick = { onSelect(value) },
+                enabled = enabled,
                 shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
             ) {
                 Text(label)

@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">Järjestelmä</string>
     <string name="appearance_scheme_light">Vaalea</string>
     <string name="appearance_scheme_dark">Tumma</string>
+    <string name="appearance_experimental_title">Kokeelliset teemat</string>
+    <string name="appearance_experimental_notice">Nämä teemat ovat vielä työn alla: niiden ulkoasu voi muuttua versiosta toiseen.</string>
+    <string name="appearance_group_functional">Toiminnalliset</string>
+    <string name="appearance_group_color">Värit</string>
+    <string name="appearance_group_character">Persoonalliset</string>
+    <string name="appearance_scheme_forced">Tämä teema valitsee itse vaalean tai tumman tilan.</string>
     <string name="language_system_default">Järjestelmän oletus</string>
 
     <plurals name="chat_heard_times">

@@ -23,7 +23,7 @@ class ThemeStructureTest {
     @Test
     fun `Every painted theme defines both canvas and card tiers`() {
         val painted = ThemeRegistry.allThemes.filter { it.id != Theme.Default.id }
-        assertEquals(4, painted.size)
+        assertEquals(19, painted.size)
         for (theme in painted) {
             val surfaces = requireNotNull(theme.surfaces) { "${theme.id} must have surfaces" }
             assertTrue("${theme.id} must define card tier", surfaces.card != null)
@@ -54,7 +54,7 @@ class ThemeStructureTest {
     fun `Only the Default theme pins fixed category avatar colors`() {
         assertTrue("Default theme must pin category colors", Theme.Default.categoryAvatarOverride != null)
         val others = ThemeRegistry.allThemes.filter { it.id != Theme.Default.id }
-        assertEquals(4, others.size)
+        assertEquals(19, others.size)
         for (theme in others) {
             assertNull("${theme.id} must derive category colors from its gamut", theme.categoryAvatarOverride)
         }

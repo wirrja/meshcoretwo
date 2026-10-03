@@ -7,6 +7,12 @@
     <string name="appearance_scheme_system">Sistem</string>
     <string name="appearance_scheme_light">Açık</string>
     <string name="appearance_scheme_dark">Koyu</string>
+    <string name="appearance_experimental_title">Deneysel temalar</string>
+    <string name="appearance_experimental_notice">Bu temalar geliştirme aşamasında: görünümleri sürümden sürüme değişebilir.</string>
+    <string name="appearance_group_functional">İşlevsel</string>
+    <string name="appearance_group_color">Renkler</string>
+    <string name="appearance_group_character">Karakterli</string>
+    <string name="appearance_scheme_forced">Bu tema açık veya koyu modu kendisi seçer.</string>
     <string name="language_system_default">Sistem varsayılanı</string>
 
     <plurals name="chat_heard_times">

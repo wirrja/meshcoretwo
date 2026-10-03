@@ -13,6 +13,12 @@
     <string name="appearance_scheme_system">System</string>
     <string name="appearance_scheme_light">Light</string>
     <string name="appearance_scheme_dark">Dark</string>
+    <string name="appearance_experimental_title">Experimental themes</string>
+    <string name="appearance_experimental_notice">These themes are a work in progress: their look may change from version to version.</string>
+    <string name="appearance_group_functional">Functional</string>
+    <string name="appearance_group_color">Colors</string>
+    <string name="appearance_group_character">With character</string>
+    <string name="appearance_scheme_forced">This theme always picks light or dark by itself.</string>
     <string name="language_system_default">System default</string>
 
     <plurals name="chat_heard_times">

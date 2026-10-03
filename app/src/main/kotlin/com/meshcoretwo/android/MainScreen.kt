@@ -11,6 +11,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.animateContentSize
 import com.meshcoretwo.android.ui.components.accentBackdrop
+import com.meshcoretwo.android.ui.components.themeOutlineStroke
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.DrawableRes
@@ -36,8 +37,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
@@ -69,6 +68,7 @@ import com.meshcoretwo.android.about.AboutScreen
 import com.meshcoretwo.android.about.LicenseTextScreen
 import com.meshcoretwo.android.about.LicensesScreen
 import com.meshcoretwo.android.appearance.AppearanceScreen
+import com.meshcoretwo.android.appearance.ExperimentalThemesScreen
 import com.meshcoretwo.android.settings.DangerZoneScreen
 import com.meshcoretwo.android.chat.ChatConversationScreen
 import com.meshcoretwo.android.chat.ChatsListScreen
@@ -120,7 +120,9 @@ import com.meshcoretwo.android.tools.ToolsScreen
 import com.meshcoretwo.android.tools.NodeDiscoveryScreen
 import com.meshcoretwo.android.tools.TracePathScreen
 import com.meshcoretwo.android.ui.components.LocalOpenDeviceSelection
+import com.meshcoretwo.android.ui.theme.LocalAppTheme
 import com.meshcoretwo.android.ui.theme.ThemeService
+import com.meshcoretwo.android.ui.theme.pill
 import com.meshcoretwo.services.backup.AppBackupService
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.connectedDeviceRecord
@@ -206,6 +208,7 @@ internal object MainRoute {
     const val OFFLINE_MAPS_PICK_REGION = "settings/offline-maps/pick-region"
     const val ABOUT = "settings/about"
     const val APPEARANCE = "settings/appearance"
+    const val EXPERIMENTAL_THEMES = "settings/appearance/experimental"
     const val DANGER_ZONE = "settings/danger-zone"
     const val LICENSES = "settings/licenses"
     const val LICENSE_TEXT = "settings/licenses/text?path={path}&title={title}"
@@ -269,12 +272,15 @@ private fun FloatingNavBar(
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 14.dp, vertical = 10.dp),
     ) {
+        val style = LocalAppTheme.current.style
+        val pill = style.corners.pill
         Surface(
             modifier = Modifier.fillMaxWidth().height(64.dp),
-            shape = RoundedCornerShape(32.dp),
+            shape = pill,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 1.dp,
-            shadowElevation = 4.dp,
+            shadowElevation = if (style.shadow) 4.dp else 0.dp,
+            border = themeOutlineStroke(),
         ) {
             Row(
                 Modifier.padding(horizontal = 4.dp),
@@ -303,7 +309,7 @@ private fun FloatingNavBar(
                                 .fillMaxWidth()
                                 .widthIn(max = if (selected) Dp.Infinity else 48.dp)
                                 .height(48.dp)
-                                .clip(CircleShape)
+                                .clip(pill)
                                 .background(background)
                                 .semantics { role = Role.Tab; this.selected = selected }
                                 .clickable { onSelect(destination) }
@@ -604,7 +610,14 @@ fun MainScreen(
                 )
             }
             composable(MainRoute.APPEARANCE) {
-                AppearanceScreen(themeService = themeService, onBack = { navController.popBackStack() })
+                AppearanceScreen(
+                    themeService = themeService,
+                    onOpenExperimentalThemes = { navController.navigate(MainRoute.EXPERIMENTAL_THEMES) },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(MainRoute.EXPERIMENTAL_THEMES) {
+                ExperimentalThemesScreen(themeService = themeService, onBack = { navController.popBackStack() })
             }
             composable(MainRoute.CONFIG_EXPORT) {
                 NodeConfigExportScreen(connectionManager = connectionManager, onBack = { navController.popBackStack() })
