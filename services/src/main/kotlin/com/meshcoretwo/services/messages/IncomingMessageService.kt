@@ -225,8 +225,11 @@ class IncomingMessageService(
      * @return The count of contact/channel messages retrieved (binary channel datagrams are
      *   drained but not counted — they aren't user-visible messages, and this port has no
      *   listener for them yet).
+     * @param onProgress Called with the running count after each counted message, so the sync UI
+     *   can show how many have arrived. The device never reports its queue length up front, so
+     *   there is no total to pair it with.
      */
-    suspend fun pollAllMessages(): Int {
+    suspend fun pollAllMessages(onProgress: (Int) -> Unit = {}): Int {
         mutex.withLock { isPolling = true }
         try {
             var count = 0
@@ -239,10 +242,12 @@ class IncomingMessageService(
                     is MessageResult.ContactMessageResult -> {
                         count++
                         handleContactMessage(result.message, DeliveryContext.InitialSync(blockAnchor))
+                        onProgress(count)
                     }
                     is MessageResult.ChannelMessageResult -> {
                         count++
                         handleChannelMessage(result.message, DeliveryContext.InitialSync(blockAnchor))
+                        onProgress(count)
                     }
                     is MessageResult.ChannelDatagramResult -> {
                         // Not a user-visible message; drain without counting.

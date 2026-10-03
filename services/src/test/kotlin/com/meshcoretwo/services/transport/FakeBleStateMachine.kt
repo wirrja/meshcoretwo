@@ -55,6 +55,10 @@ class FakeBleStateMachine : BleStateMachineOps {
 
     override fun systemConnectedDeviceAddresses(): List<String> = stubbedSystemConnectedDeviceAddresses
 
+    var stubbedOwnedLinkAddresses: Set<String> = emptySet()
+
+    override fun ownsLinkTo(deviceAddress: String): Boolean = deviceAddress in stubbedOwnedLinkAddresses
+
     override fun startAdoptingSystemConnectedPeripheral(deviceAddress: String): Boolean {
         startAdoptingSystemConnectedPeripheralCalls.add(deviceAddress)
         return stubbedDidStartAdoptingSystemConnectedPeripheral
@@ -191,6 +195,7 @@ class FakeBleStateMachine : BleStateMachineOps {
         stubbedIsDeviceConnectedToSystem = false
         isDeviceConnectedToSystemHandler = null
         isDeviceConnectedToSystemCalls.clear()
+        stubbedOwnedLinkAddresses = emptySet()
         stubbedSystemConnectedDeviceAddresses = emptyList()
         stubbedDidStartAdoptingSystemConnectedPeripheral = false
         startAdoptingSystemConnectedPeripheralCalls.clear()

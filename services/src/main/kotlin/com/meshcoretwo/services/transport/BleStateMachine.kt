@@ -24,10 +24,12 @@ import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicLong
 
@@ -201,6 +204,42 @@ class BleStateMachine(
     internal var pendingScanRequest = false
 
     private var scanCallback: ScanCallback? = null
+
+    // MARK: - GATT client ownership
+
+    /**
+     * Every GATT client this state machine opened and has not yet closed. A client can fall out of
+     * [phase] without being closed (a superseded connect, a cancelled caller, a racing callback);
+     * such an orphan keeps the link up — so the OS reports the device as connected, and
+     * `ConnectionManager` reads that as "connected to another app" and refuses to connect —
+     * with nothing left to ever close it, short of a Bluetooth restart. Tracking them lets
+     * [disconnect] sweep orphans and [ownsLinkTo] recognize the link as our own.
+     */
+    private val openGatts: MutableSet<BluetoothGatt> = java.util.Collections.newSetFromMap(java.util.concurrent.ConcurrentHashMap())
+
+    /** Opens a GATT client to [device] and records it in [openGatts]. */
+    internal fun openGatt(device: BluetoothDevice): BluetoothGatt? =
+        device.connectGatt(appContext, false, callback, BluetoothDevice.TRANSPORT_LE)?.also { openGatts.add(it) }
+
+    /** Closes [gatt] (idempotent) and drops it from [openGatts]. */
+    internal fun releaseGatt(gatt: BluetoothGatt?) {
+        if (gatt == null) return
+        gatt.close()
+        openGatts.remove(gatt)
+    }
+
+    /** Closes every tracked client. Only valid while the phase is Idle, when all of them are orphans. Caller must hold [mutex]. */
+    private fun closeOrphanedGattsLocked() {
+        for (orphan in openGatts.toList()) {
+            Log.w(TAG, "Closing orphaned GATT client for ${orphan.device.address}")
+            orphan.disconnect()
+            releaseGatt(orphan)
+        }
+    }
+
+    /** Whether this process's own BLE link — tracked phase or orphaned client — is to [deviceAddress]. */
+    override fun ownsLinkTo(deviceAddress: String): Boolean =
+        phase.deviceAddress == deviceAddress || openGatts.any { it.device.address == deviceAddress }
 
     // MARK: - Activation
 
@@ -477,7 +516,7 @@ class BleStateMachine(
     private suspend fun establishConnection(device: BluetoothDevice): Flow<ByteArray> {
         mutex.withLock { advanceConnectionGenerationLocked() }
 
-        connectToDevice(device, autoConnect = false)
+        connectToDevice(device)
 
         val channel = Channel<ByteArray>(capacity = 512)
         mutex.withLock {
@@ -502,9 +541,12 @@ class BleStateMachine(
         if (gattToClose != null) {
             gattToClose.disconnect()
             delay(100)
-            gattToClose.close()
+            releaseGatt(gattToClose)
         }
-        mutex.withLock { transitionLocked(BlePhase.Idle) }
+        mutex.withLock {
+            transitionLocked(BlePhase.Idle)
+            closeOrphanedGattsLocked()
+        }
     }
 
     /**
@@ -683,17 +725,43 @@ class BleStateMachine(
 
     // MARK: - Connecting
 
-    private suspend fun connectToDevice(device: BluetoothDevice, autoConnect: Boolean) {
+    private suspend fun connectToDevice(device: BluetoothDevice) {
         val deferred = CompletableDeferred<Unit>()
-        mutex.withLock {
+        val gatt = mutex.withLock {
+            // Claim the phase in the same locked section that opens the client: callers check
+            // for Idle earlier, but two of them (connect + adoption) can both pass that check,
+            // and the second would otherwise overwrite the first's phase and orphan its client.
+            if (phase !is BlePhase.Idle) throw BleError.ConnectionFailed("Already in operation: ${phase.kind}")
+            // With the phase Idle, any client still open is an orphan; drop it before opening a
+            // fresh one so it can't keep a parallel subscription (and a client slot) alive.
+            closeOrphanedGattsLocked()
+            val gatt = openGatt(device) ?: throw BleError.ConnectionFailed("connectGatt returned null")
             val timeoutJob = scope.launch {
                 delay(connectionTimeoutMs)
                 handleConnectionTimeout(device.address)
             }
-            val gatt = device.connectGatt(appContext, autoConnect, callback, BluetoothDevice.TRANSPORT_LE)
             transitionLocked(BlePhase.Connecting(gatt, deferred, timeoutJob))
+            gatt
         }
-        deferred.await()
+        try {
+            deferred.await()
+        } catch (cancelled: CancellationException) {
+            // The caller gave up (superseded or timed out upstream). Nobody will ever move this
+            // phase on to Connected, so tear the half-built link down instead of stranding it.
+            withContext(NonCancellable) { abandonSetupLocked(gatt) }
+            throw cancelled
+        }
+    }
+
+    /** Releases [gatt] and returns to Idle if the phase still belongs to it. */
+    private suspend fun abandonSetupLocked(gatt: BluetoothGatt) {
+        mutex.withLock {
+            if (phase.associatedGatt !== gatt) return@withLock
+            if (phase is BlePhase.Connecting) (phase as BlePhase.Connecting).timeoutJob.cancel()
+            gatt.disconnect()
+            releaseGatt(gatt)
+            transitionLocked(BlePhase.Idle)
+        }
     }
 
     private suspend fun handleConnectionTimeout(deviceAddress: String) {
@@ -701,7 +769,7 @@ class BleStateMachine(
             val connecting = phase as? BlePhase.Connecting ?: return
             if (connecting.gatt.device.address != deviceAddress) return
             connecting.gatt.disconnect()
-            connecting.gatt.close()
+            releaseGatt(connecting.gatt)
             transitionLocked(BlePhase.Idle)
             connecting.continuation.completeExceptionally(BleError.ConnectionTimeout)
         }
@@ -730,7 +798,7 @@ class BleStateMachine(
                 is ReconnectPolicy.ServiceDiscoveryStallDecision.ExtendDiscoveryWindow -> armServiceDiscoveryTimeout(gatt)
                 is ReconnectPolicy.ServiceDiscoveryStallDecision.TearDown -> {
                     gatt.disconnect()
-                    gatt.close()
+                    releaseGatt(gatt)
                     transitionLocked(BlePhase.Idle)
                     continuation.completeExceptionally(decision.error)
                 }
@@ -758,7 +826,7 @@ class BleStateMachine(
                 is ReconnectPolicy.AutoReconnectStallDecision.ExtendDiscoveryWindow -> armReconnectDiscoveryTimeout(device, generation)
                 is ReconnectPolicy.AutoReconnectStallDecision.TearDown -> {
                     current.gatt?.disconnect()
-                    current.gatt?.close()
+                    releaseGatt(current.gatt)
                     transitionLocked(BlePhase.Idle)
                     onDisconnection?.invoke(device.address, decision.error)
                 }
@@ -769,6 +837,10 @@ class BleStateMachine(
     /** Cancels the current operation, resuming any pending continuation with [error]. Caller must hold [mutex]. */
     internal fun cancelCurrentOperationLocked(error: BleError) {
         cancelPendingWriteOperationsLocked(error)
+        // Leaving a client open here would strand a live link (and a slot in the stack's small,
+        // system-wide GATT client table) with nothing left to ever close it. close() is
+        // idempotent, so callers that close the same client afterwards stay safe.
+        releaseGatt(phase.associatedGatt)
         when (val current = phase) {
             is BlePhase.WaitingForBluetooth -> current.continuation.completeExceptionally(error)
             is BlePhase.Connecting -> {

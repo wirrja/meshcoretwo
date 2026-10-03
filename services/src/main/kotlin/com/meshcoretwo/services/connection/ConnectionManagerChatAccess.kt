@@ -9,6 +9,8 @@ import com.meshcoretwo.services.messages.MessageService
 import com.meshcoretwo.services.notifications.NotificationService
 import com.meshcoretwo.services.reactions.ReactionService
 import com.meshcoretwo.services.repeats.HeardRepeatsService
+import com.meshcoretwo.services.sync.SyncState
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Narrow public seam onto the per-connection [com.meshcoretwo.services.ServiceContainer] for the
@@ -45,3 +47,7 @@ val ConnectionManager.reactionService: ReactionService?
 /** The active connection's heard-repeats correlation surface, or null when disconnected. */
 val ConnectionManager.heardRepeatsService: HeardRepeatsService?
     get() = services?.heardRepeatsService
+
+/** The active connection's full-sync progress, or null when disconnected. */
+val ConnectionManager.syncState: StateFlow<SyncState>?
+    get() = services?.syncCoordinator?.state

@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,6 +21,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshcoretwo.android.R
 import com.meshcoretwo.services.connection.ConnectionManager
 import com.meshcoretwo.services.connection.DeviceConnectionState
+import com.meshcoretwo.services.connection.syncState
+import com.meshcoretwo.services.sync.SyncPhase
+import com.meshcoretwo.services.sync.SyncState
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Shared "waiting for the device" full-screen state — replaces four independent copies of a bare
@@ -27,7 +32,9 @@ import com.meshcoretwo.services.connection.DeviceConnectionState
  * `DiscoveryScreen`/`RegionManagementScreen`, all byte-identical) with the animated [MeshGlyph]
  * "searching the mesh" motif. Phase 18. (`WelcomeScreen` originally shared the glyph; it now shows
  * the static [AppMark] instead.) After a user-chosen disconnect it shows "Radio not connected" with
- * a Connect button instead, since nothing is being connected.
+ * a Connect button instead, since nothing is being connected. While messages are being pulled
+ * from the device's queue it adds a running count beneath — the device never reports the queue
+ * length, so there is no "of N".
  */
 @Composable
 fun ConnectingState(connectionManager: ConnectionManager, modifier: Modifier = Modifier) {
@@ -55,5 +62,18 @@ fun ConnectingState(connectionManager: ConnectionManager, modifier: Modifier = M
         MeshGlyph(modifier = Modifier.size(96.dp))
         Spacer(modifier = Modifier.size(14.dp))
         Text(stringResource(R.string.connecting_to_device), style = MaterialTheme.typography.bodyLarge)
+        // The sync coordinator lives in the per-connection service container, which isn't itself
+        // observable; it exists by the time the state reaches SYNCING, so re-read it on each change.
+        val syncFlow = remember(connectionState) { connectionManager.syncState ?: MutableStateFlow(SyncState.Idle) }
+        val syncState by syncFlow.collectAsStateWithLifecycle()
+        val progress = (syncState as? SyncState.Syncing)?.progress
+        if (progress?.phase == SyncPhase.MESSAGES) {
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                stringResource(R.string.syncing_messages_count, progress.current),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

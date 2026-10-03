@@ -79,6 +79,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Verbindung zum Gerät wird hergestellt …</string>
+    <string name="syncing_messages_count">Nachrichten werden synchronisiert: %1$d</string>
     <string name="location_permission_required">Für die Standortbestimmung auf der Karte wird die Standortberechtigung benötigt.</string>
     <string name="wifi_invalid_port">Ungültiger Port</string>
     <string name="wifi_connect_failed">Verbindung zum Gerät fehlgeschlagen.</string>

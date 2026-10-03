@@ -2,7 +2,11 @@
 
 package com.meshcoretwo.services.sync
 
-/** Progress information during sync. Ported from `SyncProgress` (`SyncCoordinator.swift`). */
+/**
+ * Progress information during sync. Ported from `SyncProgress` (`SyncCoordinator.swift`).
+ * [total] is 0 when unknown — always the case for [SyncPhase.MESSAGES], whose [current] counts
+ * messages drained so far from a device queue of unreported length.
+ */
 data class SyncProgress(val phase: SyncPhase, val current: Int, val total: Int)
 
 /** Errors from [SyncCoordinator] operations. Ported from `SyncCoordinatorError` (`SyncCoordinator.swift`). */

@@ -79,6 +79,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Yhdistetään laitteeseen…</string>
+    <string name="syncing_messages_count">Synkronoidaan viestejä: %1$d</string>
     <string name="location_permission_required">Sijaintiluvalla löydetään sijaintisi kartalta.</string>
     <string name="wifi_invalid_port">Virheellinen portti</string>
     <string name="wifi_connect_failed">Laitteeseen ei saatu yhteyttä.</string>

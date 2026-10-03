@@ -79,6 +79,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Ansluter till enheten …</string>
+    <string name="syncing_messages_count">Synkroniserar meddelanden: %1$d</string>
     <string name="location_permission_required">Platsbehörighet krävs för att hitta din position på kartan.</string>
     <string name="wifi_invalid_port">Ogiltig port</string>
     <string name="wifi_connect_failed">Det gick inte att ansluta till enheten.</string>

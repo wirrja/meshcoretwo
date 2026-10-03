@@ -81,6 +81,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Подключение к устройству…</string>
+    <string name="syncing_messages_count">Синхронизация сообщений: %1$d</string>
     <string name="location_permission_required">Для определения вашего положения на карте нужно разрешение на доступ к местоположению.</string>
     <string name="wifi_invalid_port">Недопустимый порт</string>
     <string name="wifi_connect_failed">Не удалось подключиться к устройству.</string>

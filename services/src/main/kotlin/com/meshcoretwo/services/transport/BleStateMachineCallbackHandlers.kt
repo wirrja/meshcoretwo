@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.util.Log
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -91,7 +92,7 @@ private suspend fun BleStateMachine.handleDeviceConnected(gatt: BluetoothGatt) {
         if (connecting == null || connecting.gatt.device.address != gatt.device.address) {
             Log.w(TAG, "Unexpected onConnectionStateChange(connected) for ${gatt.device.address}")
             gatt.disconnect()
-            gatt.close()
+            releaseGatt(gatt)
             return@withStateLock
         }
 
@@ -106,19 +107,29 @@ private suspend fun BleStateMachine.handleDeviceDisconnected(gatt: BluetoothGatt
     withStateLock {
         val autoReconnecting = phase as? BlePhase.AutoReconnecting
         if (autoReconnecting != null && autoReconnecting.device.address == gatt.device.address) {
+            // Every failed attempt's client must be closed before the next connectGatt: the
+            // stack's GATT client table is small and shared by all apps, and an unbounded
+            // background-hold episode leaking one client per attempt eventually exhausts it —
+            // after which no app can connect to any peripheral until Bluetooth is restarted.
+            releaseGatt(gatt)
+            if (autoReconnecting.gatt != null && autoReconnecting.gatt !== gatt) {
+                // Stale callback from a client this episode already replaced; the current
+                // attempt is still pending, so don't spawn a second one alongside it.
+                return@withStateLock
+            }
+            transitionLocked(BlePhase.AutoReconnecting(autoReconnecting.device, gatt = null, autoReconnecting.tx, autoReconnecting.rx))
             val decision = reconnectPolicy.resolveConnectFailure(gatt.device.address, status, System.currentTimeMillis(), isAppActive)
             when (decision) {
                 is ReconnectPolicy.ConnectFailureDecision.RetryPendingConnect -> {
                     Log.i(TAG, "Reconnect attempt ${decision.failureCount}/${decision.budget} failed for ${gatt.device.address}; retrying")
-                    reissueReconnect(gatt.device)
+                    reissueReconnect(gatt.device, delayMs = RECONNECT_RETRY_DELAY_MS)
                 }
                 is ReconnectPolicy.ConnectFailureDecision.ContinueEpisodeAfterBudget -> {
                     Log.i(TAG, "Reconnect budget spent for ${gatt.device.address}, holding: ${decision.reason}")
-                    reissueReconnect(gatt.device)
+                    reissueReconnect(gatt.device, delayMs = RECONNECT_HOLD_DELAY_MS)
                 }
                 is ReconnectPolicy.ConnectFailureDecision.TearDown -> {
                     Log.w(TAG, "Reconnect abandoned for ${gatt.device.address}: ${decision.reason}")
-                    gatt.close()
                     transitionLocked(BlePhase.Idle)
                     onDisconnection?.invoke(gatt.device.address, decision.error)
                 }
@@ -135,7 +146,7 @@ private suspend fun BleStateMachine.handleDeviceDisconnected(gatt: BluetoothGatt
                 if (current.gatt.device.address != gatt.device.address) return@withStateLock
                 val device = gatt.device
                 cancelCurrentOperationLocked(BleError.NotConnected)
-                gatt.close()
+                releaseGatt(gatt)
                 beginReconnectEpisode(device, tx = null, rx = null)
             }
 
@@ -145,12 +156,12 @@ private suspend fun BleStateMachine.handleDeviceDisconnected(gatt: BluetoothGatt
                 if (current.associatedGatt?.device?.address != gatt.device.address) return@withStateLock
                 val error = ReconnectPolicy.makeConnectionError(status, "Disconnected during setup")
                 cancelCurrentOperationLocked(error)
-                gatt.close()
+                releaseGatt(gatt)
             }
 
             is BlePhase.DiscoveryComplete -> {
                 if (current.gatt.device.address != gatt.device.address) return@withStateLock
-                gatt.close()
+                releaseGatt(gatt)
                 transitionLocked(BlePhase.Idle)
             }
 
@@ -173,23 +184,48 @@ private fun BleStateMachine.beginReconnectEpisode(
     reissueReconnect(device)
 }
 
-/** Issues a fresh `connectGatt` for a reconnect attempt, replacing the phase's stale GATT reference. */
-private fun BleStateMachine.reissueReconnect(device: BluetoothDevice) {
+/**
+ * Issues a fresh `connectGatt` for a reconnect attempt after [delayMs], replacing (and closing)
+ * the phase's previous GATT client. The delay keeps a stack that fails `connectGatt` instantly
+ * (common with status 133 on some OEM stacks) from spinning in a tight retry loop.
+ */
+private fun BleStateMachine.reissueReconnect(device: BluetoothDevice, delayMs: Long = 0) {
+    val generation = connectionGeneration
     scope.launch {
-        val gatt = device.connectGatt(appContext, false, callback, BluetoothDevice.TRANSPORT_LE)
+        if (delayMs > 0) delay(delayMs)
+        // Re-check before allocating a client: the episode may have ended during the delay.
+        var stillWanted = false
         withStateLock {
-            val current = phase as? BlePhase.AutoReconnecting ?: run {
-                gatt.close()
+            val current = phase as? BlePhase.AutoReconnecting
+            stillWanted = current != null && current.device.address == device.address && generation == connectionGeneration
+        }
+        if (!stillWanted) return@launch
+        val gatt: BluetoothGatt? = openGatt(device)
+        withStateLock {
+            val current = phase as? BlePhase.AutoReconnecting
+            if (current == null || current.device.address != device.address || generation != connectionGeneration) {
+                releaseGatt(gatt)
                 return@withStateLock
             }
-            if (current.device.address != device.address) {
-                gatt.close()
+            if (gatt == null) {
+                // The stack refused to allocate a client at all; tear down instead of looping.
+                Log.w(TAG, "connectGatt returned null for ${device.address}; abandoning reconnect")
+                releaseGatt(current.gatt)
+                transitionLocked(BlePhase.Idle)
+                onDisconnection?.invoke(device.address, BleError.ConnectionFailed("connectGatt returned null"))
                 return@withStateLock
             }
+            if (current.gatt != null && current.gatt !== gatt) releaseGatt(current.gatt)
             transitionLocked(BlePhase.AutoReconnecting(device, gatt, current.tx, current.rx))
         }
     }
 }
+
+/** Pause before re-issuing a failed reconnect attempt inside the retry budget. */
+private const val RECONNECT_RETRY_DELAY_MS = 2_000L
+
+/** Pause between attempts once the budget is spent and the episode is merely being held. */
+private const val RECONNECT_HOLD_DELAY_MS = 10_000L
 
 internal suspend fun BleStateMachine.handleServicesDiscovered(gatt: BluetoothGatt, status: Int) {
     withStateLock {
@@ -197,7 +233,7 @@ internal suspend fun BleStateMachine.handleServicesDiscovered(gatt: BluetoothGat
         if (autoReconnecting != null && autoReconnecting.device.address == gatt.device.address) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.w(TAG, "Reconnect service discovery failed for ${gatt.device.address}: status=$status")
-                gatt.close()
+                releaseGatt(gatt)
                 transitionLocked(BlePhase.Idle)
                 onDisconnection?.invoke(gatt.device.address, ReconnectPolicy.makeConnectionError(status))
                 return@withStateLock
@@ -218,6 +254,8 @@ internal suspend fun BleStateMachine.handleServicesDiscovered(gatt: BluetoothGat
         }
 
         if (status != BluetoothGatt.GATT_SUCCESS) {
+            gatt.disconnect()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             discovering.continuation.completeExceptionally(ReconnectPolicy.makeConnectionError(status))
             return@withStateLock
@@ -225,6 +263,8 @@ internal suspend fun BleStateMachine.handleServicesDiscovered(gatt: BluetoothGat
 
         val service = gatt.getService(BleServiceUuid.NORDIC_UART)
         if (service == null) {
+            gatt.disconnect()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             discovering.continuation.completeExceptionally(BleError.CharacteristicNotFound)
             return@withStateLock
@@ -279,6 +319,8 @@ internal suspend fun BleStateMachine.handleMtuChanged(gatt: BluetoothGatt, mtu: 
 
         val service = gatt.getService(BleServiceUuid.NORDIC_UART)
         if (service == null) {
+            gatt.disconnect()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             negotiating.continuation.completeExceptionally(BleError.CharacteristicNotFound)
             return@withStateLock
@@ -287,12 +329,16 @@ internal suspend fun BleStateMachine.handleMtuChanged(gatt: BluetoothGatt, mtu: 
         val tx = service.getCharacteristic(BleServiceUuid.TX_CHARACTERISTIC)
         val rx = service.getCharacteristic(BleServiceUuid.RX_CHARACTERISTIC)
         if (tx == null || rx == null) {
+            gatt.disconnect()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             negotiating.continuation.completeExceptionally(BleError.CharacteristicNotFound)
             return@withStateLock
         }
 
         if (!gatt.subscribeToNotifications(rx)) {
+            gatt.disconnect()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             negotiating.continuation.completeExceptionally(BleError.WriteError("Failed to enable notifications"))
             return@withStateLock
@@ -327,7 +373,7 @@ internal suspend fun BleStateMachine.handleDescriptorWrite(gatt: BluetoothGatt, 
 
         if (status != BluetoothGatt.GATT_SUCCESS) {
             gatt.disconnect()
-            gatt.close()
+            releaseGatt(gatt)
             transitionLocked(BlePhase.Idle)
             subscribing.continuation.completeExceptionally(BleError.WriteError("Failed to enable notifications: status=$status"))
             return@withStateLock

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import com.meshcoretwo.protocol.MeshCoreSession
 import com.meshcoretwo.services.transport.BluetoothAvailability
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -35,13 +36,25 @@ import kotlinx.coroutines.withContext
  *   Background reconnects pass `false` to keep the full budget for unattended recovery.
  */
 suspend fun ConnectionManager.connect(deviceAddress: String, forceFullSync: Boolean = false, forceReconnect: Boolean = false) {
-    withContext(confinedDispatcher) { connectImpl(deviceAddress, forceFullSync, forceReconnect) }
+    runDetachedFromCaller { connectImpl(deviceAddress, forceFullSync, forceReconnect) }
 }
 
 /** Switches to a different device. See [connect]'s doc for identifier scope. */
 suspend fun ConnectionManager.switchDevice(deviceAddress: String) {
-    withContext(confinedDispatcher) { switchDeviceImpl(deviceAddress) }
+    runDetachedFromCaller { switchDeviceImpl(deviceAddress) }
 }
+
+/**
+ * Runs a connect-type operation in [ConnectionManager.scope] and awaits it, so cancelling the
+ * caller stops only the wait, not the operation. Callers are typically screen-scoped
+ * (`viewModelScope`): leaving the device list mid-connect would otherwise cancel the connect
+ * halfway through setup or sync — after which the state reads DISCONNECTED while the BLE link
+ * stays up, and nothing ever retries. Swift's equivalent call sites use unstructured `Task {}`s
+ * that a dismissed view never cancels, so this restores the same behavior. An explicit
+ * [disconnect] still supersedes an in-flight connect the usual way.
+ */
+internal suspend fun <T> ConnectionManager.runDetachedFromCaller(block: suspend () -> T): T =
+    scope.async { block() }.await()
 
 /** Disconnects from the current device. */
 suspend fun ConnectionManager.disconnect(reason: DisconnectReason = DisconnectReason.USER_INITIATED) {

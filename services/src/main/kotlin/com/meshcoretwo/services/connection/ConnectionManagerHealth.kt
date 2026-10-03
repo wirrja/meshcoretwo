@@ -44,6 +44,10 @@ internal suspend fun ConnectionManager.isDeviceConnectedToOtherAppImpl(deviceAdd
     if (connectionState != DeviceConnectionState.DISCONNECTED) return false
     // Don't report our own connection as "another app" (state restoration may have completed).
     if (smIsConnected && smConnectedAddress == deviceAddress) return false
+    // Android's connected-devices query can't tell apps apart, so our own link stuck mid-setup
+    // or orphaned would read as "another app" and block every reconnect until Bluetooth is
+    // restarted. Connecting anyway lets the retry loop's disconnect clear it.
+    if (stateMachine.ownsLinkTo(deviceAddress)) return false
 
     return systemConnected
 }

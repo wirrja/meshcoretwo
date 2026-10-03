@@ -79,6 +79,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Cihaza bağlanılıyor…</string>
+    <string name="syncing_messages_count">Mesajlar eşitleniyor: %1$d</string>
     <string name="location_permission_required">Haritada konumunuzu bulmak için konum izni gereklidir.</string>
     <string name="wifi_invalid_port">Geçersiz bağlantı noktası</string>
     <string name="wifi_connect_failed">Cihaza bağlanılamadı.</string>

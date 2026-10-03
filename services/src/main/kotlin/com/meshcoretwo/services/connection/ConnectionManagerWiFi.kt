@@ -45,7 +45,7 @@ private const val WIFI_MAX_RECONNECT_DURATION_MILLIS = 30_000L
  * `connectViaWiFi`.
  */
 suspend fun ConnectionManager.connectViaWiFi(host: String, port: Int, forceFullSync: Boolean = false) {
-    withContext(confinedDispatcher) { connectViaWiFiImpl(host, port, forceFullSync) }
+    runDetachedFromCaller { connectViaWiFiImpl(host, port, forceFullSync) }
 }
 
 /**

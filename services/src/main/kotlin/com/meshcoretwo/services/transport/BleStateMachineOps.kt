@@ -66,6 +66,15 @@ interface BleStateMachineOps {
     fun systemConnectedDeviceAddresses(): List<String>
 
     /**
+     * Whether this process's own BLE link is to [deviceAddress] — the current phase, or a GATT
+     * client this state machine opened and never closed. Lets `ConnectionManager` tell our own
+     * stranded link apart from another app's before [isDeviceConnectedToSystem] would report it
+     * as "connected elsewhere" and block reconnecting. Android-only: iOS has no orphaned-client
+     * failure mode to guard against.
+     */
+    fun ownsLinkTo(deviceAddress: String): Boolean
+
+    /**
      * Starts a best-effort adoption of a peripheral this app is already GATT-connected to but
      * has no live [BleStateMachine] session for (e.g. after a process restart that didn't go
      * through normal connect/reconnect). Runs the same discovery chain a fresh [connect][]

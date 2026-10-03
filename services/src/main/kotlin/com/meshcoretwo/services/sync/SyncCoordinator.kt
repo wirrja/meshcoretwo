@@ -257,7 +257,9 @@ class SyncCoordinator {
 
             _state.value = SyncState.Syncing(SyncProgress(SyncPhase.MESSAGES, 0, 0))
             val messageStatus: SyncPhaseStatus = try {
-                dependencies.incomingMessageService.pollAllMessages()
+                dependencies.incomingMessageService.pollAllMessages { count ->
+                    _state.value = SyncState.Syncing(SyncProgress(SyncPhase.MESSAGES, count, 0))
+                }
                 SyncPhaseStatus.Clean
             } catch (error: CancellationException) {
                 throw error

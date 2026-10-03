@@ -78,6 +78,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">正在连接设备…</string>
+    <string name="syncing_messages_count">正在同步消息：%1$d</string>
     <string name="location_permission_required">需要位置权限才能在地图上定位你的位置。</string>
     <string name="wifi_invalid_port">端口无效</string>
     <string name="wifi_connect_failed">无法连接到设备。</string>

@@ -3,6 +3,45 @@
 Notable user-facing changes to MeshCore Two, release by release, in Russian and English
 (from 1.1.19). Dates are UTC+3 (Moscow).
 
+## 1.1.22 — 2026-10-03
+
+### Русский
+
+- **Подключение больше не «залипает» до перезапуска Bluetooth.** Если связь с радио пропадала
+  надолго (нода выключена или вне зоны), а приложение оставалось в фоне, каждая попытка
+  переподключения оставляла в системе незакрытое Bluetooth-соединение. Через какое-то время
+  их общий лимит в телефоне заканчивался, и подключиться не удавалось ни к одной ноде, пока не
+  перезапустишь Bluetooth. Теперь каждая неудачная попытка закрывается, а между попытками есть
+  пауза.
+- **Можно уйти с экрана, пока идёт подключение.** Раньше, если нажать «Подключить» в сохранённых
+  устройствах и сразу вернуться назад, подключение обрывалось на полпути: на экране навсегда
+  оставалось «Подключение к устройству…», хотя радио было подключено. Теперь подключение
+  доводится до конца, на каком бы экране вы ни были.
+- **Своё соединение больше не принимается за чужое.** После такого обрыва радио могло
+  показываться как «Подключено в другом приложении», и кнопка «Подключить» не работала.
+  Теперь приложение узнаёт собственное соединение, закрывает его и подключается заново.
+- **Счётчик синхронизации:** пока при подключении загружаются сообщения, накопившиеся на
+  радио, под значком подключения видно «Синхронизация сообщений: N». Общего числа нет — радио
+  не сообщает заранее, сколько сообщений у него в очереди.
+
+### English
+
+- **Connecting no longer gets stuck until Bluetooth is restarted.** When the radio was out of
+  reach for a long time (switched off or out of range) while the app stayed in the background,
+  every reconnect attempt left a Bluetooth connection open in the system. After a while the
+  phone's shared limit ran out, and no radio would connect until Bluetooth was restarted. Each
+  failed attempt is now closed, and attempts are spaced out.
+- **You can leave the screen while connecting.** Previously, tapping Connect in saved devices
+  and going straight back cut the connection off halfway: "Connecting to device…" stayed on
+  screen forever even though the radio was connected. The connection now finishes whichever
+  screen you're on.
+- **The app no longer mistakes its own connection for another app's.** After such a cut-off,
+  the radio could show as "Connected in another app" with a Connect button that did nothing.
+  The app now recognizes its own connection, closes it and connects again.
+- **Sync counter:** while messages stored on the radio are downloaded during connection, the
+  connecting screen shows "Syncing messages: N". There is no total: the radio doesn't report
+  how many messages it has queued.
+
 ## 1.1.21 — 2026-09-26
 
 ### Русский

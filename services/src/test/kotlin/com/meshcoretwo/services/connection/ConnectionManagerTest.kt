@@ -15,6 +15,11 @@ import com.meshcoretwo.services.persistence.MeshCoreDatabase
 import com.meshcoretwo.services.security.KeychainService
 import com.meshcoretwo.services.transport.FakeBleStateMachine
 import kotlinx.coroutines.cancel
+import org.junit.Assert.assertNotEquals
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -264,6 +269,42 @@ class ConnectionManagerTest {
 
         assertTrue(caught is DevicePairingError.Cancelled)
         assertFalse(connectionManager.isPairingInProgress)
+    }
+
+    @Test
+    fun `connect completes even when its caller is cancelled mid-handshake`() = runBlocking {
+        // A screen-scoped caller (viewModelScope) leaving mid-connect must not cancel the connect
+        // itself: a half-finished one leaves the state DISCONNECTED over a live BLE link.
+        val caller = CoroutineScope(Dispatchers.Default).launch { connectionManager.connect(DEVICE_A) }
+        waitUntilSent(transport.mock, minCount = 1)
+        caller.cancelAndJoin()
+
+        answerConnectHandshake(transport.mock)
+        withTimeout(10_000) {
+            while (connectionManager.connectedDevice == null) delay(5)
+        }
+
+        assertEquals(DEVICE_A, connectionManager.connectedDevice!!.bleAddress)
+        assertNotEquals(DeviceConnectionState.DISCONNECTED, connectionManager.connectionState)
+    }
+
+    // MARK: - isDeviceConnectedToOtherApp
+
+    @Test
+    fun `isDeviceConnectedToOtherApp reports a system link this app does not own`() = runBlocking {
+        stateMachine.stubbedIsDeviceConnectedToSystem = true
+
+        assertTrue(connectionManager.isDeviceConnectedToOtherApp(DEVICE_A))
+    }
+
+    @Test
+    fun `isDeviceConnectedToOtherApp ignores this app's own stranded link`() = runBlocking {
+        // Our own client stuck mid-setup (or orphaned) shows up in the OS connected-devices list
+        // too; treating it as another app's would block reconnecting until Bluetooth restarts.
+        stateMachine.stubbedIsDeviceConnectedToSystem = true
+        stateMachine.stubbedOwnedLinkAddresses = setOf(DEVICE_A)
+
+        assertFalse(connectionManager.isDeviceConnectedToOtherApp(DEVICE_A))
     }
 
     // MARK: - waitForOtherAppReconnection

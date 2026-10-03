@@ -80,6 +80,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Connexion à l’appareil…</string>
+    <string name="syncing_messages_count">Synchronisation des messages : %1$d</string>
     <string name="location_permission_required">L’autorisation de localisation est nécessaire pour trouver votre position sur la carte.</string>
     <string name="wifi_invalid_port">Port invalide</string>
     <string name="wifi_connect_failed">Impossible de se connecter à l’appareil.</string>

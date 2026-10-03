@@ -87,6 +87,7 @@
 
     <!-- Shared components -->
     <string name="connecting_to_device">Connecting to device…</string>
+    <string name="syncing_messages_count">Syncing messages: %1$d</string>
     <string name="location_permission_required">Location permission is required to find your position on the map.</string>
     <string name="wifi_invalid_port">Invalid port</string>
     <string name="wifi_connect_failed">Couldn’t connect to the device.</string>
